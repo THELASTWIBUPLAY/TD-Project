@@ -26,9 +26,8 @@ public class Enemy : MonoBehaviour
     public EnemyArchetype archetype = EnemyArchetype.Normal;
 
     [Header("Base Safety Boundary")]
-    public float baseLineY = -2f; // Sesuaikan dengan posisi Y BaseLine kamu
+    public float baseLineY = -2f;
 
-    // Tambahkan variabel event statis untuk UI Boss
     public static System.Action<float, float> OnBossHpChanged; // (currentHp, maxHp)
     public static System.Action OnBossDefeatedEvent;
     private bool isDead = false;
@@ -138,16 +137,41 @@ public class Enemy : MonoBehaviour
         if (isDead) return;
         isDead = true;
 
+        int currentWave = WaveManager.Instance != null ? WaveManager.Instance.currentWave : 1;
+
+        // 1. Berikan EXP ke Player
+        // 1. Berikan EXP ke Player
         if (GameManager.Instance != null)
         {
-            int wave = WaveManager.Instance != null ? WaveManager.Instance.currentWave : 1;
-            float waveExpBonus = (wave - 1) * 3f;
+            // Bonus flat terukur: musuh di wave 40 memberi tambahan yang pas
+            float waveExpBonus = (currentWave - 1) * 2.5f;
             float totalBaseExp = expReward + waveExpBonus;
-            int finalExp = Mathf.RoundToInt(totalBaseExp * GlobalExpMultiplier);
+            int finalExp = Mathf.RoundToInt(totalBaseExp * Enemy.GlobalExpMultiplier);
 
             GameManager.Instance.AddExp(finalExp);
         }
 
+        // 2. Berikan Skor sesuai StageConfig
+        // 2. Berikan Skor HANYA di Endless Mode
+        if (GameManager.Instance != null && WaveManager.Instance != null && WaveManager.Instance.stageConfig != null)
+        {
+            StageConfig cfg = WaveManager.Instance.stageConfig;
+
+            if (cfg.isEndless)
+            {
+                int scoreGiven = archetype switch
+                {
+                    EnemyArchetype.Normal => cfg.scoreNormalMob,
+                    EnemyArchetype.Scout => cfg.scoreScoutMob,
+                    EnemyArchetype.Tank => cfg.scoreTankMob,
+                    EnemyArchetype.Boss => (currentWave >= 10) ? cfg.scoreFinalBoss : cfg.scoreMiniBoss,
+                    _ => 10
+                };
+                GameManager.Instance.AddScore(scoreGiven);
+            }
+        }
+
+        // 3. Notifikasi musuh mati ke WaveManager
         if (WaveManager.Instance != null)
         {
             WaveManager.Instance.OnEnemyDefeated(gameObject);
@@ -177,7 +201,7 @@ public class Enemy : MonoBehaviour
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
 
         // Scaling dasar per wave
-        float waveHpFactor = 1f + ((wave - 1) * 0.12f); // Musuh makin tebal tiap wave
+        float waveHpFactor = 1f + ((wave - 1) * 0.12f);
 
         switch (archetype)
         {
@@ -187,34 +211,39 @@ public class Enemy : MonoBehaviour
                 damageToBase = 5f;
                 expReward = 8;
                 transform.localScale = new Vector3(0.5f, 0.5f, 1f);
-                if (spriteRenderer != null) originalColor = Color.red;
+                originalColor = Color.red;
                 break;
 
             case EnemyArchetype.Scout:
-                maxHp = 9f * waveHpFactor; // Darah lebih tipis
-                moveSpeed = 2.3f;          // Gerakan sangat kencang
+                maxHp = 9f * waveHpFactor;
+                moveSpeed = 2.3f;
                 damageToBase = 4f;
                 expReward = 10;
-                transform.localScale = new Vector3(0.35f, 0.35f, 1f); // Lebih kecil
-                if (spriteRenderer != null) originalColor = new Color(1f, 0.8f, 0.1f); // Kuning terang
+                transform.localScale = new Vector3(0.35f, 0.35f, 1f);
+                originalColor = new Color(1f, 0.8f, 0.1f); // Kuning terang
                 break;
 
             case EnemyArchetype.Tank:
-                maxHp = 45f * waveHpFactor; // Darah 3x lipat
-                moveSpeed = 0.75f;         // Gerakan lambat
-                damageToBase = 15f;        // Hantaman ke base lebih sakit
+                maxHp = 45f * waveHpFactor;
+                moveSpeed = 0.75f;
+                damageToBase = 15f;
                 expReward = 22;
-                transform.localScale = new Vector3(0.85f, 0.85f, 1f); // Bodi besar
-                if (spriteRenderer != null) originalColor = new Color(0.5f, 0.1f, 0.7f); // Ungu gelap
+                transform.localScale = new Vector3(0.85f, 0.85f, 1f);
+                originalColor = new Color(0.5f, 0.1f, 0.7f); // Ungu gelap
                 break;
 
             case EnemyArchetype.Boss:
-                maxHp = 180f * waveHpFactor; // HP luar biasa tebal
-                moveSpeed = 0.5f;           // Gerak sangat lambat dan mengintimidasi
-                damageToBase = 50f;         // Hantaman fatal ke Base (setengah HP Base)
-                expReward = 80;
-                transform.localScale = new Vector3(1.3f, 1.3f, 1f); // Ukuran raksasa
-                if (spriteRenderer != null) originalColor = new Color(0.9f, 0.1f, 0.2f); // Merah membara
+                // Cek apakah ini Miniboss (Wave <= 5) atau Final Boss (Wave >= 10)
+                bool isFinalBoss = (wave >= 10);
+
+                moveSpeed = 0.5f;
+                damageToBase = isFinalBoss ? 50f : 30f;
+                expReward = isFinalBoss ? 100 : 50;
+
+                maxHp = (isFinalBoss ? 450f : 200f) + (wave * 30f);
+
+                transform.localScale = isFinalBoss ? new Vector3(2.2f, 2.2f, 1f) : new Vector3(1.7f, 1.7f, 1f);
+                originalColor = isFinalBoss ? new Color(0.8f, 0f, 0.2f) : new Color(0.9f, 0.3f, 0f);
                 break;
         }
 

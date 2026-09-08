@@ -174,10 +174,15 @@ public class Character : MonoBehaviour
     {
         if (target == null || projectilePrefab == null) return;
 
+        // Bunyikan SFX saat menembak hanya untuk kelas selain Bombardier
+        if (classType != CharacterClassType.Bombardier && AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayClassShootSFX(classType);
+        }
+
         float starDamageMult = starLevel == 1 ? 1f : (starLevel == 2 ? 2.2f : 4.5f);
         float finalDamage = baseAttackDamage * starDamageMult * (1f + (GlobalDamageBonusPercent / 100f));
 
-        // Efek Bintang 3 Khusus Sniper: Damage berlipat ke Boss/Tank
         if (starLevel >= 3 && classType == CharacterClassType.Sniper)
         {
             Enemy targetEnemyComp = target.GetComponent<Enemy>();
@@ -187,7 +192,6 @@ public class Character : MonoBehaviour
             }
         }
 
-        // Efek Bintang 3 Khusus Ranger: Double Tap (tembak 2 peluru)
         if (starLevel >= 3 && classType == CharacterClassType.Ranger)
         {
             StartCoroutine(DoubleTapRoutine(target, finalDamage));
@@ -208,7 +212,11 @@ public class Character : MonoBehaviour
         if (projectile != null)
         {
             projectile.damage = dmg;
-            projectile.Setup(target);
+
+            bool isAoE = (classType == CharacterClassType.Bombardier);
+            float splashRadius = (starLevel >= 3) ? 2.2f : 1.5f;
+
+            projectile.Setup(target, isAoE, splashRadius);
         }
     }
 

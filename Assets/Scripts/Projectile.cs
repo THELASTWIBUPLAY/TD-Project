@@ -7,6 +7,10 @@ public class Projectile : MonoBehaviour
     public float damage = 10f;
     public float lifetime = 4f;
 
+    [Header("AoE Configuration")]
+    public bool isAoE = false;
+    public float aoeRadius = 1.5f;
+
     [Header("Soft Homing Config")]
     public float turnSpeed = 280f; 
     public float leadPredictionTime = 0.25f;
@@ -20,12 +24,20 @@ public class Projectile : MonoBehaviour
     private Rigidbody2D targetRb;
     private Vector2 currentDirection = Vector2.up;
 
+    // Overload Setup agar kompatibel dengan pemanggilan lama maupun baru
     public void Setup(Transform target)
     {
-        targetEnemy = target;
+        Setup(target, false, 1.5f);
+    }
 
-        // Beri jatah 1x pantulan jika kartu Ricochet aktif
-        if (GlobalRicochetUnlocked)
+    public void Setup(Transform target, bool isAreaDamage, float splashRadius = 1.5f)
+    {
+        targetEnemy = target;
+        isAoE = isAreaDamage;
+        aoeRadius = splashRadius;
+
+        // Beri jatah 1x pantulan jika kartu Ricochet aktif (AoE tidak memantul agar balance)
+        if (GlobalRicochetUnlocked && !isAoE)
         {
             ricochetRemaining = 1;
         }
@@ -79,13 +91,44 @@ public class Projectile : MonoBehaviour
     {
         if (collision.CompareTag("Enemy"))
         {
+            if (isAoE)
+            {
+                // Mainkan SFX ledakan
+                if (AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.PlayClassShootSFX(CharacterClassType.Bombardier);
+                }
+
+                // --- MUNCULKAN VISUAL RADIUS LEDAKAN ---
+                ExplosionEffect.Create(transform.position, aoeRadius);
+                // ----------------------------------------
+
+                // Berikan damage ke seluruh musuh di radius ledakan
+                Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(transform.position, aoeRadius);
+                foreach (Collider2D col in hitEnemies)
+                {
+                    if (col.CompareTag("Enemy"))
+                    {
+                        Enemy e = col.GetComponent<Enemy>();
+                        if (e != null)
+                        {
+                            e.TakeDamage(damage);
+                        }
+                    }
+                }
+
+                Destroy(gameObject);
+                return;
+            }
+
+            // Hit target tunggal untuk kelas selain Bombardier
             Enemy enemy = collision.GetComponent<Enemy>();
             if (enemy != null)
             {
                 enemy.TakeDamage(damage);
             }
 
-            // Jika masih punya jatah pantulan, cari musuh terdekat berikutnya
+            // Cek pantulan Ricochet jika bukan AoE
             if (ricochetRemaining > 0)
             {
                 ricochetRemaining--;
@@ -97,8 +140,8 @@ public class Projectile : MonoBehaviour
                     targetEnemy = nextTarget;
                     targetRb = targetEnemy.GetComponent<Rigidbody2D>();
                     currentDirection = (targetEnemy.position - transform.position).normalized;
-                    damage *= 0.75f; // Damage pantulan 75% dari normal
-                    return; // Jangan hancurkan peluru dulu
+                    damage *= 0.75f;
+                    return;
                 }
             }
 
@@ -130,5 +173,14 @@ public class Projectile : MonoBehaviour
     private void OnBecameInvisible()
     {
         Destroy(gameObject);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (isAoE)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position, aoeRadius);
+        }
     }
 }

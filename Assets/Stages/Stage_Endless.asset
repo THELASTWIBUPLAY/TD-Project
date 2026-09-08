@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26ed33e1f9a85da4a8aba5b12ca08528, type: 3}
+  m_Name: Stage_Endless
+  m_EditorClassIdentifier: 
+  stageName: Endless Run
+  isEndless: 1
+  maxWave: 10
+  baseEnemyCount: 5
+  enemyCountWaveMultiplier: 2
+  baseSpawnInterval: 2.2
+  minSpawnInterval: 0.6
+  miniBossInterval: 5
+  finalBossInterval: 10
+  miniBossCount: 1
+  finalBossCount: 1
+  scoreNormalMob: 10
+  scoreScoutMob: 15
+  scoreTankMob: 30
+  scoreMiniBoss: 120
+  scoreFinalBoss: 350
+  scoreWaveClearBonus: 50
