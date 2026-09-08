@@ -116,22 +116,26 @@ public class WaveManager : MonoBehaviour
     // Penentu komposisi tipe musuh berdasarkan nomor Wave
     EnemyArchetype PickEnemyTypeForWave(int wave, int enemyIndex)
     {
+        // Wave 5 dan 10: Musuh terakhir yang muncul adalah BOSS
+        if ((wave == 5 || wave == 10) && enemyIndex == totalEnemiesThisWave - 1)
+        {
+            return EnemyArchetype.Boss;
+        }
+
         if (wave < 3)
         {
             return EnemyArchetype.Normal;
         }
         else if (wave < 5)
         {
-            // Peluang 30% muncul scout
             return (Random.value < 0.3f) ? EnemyArchetype.Scout : EnemyArchetype.Normal;
         }
         else
         {
-            // Wave 5 ke atas: Campuran ketiganya
             float roll = Random.value;
-            if (roll < 0.25f) return EnemyArchetype.Tank;   // 25% Tank
-            if (roll < 0.55f) return EnemyArchetype.Scout;  // 30% Scout
-            return EnemyArchetype.Normal;                   // 45% Normal
+            if (roll < 0.25f) return EnemyArchetype.Tank;
+            if (roll < 0.55f) return EnemyArchetype.Scout;
+            return EnemyArchetype.Normal;
         }
     }
 

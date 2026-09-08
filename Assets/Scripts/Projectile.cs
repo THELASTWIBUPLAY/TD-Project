@@ -8,11 +8,13 @@ public class Projectile : MonoBehaviour
     public float lifetime = 4f;
 
     [Header("Soft Homing Config")]
-    [Tooltip("Semakin tinggi angkanya, semakin tajam beloknya. Nilai 200-350 terasa sangat natural.")]
     public float turnSpeed = 280f; 
-
-    [Tooltip("Waktu prediksi pergerakan musuh ke depan (dalam detik).")]
     public float leadPredictionTime = 0.25f;
+
+    [Header("Ricochet Mechanic")]
+    public static bool GlobalRicochetUnlocked = false;
+    private int ricochetRemaining = 0;
+    private Transform lastHitTarget;
 
     private Transform targetEnemy;
     private Rigidbody2D targetRb;
@@ -22,12 +24,15 @@ public class Projectile : MonoBehaviour
     {
         targetEnemy = target;
 
+        // Beri jatah 1x pantulan jika kartu Ricochet aktif
+        if (GlobalRicochetUnlocked)
+        {
+            ricochetRemaining = 1;
+        }
+
         if (targetEnemy != null)
         {
-            // Ambil Rigidbody2D musuh jika ada untuk membaca kecepatannya secara akurat
             targetRb = targetEnemy.GetComponent<Rigidbody2D>();
-
-            // Arahkan tembakan awal langsung ke target
             currentDirection = (targetEnemy.position - transform.position).normalized;
             UpdateRotation(currentDirection);
         }
@@ -40,40 +45,32 @@ public class Projectile : MonoBehaviour
 
     void Update()
     {
-        // 1. Tentukan arah target yang ingin dituju
         if (targetEnemy != null)
         {
             Vector3 predictedTargetPos = targetEnemy.position;
 
-            // Tambahkan prediksi ke mana musuh akan berada
             if (targetRb != null)
             {
                 predictedTargetPos += (Vector3)(targetRb.linearVelocity * leadPredictionTime);
             }
             else
             {
-                // Jika musuh bergerak via Transform.Translate ke bawah
                 Enemy enemyScript = targetEnemy.GetComponent<Enemy>();
                 float enemySpeed = enemyScript != null ? enemyScript.moveSpeed : 1.3f;
                 predictedTargetPos += Vector3.down * (enemySpeed * leadPredictionTime);
             }
 
             Vector2 desiredDirection = (predictedTargetPos - transform.position).normalized;
-
-            // 2. Berbelok bertahap menggunakan RotateTowards (tidak patah/lengket)
             float step = turnSpeed * Mathf.Deg2Rad * Time.deltaTime;
             currentDirection = Vector3.RotateTowards(currentDirection, desiredDirection, step, 0f);
-            
             UpdateRotation(currentDirection);
         }
 
-        // 3. Maju terus searah orientasi peluru saat ini
         transform.position += (Vector3)(currentDirection * speed * Time.deltaTime);
     }
 
     void UpdateRotation(Vector2 dir)
     {
-        // Ujung proyektil selalu menghadap ke arah jalurnya
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90f;
         transform.rotation = Quaternion.Euler(0, 0, angle);
     }
@@ -87,8 +84,47 @@ public class Projectile : MonoBehaviour
             {
                 enemy.TakeDamage(damage);
             }
+
+            // Jika masih punya jatah pantulan, cari musuh terdekat berikutnya
+            if (ricochetRemaining > 0)
+            {
+                ricochetRemaining--;
+                lastHitTarget = collision.transform;
+                Transform nextTarget = FindNextBounceTarget();
+
+                if (nextTarget != null)
+                {
+                    targetEnemy = nextTarget;
+                    targetRb = targetEnemy.GetComponent<Rigidbody2D>();
+                    currentDirection = (targetEnemy.position - transform.position).normalized;
+                    damage *= 0.75f; // Damage pantulan 75% dari normal
+                    return; // Jangan hancurkan peluru dulu
+                }
+            }
+
             Destroy(gameObject);
         }
+    }
+
+    Transform FindNextBounceTarget()
+    {
+        Collider2D[] candidates = Physics2D.OverlapCircleAll(transform.position, 4.5f);
+        Transform closest = null;
+        float minDist = Mathf.Infinity;
+
+        foreach (var col in candidates)
+        {
+            if (col.CompareTag("Enemy") && col.transform != lastHitTarget)
+            {
+                float dist = Vector2.Distance(transform.position, col.transform.position);
+                if (dist < minDist)
+                {
+                    minDist = dist;
+                    closest = col.transform;
+                }
+            }
+        }
+        return closest;
     }
 
     private void OnBecameInvisible()

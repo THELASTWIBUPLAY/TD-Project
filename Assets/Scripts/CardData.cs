@@ -2,11 +2,15 @@ using UnityEngine;
 
 public enum BuffType
 {
-    AddCharacter,       // +1 Karakter
-    BoostAttack,        // Attack % (15% -> 25% -> 40%)
-    BoostAttackSpeed,   // ASPD % (15% -> 30% -> 50%)
-    SlowMob,            // Slow Mob % (15% -> 25% -> 35%)
-    ExpGain             // EXP Gain % (20% -> 40% -> 70%)
+    AddRandomCharacter,
+    AddSpecificCharacter,
+    BoostAttack,
+    BoostAttackSpeed,
+    SlowMob,
+    ExpGain,
+    Ricochet,
+    EmergencyRepair,
+    Overdrive
 }
 
 [System.Serializable]
@@ -14,22 +18,36 @@ public class UpgradeCard
 {
     public string cardName;
     public BuffType buffType;
-    public int currentLevel = 0; // 0 = belum punya, max = 3
-    
-    // Nilai stat pemain tiap level [Lv1, Lv2, Lv3]
-    public float[] playerValues = new float[3];
-    // Nilai buff musuh tiap level [Lv1, Lv2, Lv3]
-    public float[] mobValues = new float[3];
+    public CharacterClassType targetClassType; // Kelas sasaran jika AddSpecificCharacter
+    public int currentLevel = 0;
 
-    public bool IsMaxLevel => (buffType != BuffType.AddCharacter) && currentLevel >= 3;
+    public float[] playerValues = new float[0];
+    public float[] mobValues = new float[0];
+
+    public bool IsMaxLevel
+    {
+        get
+        {
+            if (buffType == BuffType.AddRandomCharacter || buffType == BuffType.AddSpecificCharacter || buffType == BuffType.EmergencyRepair)
+            {
+                return false; // Bisa diambil terus menerus
+            }
+            if (playerValues == null || playerValues.Length == 0) return false;
+            return currentLevel >= playerValues.Length;
+        }
+    }
 
     public float GetNextPlayerValue()
     {
-        return currentLevel < 3 ? playerValues[currentLevel] : playerValues[2];
+        if (playerValues == null || playerValues.Length == 0) return 0f;
+        int idx = Mathf.Clamp(currentLevel, 0, playerValues.Length - 1);
+        return playerValues[idx];
     }
 
     public float GetNextMobValue()
     {
-        return currentLevel < 3 ? mobValues[currentLevel] : mobValues[2];
+        if (mobValues == null || mobValues.Length == 0) return 0f;
+        int idx = Mathf.Clamp(currentLevel, 0, mobValues.Length - 1);
+        return mobValues[idx];
     }
 }

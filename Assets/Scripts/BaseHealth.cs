@@ -50,4 +50,10 @@ public class BaseHealth : MonoBehaviour
             healthText.text = $"{Mathf.CeilToInt(currentHealth)} / {maxHealth}";
         }
     }
+
+    public void HealBase(float amount)
+    {
+        currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
+        UpdateUI();
+    }
 }

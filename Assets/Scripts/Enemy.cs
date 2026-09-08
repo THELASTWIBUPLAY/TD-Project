@@ -25,6 +25,12 @@ public class Enemy : MonoBehaviour
     [Header("Archetype Setup")]
     public EnemyArchetype archetype = EnemyArchetype.Normal;
 
+    [Header("Base Safety Boundary")]
+    public float baseLineY = -2f; // Sesuaikan dengan posisi Y BaseLine kamu
+
+    // Tambahkan variabel event statis untuk UI Boss
+    public static System.Action<float, float> OnBossHpChanged; // (currentHp, maxHp)
+    public static System.Action OnBossDefeatedEvent;
     private bool isDead = false;
 
     public static void ResetGlobalStats()
@@ -55,6 +61,36 @@ public class Enemy : MonoBehaviour
     void Update()
     {
         transform.Translate(Vector3.down * moveSpeed * Time.deltaTime);
+
+        // PENGAMAN: Jika musuh terlalu cepat sampai melompati Collider Base
+        if (!isDead && transform.position.y <= baseLineY)
+        {
+            HitBaseDirectly();
+        }
+    }
+
+    private void HitBaseDirectly()
+    {
+        if (isDead) return;
+        isDead = true;
+
+        BaseHealth baseHealth = FindFirstObjectByType<BaseHealth>();
+        if (baseHealth != null)
+        {
+            baseHealth.TakeBaseDamage(damageToBase);
+        }
+
+        if (WaveManager.Instance != null)
+        {
+            WaveManager.Instance.OnEnemyDefeated(gameObject);
+        }
+
+        if (archetype == EnemyArchetype.Boss)
+        {
+            OnBossDefeatedEvent?.Invoke();
+        }
+
+        Destroy(gameObject);
     }
 
     public void TakeDamage(float damageAmount)
@@ -74,6 +110,11 @@ public class Enemy : MonoBehaviour
         if (DamageTextManager.Instance != null)
         {
             DamageTextManager.Instance.SpawnDamageText(transform.position, damageAmount);
+        }
+
+        if (archetype == EnemyArchetype.Boss)
+        {
+            OnBossHpChanged?.Invoke(currentHp, maxHp);
         }
 
         if (currentHp <= 0)
@@ -112,6 +153,11 @@ public class Enemy : MonoBehaviour
             WaveManager.Instance.OnEnemyDefeated(gameObject);
         }
 
+        if (archetype == EnemyArchetype.Boss)
+        {
+            OnBossDefeatedEvent?.Invoke();
+        }
+
         Destroy(gameObject);
     }
 
@@ -121,20 +167,7 @@ public class Enemy : MonoBehaviour
 
         if (collision.CompareTag("Base"))
         {
-            isDead = true;
-
-            BaseHealth baseHealth = collision.GetComponent<BaseHealth>();
-            if (baseHealth != null)
-            {
-                baseHealth.TakeBaseDamage(damageToBase);
-            }
-
-            if (WaveManager.Instance != null)
-            {
-                WaveManager.Instance.OnEnemyDefeated(gameObject);
-            }
-
-            Destroy(gameObject);
+            HitBaseDirectly();
         }
     }
 
@@ -173,6 +206,15 @@ public class Enemy : MonoBehaviour
                 expReward = 22;
                 transform.localScale = new Vector3(0.85f, 0.85f, 1f); // Bodi besar
                 if (spriteRenderer != null) originalColor = new Color(0.5f, 0.1f, 0.7f); // Ungu gelap
+                break;
+
+            case EnemyArchetype.Boss:
+                maxHp = 180f * waveHpFactor; // HP luar biasa tebal
+                moveSpeed = 0.5f;           // Gerak sangat lambat dan mengintimidasi
+                damageToBase = 50f;         // Hantaman fatal ke Base (setengah HP Base)
+                expReward = 80;
+                transform.localScale = new Vector3(1.3f, 1.3f, 1f); // Ukuran raksasa
+                if (spriteRenderer != null) originalColor = new Color(0.9f, 0.1f, 0.2f); // Merah membara
                 break;
         }
 

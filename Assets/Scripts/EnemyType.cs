@@ -4,5 +4,6 @@ public enum EnemyArchetype
 {
     Normal,
     Scout,
-    Tank
+    Tank,
+    Boss
 }
