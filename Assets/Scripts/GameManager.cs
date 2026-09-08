@@ -24,6 +24,11 @@ public class GameManager : MonoBehaviour
     public float currentExp = 0f;
     public float expToNextLevel = 20f;
 
+    [Header("End Game UI Panels")]
+    public GameObject gameOverPanel;
+    public TextMeshProUGUI gameOverWaveText;
+    public GameObject gameWinPanel;
+
     void Awake()
     {
         Instance = this;
@@ -119,5 +124,41 @@ public class GameManager : MonoBehaviour
         {
             expText.text = $"Lv.{currentLevel} ({currentExp}/{expToNextLevel})";
         }
+    }
+
+    public void TriggerGameOver()
+    {
+        Time.timeScale = 0f; // Hentikan game
+
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(true);
+        }
+
+        if (gameOverWaveText != null && WaveManager.Instance != null)
+        {
+            gameOverWaveText.text = $"Bertahan Sampai: Wave {WaveManager.Instance.currentWave}";
+        }
+    }
+
+    public void TriggerGameWin()
+    {
+        Time.timeScale = 0f; // Hentikan game
+
+        if (gameWinPanel != null)
+        {
+            gameWinPanel.SetActive(true);
+        }
+    }
+
+    // Dipanggil oleh tombol Retry / Main Lagi di UI
+    public void RestartGame()
+    {
+        Time.timeScale = 1f; // Kembalikan waktu normal
+        Enemy.ResetGlobalStats(); // Reset multiplier musuh
+        Character.GlobalDamageBonusPercent = 0f;
+        Character.GlobalAtkSpeedMultiplier = 1f;
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

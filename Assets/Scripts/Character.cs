@@ -148,4 +148,29 @@ public class Character : MonoBehaviour
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, attackRange);
     }
+
+    // Animasi letupan saat berhasil merge
+    public void PlayMergeCelebration()
+    {
+        StartCoroutine(MergePopRoutine());
+    }
+
+    IEnumerator MergePopRoutine()
+    {
+        Vector3 baseScale = basePresetScale * (1f + ((starLevel - 1) * 0.2f));
+        Vector3 bigScale = baseScale * 1.45f;
+
+        float duration = 0.2f;
+        float t = 0f;
+
+        // Membesar mendadak
+        while (t < duration)
+        {
+            transform.localScale = Vector3.Lerp(bigScale, baseScale, t / duration);
+            t += Time.deltaTime;
+            yield return null;
+        }
+
+        transform.localScale = baseScale;
+    }
 }

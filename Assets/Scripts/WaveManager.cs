@@ -88,6 +88,15 @@ public class WaveManager : MonoBehaviour
             if (enemyPrefab != null)
             {
                 GameObject newEnemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
+                Enemy enemyComp = newEnemy.GetComponent<Enemy>();
+
+                if (enemyComp != null)
+                {
+                    // Tentukan tipe musuh secara dinamis
+                    EnemyArchetype chosenType = PickEnemyTypeForWave(currentWave, i);
+                    enemyComp.ApplyArchetype(chosenType, currentWave);
+                }
+
                 activeEnemies.Add(newEnemy);
             }
 
@@ -101,9 +110,29 @@ public class WaveManager : MonoBehaviour
         }
 
         isSpawning = false;
-
-        // Cek darurat jika semua musuh ternyata sudah mati saat spawn terakhir selesai
         CheckWaveCompletion();
+    }
+
+    // Penentu komposisi tipe musuh berdasarkan nomor Wave
+    EnemyArchetype PickEnemyTypeForWave(int wave, int enemyIndex)
+    {
+        if (wave < 3)
+        {
+            return EnemyArchetype.Normal;
+        }
+        else if (wave < 5)
+        {
+            // Peluang 30% muncul scout
+            return (Random.value < 0.3f) ? EnemyArchetype.Scout : EnemyArchetype.Normal;
+        }
+        else
+        {
+            // Wave 5 ke atas: Campuran ketiganya
+            float roll = Random.value;
+            if (roll < 0.25f) return EnemyArchetype.Tank;   // 25% Tank
+            if (roll < 0.55f) return EnemyArchetype.Scout;  // 30% Scout
+            return EnemyArchetype.Normal;                   // 45% Normal
+        }
     }
 
     // Dipanggil saat musuh hancur atau mati
@@ -132,17 +161,30 @@ public class WaveManager : MonoBehaviour
         }
     }
 
+    [Header("Win Condition")]
+    public int maxWaveToWin = 10; // Selesaikan Wave 10 untuk menang
+
     IEnumerator WaveClearRoutine()
     {
         isWaveClearing = true;
-        Debug.Log($"<color=green>WAVE {currentWave} BERHASIL DILEWATI!</color>");
+        Debug.Log($"<color=green>WAVE {currentWave} CLEAR!</color>");
+
+        // Cek apakah pemain sudah menamatkan wave terakhir
+        if (currentWave >= maxWaveToWin)
+        {
+            yield return new WaitForSecondsRealtime(1.0f);
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.TriggerGameWin();
+            }
+            yield break;
+        }
 
         if (waveClearPanel != null)
         {
             waveClearPanel.SetActive(true);
         }
 
-        // Pakai WaitForSecondsRealtime agar tidak nyangkut saat game ter-pause
         yield return new WaitForSecondsRealtime(2.5f);
 
         if (waveClearPanel != null)

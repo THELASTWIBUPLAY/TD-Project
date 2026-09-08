@@ -4,41 +4,50 @@ using TMPro;
 
 public class BaseHealth : MonoBehaviour
 {
-    public float maxHp = 100f;
-    public float currentHp;
+    public float maxHealth = 100f;
+    public float currentHealth;
 
     [Header("UI References")]
-    public Slider hpSlider;
-    public TextMeshProUGUI hpText;
+    public Slider healthBar;
+    public TextMeshProUGUI healthText;
+
+    private bool isGameOverTriggered = false;
 
     void Start()
     {
-        currentHp = maxHp;
+        currentHealth = maxHealth;
         UpdateUI();
     }
 
     public void TakeBaseDamage(float damage)
     {
-        currentHp = Mathf.Max(0, currentHp - damage);
+        if (isGameOverTriggered) return;
+
+        currentHealth -= damage;
+        currentHealth = Mathf.Max(0, currentHealth);
         UpdateUI();
 
-        if (currentHp <= 0)
+        if (currentHealth <= 0)
         {
-            Debug.Log("Game Over!");
+            isGameOverTriggered = true;
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.TriggerGameOver();
+            }
         }
     }
 
     void UpdateUI()
     {
-        if (hpSlider != null)
+        if (healthBar != null)
         {
-            hpSlider.maxValue = maxHp;
-            hpSlider.value = currentHp;
+            healthBar.maxValue = maxHealth;
+            healthBar.value = currentHealth;
         }
 
-        if (hpText != null)
+        if (healthText != null)
         {
-            hpText.text = $"{currentHp} / {maxHp}";
+            healthText.text = $"{Mathf.CeilToInt(currentHealth)} / {maxHealth}";
         }
     }
 }

@@ -140,7 +140,9 @@ public class SlotGridManager : MonoBehaviour
                 // Update karakter utama menjadi bintang berikutnya
                 if (targetSlot.currentCharacter != null)
                 {
+                    // Naikkan bintang dan picu letupan visual
                     targetSlot.currentCharacter.SetStarLevel(checkStar + 1);
+                    targetSlot.currentCharacter.PlayMergeCelebration();
                     Debug.Log($"MERGE SUKSES: Menjadi Bintang {checkStar + 1} di {targetSlot.gameObject.name}");
                 }
 
