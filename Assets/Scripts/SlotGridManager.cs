@@ -63,13 +63,20 @@ public class SlotGridManager : MonoBehaviour
 
     void SpawnDefaultCenterCharacter()
     {
-        // 15 slot index-nya 0 sampai 14, titik tengah pastinya adalah indeks 7
         int centerIndex = allSlots.Count / 2;
 
         if (allSlots.Count > centerIndex && allSlots[centerIndex] != null)
         {
             CharacterSlot centerSlot = allSlots[centerIndex];
             GameObject defaultChar = Instantiate(characterPrefab, centerSlot.transform.position, Quaternion.identity);
+            
+            // Beri kelas awal Ranger
+            Character charComp = defaultChar.GetComponent<Character>();
+            if (charComp != null)
+            {
+                charComp.SetupClass(CharacterClassType.Ranger, 1);
+            }
+
             centerSlot.AssignCharacter(defaultChar);
         }
     }
@@ -100,54 +107,49 @@ public class SlotGridManager : MonoBehaviour
     // Fungsi untuk memicu merge 3 karakter
     public void CheckAndExecuteMerge()
     {
-        // Cek dari bintang 1 dulu, baru bintang 2
-        for (int checkStar = 1; checkStar <= 2; checkStar++)
+        // Loop untuk bintang 1 -> 2, dan bintang 2 -> 3
+        for (int star = 1; star <= 2; star++)
         {
-            List<CharacterSlot> matchingSlots = new List<CharacterSlot>();
-
-            // Cari semua slot yang berisi karakter dengan bintang yang cocok
-            foreach (CharacterSlot slot in allSlots)
+            foreach (CharacterClassType cls in System.Enum.GetValues(typeof(CharacterClassType)))
             {
-                if (slot != null && slot.isOccupied && slot.currentCharacter != null)
+                List<CharacterSlot> matchingSlots = new List<CharacterSlot>();
+
+                foreach (var slot in allSlots)
                 {
-                    if (slot.currentCharacter.starLevel == checkStar)
+                    if (slot != null && slot.isOccupied && slot.currentCharacter != null)
                     {
-                        matchingSlots.Add(slot);
+                        // Pastikan mencocokkan bintang dan kelas
+                        if (slot.currentCharacter.starLevel == star && slot.currentCharacter.classType == cls)
+                        {
+                            matchingSlots.Add(slot);
+                        }
                     }
                 }
+
+                // Jika sudah terkumpul 3 unit sejenis & sebintang
+                if (matchingSlots.Count >= 3)
+                {
+                    ExecuteMerge(matchingSlots[0], matchingSlots[1], matchingSlots[2], star + 1, cls);
+                    
+                    // Panggil ulang untuk mengecek merge berantai (chain merge)
+                    CheckAndExecuteMerge();
+                    return;
+                }
             }
+        }
+    }
 
-            // Jika ketemu minimal 3 karakter dengan bintang sama:
-            if (matchingSlots.Count >= 3)
-            {
-                CharacterSlot targetSlot = matchingSlots[0];
-                CharacterSlot sacrificed1 = matchingSlots[1];
-                CharacterSlot sacrificed2 = matchingSlots[2];
+    void ExecuteMerge(CharacterSlot targetSlot, CharacterSlot sacrificeA, CharacterSlot sacrificeB, int newStar, CharacterClassType cls)
+    {
+        // Hancurkan 2 unit tumbal
+        sacrificeA.ClearSlot();
+        sacrificeB.ClearSlot();
 
-                // Hapus 2 karakter kurban dan bersihkan petaknya
-                if (sacrificed1.currentCharacter != null)
-                {
-                    Destroy(sacrificed1.currentCharacter.gameObject);
-                    sacrificed1.ClearSlot();
-                }
-
-                if (sacrificed2.currentCharacter != null)
-                {
-                    Destroy(sacrificed2.currentCharacter.gameObject);
-                    sacrificed2.ClearSlot();
-                }
-
-                // Update karakter utama menjadi bintang berikutnya
-                if (targetSlot.currentCharacter != null)
-                {
-                    targetSlot.currentCharacter.SetStarLevel(checkStar + 1);
-                    Debug.Log($"MERGE SUKSES: Menjadi Bintang {checkStar + 1} di {targetSlot.gameObject.name}");
-                }
-
-                // Cek apakah merge lanjutan (misal 3 buah bintang 2 -> bintang 3) bisa langsung terjadi
-                CheckAndExecuteMerge();
-                break;
-            }
+        // Naikkan level dan perbarui tampilan slot utama
+        if (targetSlot.currentCharacter != null)
+        {
+            targetSlot.currentCharacter.SetupClass(cls, newStar);
+            targetSlot.currentCharacter.PlayMergeCelebration();
         }
     }
 }

@@ -4,7 +4,8 @@ using TMPro;
 
 public class Character : MonoBehaviour
 {
-    [Header("Star Level")]
+    [Header("Class & Star Config")]
+    public CharacterClassType classType = CharacterClassType.Ranger;
     [Range(1, 3)]
     public int starLevel = 1;
     public TextMeshPro starText3D;
@@ -20,16 +21,17 @@ public class Character : MonoBehaviour
 
     [Header("References")]
     public GameObject projectilePrefab;
+    private SpriteRenderer spriteRenderer;
 
     [Header("Bouncy Animation")]
     public float bounceDuration = 0.15f;
-    private Vector3 basePresetScale = new Vector3(0.6f, 0.6f, 1f); // Ukuran standar karakter
+    private Vector3 basePresetScale = new Vector3(0.6f, 0.6f, 1f);
     private Coroutine bounceCoroutine;
     private float fireCountdown = 0f;
 
     void Awake()
     {
-        // Pastikan skala dasar tersimpan aman sejak awal instansiasi
+        spriteRenderer = GetComponent<SpriteRenderer>();
         if (transform.localScale != Vector3.zero)
         {
             basePresetScale = transform.localScale;
@@ -38,7 +40,59 @@ public class Character : MonoBehaviour
 
     void Start()
     {
+        ApplyClassStats();
         UpdateStarDisplay();
+    }
+
+    public void SetupClass(CharacterClassType type, int star = 1)
+    {
+        classType = type;
+        starLevel = star;
+        ApplyClassStats();
+        UpdateStarDisplay();
+    }
+
+    public void ApplyClassStats()
+    {
+        if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+
+        switch (classType)
+        {
+            case CharacterClassType.Ranger:
+                baseAttackDamage = 12f;
+                baseAttackCooldown = 0.65f;
+                attackRange = 7.5f;
+                if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0.4f, 0.8f); // Pink cerah
+                break;
+
+            case CharacterClassType.Sniper:
+                baseAttackDamage = 45f;
+                baseAttackCooldown = 1.6f;
+                attackRange = 10f;
+                if (spriteRenderer != null) spriteRenderer.color = new Color(0.2f, 0.85f, 0.3f); // Hijau
+                break;
+
+            case CharacterClassType.Bombardier:
+                baseAttackDamage = 25f;
+                baseAttackCooldown = 1.1f;
+                attackRange = 6.5f;
+                if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0.45f, 0.1f); // Oranye
+                break;
+
+            case CharacterClassType.Cryo:
+                baseAttackDamage = 8f;
+                baseAttackCooldown = 0.8f;
+                attackRange = 7f;
+                if (spriteRenderer != null) spriteRenderer.color = new Color(0.4f, 0.8f, 1f); // Biru es muda
+                break;
+
+            case CharacterClassType.Gunslinger:
+                baseAttackDamage = 6f;
+                baseAttackCooldown = 0.25f; // Rapid fire
+                attackRange = 5.2f;
+                if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0.85f, 0.15f); // Kuning emas
+                break;
+        }
     }
 
     void Update()
@@ -50,11 +104,11 @@ public class Character : MonoBehaviour
 
         if (fireCountdown <= 0f)
         {
-            Transform target = FindClosestEnemy();
+            Transform target = PickTargetForClass();
             if (target != null)
             {
                 Shoot(target);
-                fireCountdown = Mathf.Max(0.1f, currentCooldown);
+                fireCountdown = Mathf.Max(0.08f, currentCooldown);
             }
         }
     }
@@ -72,17 +126,36 @@ public class Character : MonoBehaviour
             starText3D.text = starLevel.ToString();
         }
 
-        // Sedikit perbesar karakter saat naik bintang, tapi tetap berbasis pada ukuran dasar
         float scaleMult = 1f + ((starLevel - 1) * 0.2f);
         transform.localScale = basePresetScale * scaleMult;
     }
 
-    Transform FindClosestEnemy()
+    Transform PickTargetForClass()
     {
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, attackRange);
-        Transform lowestEnemy = null;
-        float lowestY = Mathf.Infinity;
+        Transform bestEnemy = null;
 
+        // Sniper memprioritaskan musuh dengan HP tertinggi (Tank/Boss)
+        if (classType == CharacterClassType.Sniper)
+        {
+            float maxFoundHp = -1f;
+            foreach (Collider2D col in colliders)
+            {
+                if (col.CompareTag("Enemy"))
+                {
+                    Enemy e = col.GetComponent<Enemy>();
+                    if (e != null && e.maxHp > maxFoundHp)
+                    {
+                        maxFoundHp = e.maxHp;
+                        bestEnemy = col.transform;
+                    }
+                }
+            }
+            if (bestEnemy != null) return bestEnemy;
+        }
+
+        // Kelas lainnya menembak musuh yang posisinya paling bawah (terdekat ke Base)
+        float lowestY = Mathf.Infinity;
         foreach (Collider2D col in colliders)
         {
             if (col.CompareTag("Enemy"))
@@ -90,30 +163,68 @@ public class Character : MonoBehaviour
                 if (col.transform.position.y < lowestY)
                 {
                     lowestY = col.transform.position.y;
-                    lowestEnemy = col.transform;
+                    bestEnemy = col.transform;
                 }
             }
         }
-        return lowestEnemy;
+        return bestEnemy;
     }
 
     void Shoot(Transform target)
     {
         if (target == null || projectilePrefab == null) return;
 
-        GameObject projGO = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
-        Projectile projectile = projGO.GetComponent<Projectile>();
-        if (projectile != null)
+        // Bunyikan SFX saat menembak hanya untuk kelas selain Bombardier
+        if (classType != CharacterClassType.Bombardier && AudioManager.Instance != null)
         {
-            float starDamageMult = starLevel == 1 ? 1f : (starLevel == 2 ? 2.2f : 4.5f);
-            float finalDamage = baseAttackDamage * starDamageMult * (1f + (GlobalDamageBonusPercent / 100f));
+            AudioManager.Instance.PlayClassShootSFX(classType);
+        }
 
-            projectile.damage = finalDamage;
-            projectile.Setup(target);
+        float starDamageMult = starLevel == 1 ? 1f : (starLevel == 2 ? 2.2f : 4.5f);
+        float finalDamage = baseAttackDamage * starDamageMult * (1f + (GlobalDamageBonusPercent / 100f));
+
+        if (starLevel >= 3 && classType == CharacterClassType.Sniper)
+        {
+            Enemy targetEnemyComp = target.GetComponent<Enemy>();
+            if (targetEnemyComp != null && (targetEnemyComp.archetype == EnemyArchetype.Tank || targetEnemyComp.archetype == EnemyArchetype.Boss))
+            {
+                finalDamage *= 1.8f;
+            }
+        }
+
+        if (starLevel >= 3 && classType == CharacterClassType.Ranger)
+        {
+            StartCoroutine(DoubleTapRoutine(target, finalDamage));
+        }
+        else
+        {
+            SpawnProjectile(target, finalDamage);
         }
 
         if (bounceCoroutine != null) StopCoroutine(bounceCoroutine);
         bounceCoroutine = StartCoroutine(BounceEffect());
+    }
+
+    void SpawnProjectile(Transform target, float dmg)
+    {
+        GameObject projGO = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
+        Projectile projectile = projGO.GetComponent<Projectile>();
+        if (projectile != null)
+        {
+            projectile.damage = dmg;
+
+            bool isAoE = (classType == CharacterClassType.Bombardier);
+            float splashRadius = (starLevel >= 3) ? 2.2f : 1.5f;
+
+            projectile.Setup(target, isAoE, splashRadius);
+        }
+    }
+
+    IEnumerator DoubleTapRoutine(Transform target, float dmg)
+    {
+        SpawnProjectile(target, dmg);
+        yield return new WaitForSeconds(0.12f);
+        if (target != null) SpawnProjectile(target, dmg);
     }
 
     IEnumerator BounceEffect()
@@ -143,9 +254,25 @@ public class Character : MonoBehaviour
         transform.localScale = targetScale;
     }
 
-    private void OnDrawGizmosSelected()
+    public void PlayMergeCelebration()
     {
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
+        StartCoroutine(MergePopRoutine());
+    }
+
+    IEnumerator MergePopRoutine()
+    {
+        Vector3 baseScale = basePresetScale * (1f + ((starLevel - 1) * 0.2f));
+        Vector3 bigScale = baseScale * 1.45f;
+        float duration = 0.2f;
+        float t = 0f;
+
+        while (t < duration)
+        {
+            transform.localScale = Vector3.Lerp(bigScale, baseScale, t / duration);
+            t += Time.deltaTime;
+            yield return null;
+        }
+
+        transform.localScale = baseScale;
     }
 }

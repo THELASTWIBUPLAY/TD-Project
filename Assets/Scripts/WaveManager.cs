@@ -8,16 +8,17 @@ public class WaveManager : MonoBehaviour
 {
     public static WaveManager Instance { get; private set; }
 
+    [Header("Stage Configuration (ScriptableObject)")]
+    public StageConfig stageConfig;
+
     [Header("Spawner Setup")]
     public GameObject enemyPrefab;
     public float spawnYPosition = 6f;
     public float minX = -2f;
     public float maxX = 2f;
 
-    [Header("Wave Progression")]
+    [Header("Wave Progression State")]
     public int currentWave = 1;
-    public int baseEnemyCount = 5;
-    public float baseSpawnInterval = 2.2f;
     public float spawnInterval;
 
     [Header("Wave UI")]
@@ -30,7 +31,6 @@ public class WaveManager : MonoBehaviour
     private bool isSpawning = false;
     private bool isWaveClearing = false;
 
-    // Simpan daftar musuh yang sedang hidup di arena
     private List<GameObject> activeEnemies = new List<GameObject>();
 
     void Awake()
@@ -56,8 +56,14 @@ public class WaveManager : MonoBehaviour
         isWaveClearing = false;
         activeEnemies.Clear();
 
-        totalEnemiesThisWave = baseEnemyCount + ((currentWave - 1) * 2);
-        spawnInterval = Mathf.Max(0.8f, baseSpawnInterval - ((currentWave - 1) * 0.1f));
+        // Mengambil formula dari StageConfig
+        int baseEnemies = stageConfig != null ? stageConfig.baseEnemyCount : 5;
+        float mult = stageConfig != null ? stageConfig.enemyCountWaveMultiplier : 2f;
+        totalEnemiesThisWave = Mathf.RoundToInt(baseEnemies + ((currentWave - 1) * mult));
+
+        float baseInterval = stageConfig != null ? stageConfig.baseSpawnInterval : 2.2f;
+        float minInterval = stageConfig != null ? stageConfig.minSpawnInterval : 0.6f;
+        spawnInterval = Mathf.Max(minInterval, baseInterval - ((currentWave - 1) * 0.08f));
 
         spawnedCount = 0;
 
@@ -69,7 +75,8 @@ public class WaveManager : MonoBehaviour
 
         if (waveText != null)
         {
-            waveText.text = $"Wave {currentWave}";
+            string modeLabel = (stageConfig != null && stageConfig.isEndless) ? " (Endless)" : "";
+            waveText.text = $"Wave {currentWave}{modeLabel}";
         }
 
         StartCoroutine(SpawnEnemiesRoutine());
@@ -88,6 +95,19 @@ public class WaveManager : MonoBehaviour
             if (enemyPrefab != null)
             {
                 GameObject newEnemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
+                Enemy enemyComp = newEnemy.GetComponent<Enemy>();
+
+                if (enemyComp != null)
+                {
+                    EnemyArchetype chosenType = PickEnemyTypeForWave(currentWave, i);
+                    enemyComp.ApplyArchetype(chosenType, currentWave);
+
+                    if (chosenType == EnemyArchetype.Boss && AudioManager.Instance != null)
+                    {
+                        AudioManager.Instance.PlayBossIncomingSFX();
+                    }
+                }
+
                 activeEnemies.Add(newEnemy);
             }
 
@@ -101,12 +121,52 @@ public class WaveManager : MonoBehaviour
         }
 
         isSpawning = false;
-
-        // Cek darurat jika semua musuh ternyata sudah mati saat spawn terakhir selesai
         CheckWaveCompletion();
     }
 
-    // Dipanggil saat musuh hancur atau mati
+    EnemyArchetype PickEnemyTypeForWave(int wave, int enemyIndex)
+    {
+        int finalBossInt = stageConfig != null ? stageConfig.finalBossInterval : 10;
+        int miniBossInt = stageConfig != null ? stageConfig.miniBossInterval : 5;
+
+        int finalCount = stageConfig != null ? stageConfig.finalBossCount : 1;
+        int miniCount = stageConfig != null ? stageConfig.miniBossCount : 1;
+
+        // 1. Cek Wave Boss Utama (misal: wave 10, 20, 30...)
+        if (finalBossInt > 0 && wave % finalBossInt == 0)
+        {
+            if (enemyIndex >= totalEnemiesThisWave - finalCount)
+            {
+                return EnemyArchetype.Boss;
+            }
+        }
+        // 2. Cek Wave Miniboss (misal: wave 5, 15, 25...)
+        else if (miniBossInt > 0 && wave % miniBossInt == 0)
+        {
+            if (enemyIndex >= totalEnemiesThisWave - miniCount)
+            {
+                return EnemyArchetype.Boss;
+            }
+        }
+
+        // Variasi mob reguler
+        if (wave < 3)
+        {
+            return EnemyArchetype.Normal;
+        }
+        else if (wave < 5)
+        {
+            return (Random.value < 0.3f) ? EnemyArchetype.Scout : EnemyArchetype.Normal;
+        }
+        else
+        {
+            float roll = Random.value;
+            if (roll < 0.28f) return EnemyArchetype.Tank;
+            if (roll < 0.58f) return EnemyArchetype.Scout;
+            return EnemyArchetype.Normal;
+        }
+    }
+
     public void OnEnemyDefeated(GameObject enemyGO)
     {
         if (activeEnemies.Contains(enemyGO))
@@ -114,18 +174,14 @@ public class WaveManager : MonoBehaviour
             activeEnemies.Remove(enemyGO);
         }
 
-        // Bersihkan referensi null yang mungkin tersisa
         activeEnemies.RemoveAll(item => item == null);
-
         CheckWaveCompletion();
     }
 
     void CheckWaveCompletion()
     {
-        // Bersihkan objek musuh yang sudah hancur
         activeEnemies.RemoveAll(item => item == null);
 
-        // Jika semua musuh wave ini SUDAH di-spawn DAN tidak ada lagi musuh di arena
         if (!isSpawning && spawnedCount >= totalEnemiesThisWave && activeEnemies.Count == 0 && !isWaveClearing)
         {
             StartCoroutine(WaveClearRoutine());
@@ -135,15 +191,35 @@ public class WaveManager : MonoBehaviour
     IEnumerator WaveClearRoutine()
     {
         isWaveClearing = true;
-        Debug.Log($"<color=green>WAVE {currentWave} BERHASIL DILEWATI!</color>");
+        Debug.Log($"<color=green>WAVE {currentWave} CLEAR!</color>");
+
+        // Tambah bonus skor wave clear
+        // Tambah bonus skor wave clear HANYA jika Endless Mode
+        if (GameManager.Instance != null && stageConfig != null && stageConfig.isEndless)
+        {
+            GameManager.Instance.AddScore(stageConfig.scoreWaveClearBonus);
+        }
+
+        // Kondisi menang hanya jika BUKAN mode Endless
+        bool isEndless = stageConfig != null && stageConfig.isEndless;
+        int maxWave = stageConfig != null ? stageConfig.maxWave : 10;
+
+        if (!isEndless && currentWave >= maxWave)
+        {
+            yield return new WaitForSecondsRealtime(1.0f);
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.TriggerGameWin();
+            }
+            yield break;
+        }
 
         if (waveClearPanel != null)
         {
             waveClearPanel.SetActive(true);
         }
 
-        // Pakai WaitForSecondsRealtime agar tidak nyangkut saat game ter-pause
-        yield return new WaitForSecondsRealtime(2.5f);
+        yield return new WaitForSecondsRealtime(2.0f);
 
         if (waveClearPanel != null)
         {

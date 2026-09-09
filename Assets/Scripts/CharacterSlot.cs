@@ -19,9 +19,23 @@ public class CharacterSlot : MonoBehaviour
     public void ClearSlot()
     {
         isOccupied = false;
+
+        // Hancurkan GameObject fisik karakter jika masih ada
+        if (currentCharacter != null)
+        {
+            Destroy(currentCharacter.gameObject);
+        }
+        else
+        {
+            // Pengaman jika child transform masih tertinggal
+            foreach (Transform child in transform)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+
         currentCharacter = null;
     }
-
     private void OnDrawGizmos()
     {
         Gizmos.color = isOccupied ? Color.red : Color.green;
