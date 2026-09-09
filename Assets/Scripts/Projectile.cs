@@ -24,19 +24,23 @@ public class Projectile : MonoBehaviour
     private Rigidbody2D targetRb;
     private Vector2 currentDirection = Vector2.up;
 
-    // Overload Setup agar kompatibel dengan pemanggilan lama maupun baru
+    // Overload 1: jika hanya passing target tunggal
     public void Setup(Transform target)
     {
         Setup(target, false, 1.5f);
     }
 
+    // Overload 2: implementasi utama
     public void Setup(Transform target, bool isAreaDamage, float splashRadius = 1.5f)
     {
         targetEnemy = target;
         isAoE = isAreaDamage;
         aoeRadius = splashRadius;
 
-        // Beri jatah 1x pantulan jika kartu Ricochet aktif (AoE tidak memantul agar balance)
+        // Kunci ke 0 dulu agar tidak membawa data sisa prefab
+        ricochetRemaining = 0;
+
+        // Beri jatah 1x pantulan HANYA jika kartu Ricochet memang sudah aktif
         if (GlobalRicochetUnlocked && !isAoE)
         {
             ricochetRemaining = 1;

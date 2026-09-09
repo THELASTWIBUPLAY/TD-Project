@@ -182,6 +182,12 @@ public class Enemy : MonoBehaviour
             OnBossDefeatedEvent?.Invoke();
         }
 
+        // Catat musuh yang mati ke GameManager
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.RegisterKill();
+        }
+
         Destroy(gameObject);
     }
 

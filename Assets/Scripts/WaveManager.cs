@@ -41,6 +41,7 @@ public class WaveManager : MonoBehaviour
             return;
         }
         Instance = this;
+        Projectile.GlobalRicochetUnlocked = false;
 
         Enemy.ResetGlobalStats();
     }
