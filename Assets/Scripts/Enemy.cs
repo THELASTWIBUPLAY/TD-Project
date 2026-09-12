@@ -190,6 +190,11 @@ public class Enemy : MonoBehaviour
         if (archetype == EnemyArchetype.Boss)
         {
             OnBossDefeatedEvent?.Invoke();
+
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.ReturnToNormalBGM(); 
+            }
         }
 
         if (GameManager.Instance != null)

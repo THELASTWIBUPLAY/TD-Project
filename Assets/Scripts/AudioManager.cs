@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using TMPro;
 
@@ -7,7 +8,8 @@ public class AudioManager : MonoBehaviour
 
     [Header("Audio Sources")]
     [SerializeField] private AudioSource sfxSource;
-    [SerializeField] private AudioSource bgmSource;
+    [SerializeField] private AudioSource bgmNormalSource;
+    [SerializeField] private AudioSource bgmBossSource;
 
     [Header("Mute UI Feedback")]
     public TextMeshProUGUI muteButtonText; 
@@ -22,6 +24,11 @@ public class AudioManager : MonoBehaviour
     [Header("Game Event SFX")]
     public AudioClip sfxIncomingBoss;
     public AudioClip bgmMusic;
+    public AudioClip bossBgm;
+
+    [Header("BGM Settings")]
+    public float defaultBgmVolume = 0.45f;
+    private Coroutine transitionCoroutine;
 
     private float lastShootSoundTime;
     public float minSoundInterval = 0.05f; 
@@ -42,16 +49,20 @@ public class AudioManager : MonoBehaviour
             sfxSource.playOnAwake = false;
         }
 
-        if (bgmSource == null)
+        if (bgmNormalSource == null)
         {
-            bgmSource = gameObject.AddComponent<AudioSource>();
-            bgmSource.loop = true;
-            bgmSource.playOnAwake = false;
-            bgmSource.priority = 0; 
+            bgmNormalSource = gameObject.AddComponent<AudioSource>();
+            bgmNormalSource.loop = true;
+            bgmNormalSource.playOnAwake = false;
+            bgmNormalSource.priority = 0;
         }
-        else
+
+        if (bgmBossSource == null)
         {
-            bgmSource.priority = 0;
+            bgmBossSource = gameObject.AddComponent<AudioSource>();
+            bgmBossSource.loop = true;
+            bgmBossSource.playOnAwake = false;
+            bgmBossSource.priority = 0;
         }
     }
 
@@ -63,12 +74,76 @@ public class AudioManager : MonoBehaviour
 
     public void PlayBGM()
     {
-        if (bgmMusic != null && bgmSource != null)
+        if (bgmMusic != null && bgmNormalSource != null)
         {
-            bgmSource.clip = bgmMusic;
-            bgmSource.volume = 0.45f;
-            bgmSource.Play();
+            bgmNormalSource.clip = bgmMusic;
+            bgmNormalSource.volume = defaultBgmVolume;
+            bgmNormalSource.Play();
         }
+    }
+
+    public void PlayBossBGM()
+    {
+        if (bossBgm == null) return;
+
+        if (transitionCoroutine != null) StopCoroutine(transitionCoroutine);
+        transitionCoroutine = StartCoroutine(ToBossRoutine());
+    }
+
+    public void ReturnToNormalBGM()
+    {
+        if (transitionCoroutine != null) StopCoroutine(transitionCoroutine);
+        transitionCoroutine = StartCoroutine(ToNormalRoutine());
+    }
+
+    private IEnumerator ToBossRoutine()
+    {
+        float duration = 0.6f;
+        float elapsed = 0f;
+        float startNormalVol = bgmNormalSource.volume;
+
+        bgmBossSource.clip = bossBgm;
+        bgmBossSource.volume = 0f;
+        bgmBossSource.Play();
+
+        while (elapsed < duration)
+        {
+            float t = elapsed / duration;
+            bgmNormalSource.volume = Mathf.Lerp(startNormalVol, 0f, t);
+            bgmBossSource.volume = Mathf.Lerp(0f, defaultBgmVolume, t);
+
+            elapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        bgmBossSource.volume = defaultBgmVolume;
+        bgmNormalSource.volume = 0f;
+        bgmNormalSource.Pause();
+        transitionCoroutine = null;
+    }
+
+    private IEnumerator ToNormalRoutine()
+    {
+        float duration = 1.0f;
+        float elapsed = 0f;
+        float startBossVol = bgmBossSource.volume;
+
+        bgmNormalSource.UnPause();
+
+        while (elapsed < duration)
+        {
+            float t = elapsed / duration;
+            bgmBossSource.volume = Mathf.Lerp(startBossVol, 0f, t);
+            bgmNormalSource.volume = Mathf.Lerp(0f, defaultBgmVolume, t);
+
+            elapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        bgmNormalSource.volume = defaultBgmVolume;
+        bgmBossSource.volume = 0f;
+        bgmBossSource.Stop();
+        transitionCoroutine = null;
     }
 
     public void PlayClassShootSFX(CharacterClassType classType)
@@ -105,7 +180,8 @@ public class AudioManager : MonoBehaviour
     public void ToggleMute()
     {
         isMuted = !isMuted;
-        if (bgmSource != null) bgmSource.mute = isMuted;
+        if (bgmNormalSource != null) bgmNormalSource.mute = isMuted;
+        if (bgmBossSource != null) bgmBossSource.mute = isMuted;
         if (sfxSource != null) sfxSource.mute = isMuted;
 
         UpdateMuteUI();

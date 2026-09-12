@@ -57,7 +57,6 @@ public class WaveManager : MonoBehaviour
         isWaveClearing = false;
         activeEnemies.Clear();
 
-        // Mengambil formula dari StageConfig
         int baseEnemies = stageConfig != null ? stageConfig.baseEnemyCount : 5;
         float mult = stageConfig != null ? stageConfig.enemyCountWaveMultiplier : 2f;
         totalEnemiesThisWave = Mathf.RoundToInt(baseEnemies + ((currentWave - 1) * mult));
@@ -107,6 +106,7 @@ public class WaveManager : MonoBehaviour
                     if (AudioManager.Instance != null)
                     {
                         AudioManager.Instance.PlayBossIncomingSFX();
+                        AudioManager.Instance.PlayBossBGM();
                     }
 
                     yield return new WaitForSeconds(1f);
