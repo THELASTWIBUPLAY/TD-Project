@@ -10,6 +10,7 @@ public class Enemy : MonoBehaviour
     public float damageToBase = 5f;
     public int expReward = 8;
 
+
     [Header("Visual Feedback")]
     private SpriteRenderer spriteRenderer;
     private Color originalColor;
@@ -17,20 +18,25 @@ public class Enemy : MonoBehaviour
     public float flashDuration = 0.08f;
     private Coroutine flashCoroutine;
 
+
     public static float GlobalHpMultiplier = 1f;
     public static float GlobalSpeedMultiplier = 1f;
     public static float GlobalDamageMultiplier = 1f;
     public static float GlobalExpMultiplier = 1f;
 
+
     [Header("Archetype Setup")]
     public EnemyArchetype archetype = EnemyArchetype.Normal;
+
 
     [Header("Base Safety Boundary")]
     public float baseLineY = -2f;
 
+
     public static System.Action<float, float> OnBossHpChanged; // (currentHp, maxHp)
     public static System.Action OnBossDefeatedEvent;
     private bool isDead = false;
+
 
     public static void ResetGlobalStats()
     {
@@ -39,6 +45,7 @@ public class Enemy : MonoBehaviour
         GlobalDamageMultiplier = 1f;
         GlobalExpMultiplier = 1f;
     }
+
 
     void Awake()
     {
@@ -49,6 +56,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
+
     void Start()
     {
         maxHp *= GlobalHpMultiplier;
@@ -56,6 +64,7 @@ public class Enemy : MonoBehaviour
         damageToBase *= GlobalDamageMultiplier;
         currentHp = maxHp;
     }
+
 
     void Update()
     {
@@ -67,6 +76,7 @@ public class Enemy : MonoBehaviour
             HitBaseDirectly();
         }
     }
+
 
     private void HitBaseDirectly()
     {
@@ -91,6 +101,7 @@ public class Enemy : MonoBehaviour
 
         Destroy(gameObject);
     }
+
 
     public void TakeDamage(float damageAmount)
     {
@@ -122,6 +133,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
+
     IEnumerator HitFlashRoutine()
     {
         if (spriteRenderer != null)
@@ -132,6 +144,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
+
     private void Die()
     {
         if (isDead) return;
@@ -139,20 +152,30 @@ public class Enemy : MonoBehaviour
 
         int currentWave = WaveManager.Instance != null ? WaveManager.Instance.currentWave : 1;
 
-        // 1. Berikan EXP ke Player
-        // 1. Berikan EXP ke Player
+        // ==========================================
+        // 1. Berikan EXP ke Player (DISEIMBAGKAN)
+        // ==========================================
         if (GameManager.Instance != null)
         {
-            // Bonus flat terukur: musuh di wave 40 memberi tambahan yang pas
-            float waveExpBonus = (currentWave - 1) * 2.5f;
-            float totalBaseExp = expReward + waveExpBonus;
+            // Base EXP dari archetype
+            float baseExp = expReward;
+
+            // Wave Bonus yang lebih stabil: naik perlahan, tapi ada cap di 200
+            float waveExpBonus = Mathf.Min((currentWave - 1) * 1.5f, 200f);
+
+            // Total EXP sebelum multiplier kartu
+            float totalBaseExp = baseExp + waveExpBonus;
+
+            // Terapkan multiplier kartu global (jika ada)
             int finalExp = Mathf.RoundToInt(totalBaseExp * Enemy.GlobalExpMultiplier);
+
+            Debug.Log($"[Enemy.Die] Wave {currentWave}: Base={baseExp}, Bonus={waveExpBonus}, Total={totalBaseExp}, Final={finalExp}");
 
             GameManager.Instance.AddExp(finalExp);
         }
 
-        // 2. Berikan Skor sesuai StageConfig
-        // 2. Berikan Skor HANYA di Endless Mode
+
+        // 2. Berikan Skor sesuai StageConfig (HANYA di Endless Mode)
         if (GameManager.Instance != null && WaveManager.Instance != null && WaveManager.Instance.stageConfig != null)
         {
             StageConfig cfg = WaveManager.Instance.stageConfig;
@@ -171,6 +194,7 @@ public class Enemy : MonoBehaviour
             }
         }
 
+
         // 3. Notifikasi musuh mati ke WaveManager
         if (WaveManager.Instance != null)
         {
@@ -182,6 +206,7 @@ public class Enemy : MonoBehaviour
             OnBossDefeatedEvent?.Invoke();
         }
 
+
         // Catat musuh yang mati ke GameManager
         if (GameManager.Instance != null)
         {
@@ -190,6 +215,7 @@ public class Enemy : MonoBehaviour
 
         Destroy(gameObject);
     }
+
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -201,6 +227,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
+
     public void ApplyArchetype(EnemyArchetype type, int wave)
     {
         archetype = type;
@@ -208,6 +235,7 @@ public class Enemy : MonoBehaviour
 
         // Scaling dasar per wave
         float waveHpFactor = 1f + ((wave - 1) * 0.12f);
+
 
         switch (archetype)
         {

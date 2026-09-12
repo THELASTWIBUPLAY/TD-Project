@@ -27,6 +27,11 @@ public class BaseHealth : MonoBehaviour
         currentHealth = Mathf.Max(0, currentHealth);
         UpdateUI();
 
+        if (CameraShake.Instance != null)
+        {
+            CameraShake.Instance.Shake(0.18f, 0.12f); // Getaran cepat & terasa
+        }
+
         if (currentHealth <= 0)
         {
             isGameOverTriggered = true;

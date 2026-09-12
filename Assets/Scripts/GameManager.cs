@@ -3,19 +3,23 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 
+
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
+
     [Header("Speed & Pause Controls")]
     public TextMeshProUGUI speedButtonText;
-    private int currentSpeedIndex = 1; // Mulai dari 1 agar default kecepatan awal tetap 1x
+    private int currentSpeedIndex = 1; 
     private readonly float[] speedMultipliers = { 0.5f, 1f, 2f, 3f, 5f };
     private bool isPaused = false;
     private bool isMuted = false;
 
+
     [Header("Pause Modal")]
     public GameObject PausePanel;
+
 
     [Header("EXP & Level System")]
     public Slider expSlider;
@@ -24,26 +28,31 @@ public class GameManager : MonoBehaviour
     public float currentExp = 0f;
     public float expToNextLevel = 20f;
 
+
     [Header("End Game UI Panels")]
     public GameObject gameOverPanel;
     public TextMeshProUGUI gameOverWaveText;
     public GameObject gameWinPanel;
 
+
     [Header("Scoring System")]
     public TextMeshProUGUI scoreText;
     public int currentScore = 0;
+
 
     [Header("End Game Summary References")]
     public TextMeshProUGUI gameOverScoreText;
     public TextMeshProUGUI gameOverKillsText;
     public TextMeshProUGUI gameOverHighscoreText;
 
+
     public TextMeshProUGUI gameWinScoreText;
     public TextMeshProUGUI gameWinKillsText;
     public TextMeshProUGUI gameWinHighscoreText;
 
-    // Statistik Match
+
     public int totalEnemiesKilled = 0;
+
 
     void Awake()
     {
@@ -51,9 +60,10 @@ public class GameManager : MonoBehaviour
         Projectile.GlobalRicochetUnlocked = false;
     }
 
+
     void Start()
     {
-        UpdateSpeedUI(); // Pastikan tombol menampilkan "1x" saat start
+        UpdateSpeedUI(); 
         if (PausePanel != null) PausePanel.SetActive(false);
         UpdateExpUI();
 
@@ -69,6 +79,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
+
     public void AddScore(int amount)
     {
         if (WaveManager.Instance != null && WaveManager.Instance.stageConfig != null)
@@ -80,6 +91,7 @@ public class GameManager : MonoBehaviour
         UpdateScoreUI();
     }
 
+
     void UpdateScoreUI()
     {
         if (scoreText != null)
@@ -87,6 +99,7 @@ public class GameManager : MonoBehaviour
             scoreText.text = $"Score: {currentScore:N0}";
         }
     }
+
 
     public void RegisterKill()
     {
@@ -102,6 +115,7 @@ public class GameManager : MonoBehaviour
         UpdateSpeedUI();
     }
 
+
     private void UpdateSpeedUI()
     {
         if (speedButtonText != null)
@@ -111,16 +125,18 @@ public class GameManager : MonoBehaviour
         }
     }
 
+
     public void TogglePause()
     {
         isPaused = !isPaused;
         Time.timeScale = isPaused ? 0f : speedMultipliers[currentSpeedIndex];
-        
+
         if (PausePanel != null)
         {
             PausePanel.SetActive(isPaused);
         }
     }
+
 
     public void ResumeGame()
     {
@@ -129,6 +145,7 @@ public class GameManager : MonoBehaviour
         Time.timeScale = speedMultipliers[currentSpeedIndex];
     }
 
+
     public void QuitGame()
     {
         Time.timeScale = 1f;
@@ -136,10 +153,12 @@ public class GameManager : MonoBehaviour
         Debug.Log("Quit Game dipanggil!");
     }
 
+
     public void RestoreSpeedAfterModal()
     {
         Time.timeScale = speedMultipliers[currentSpeedIndex];
     }
+
 
     public void ToggleMute()
     {
@@ -154,6 +173,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
+
     public void AddExp(float amount)
     {
         currentExp += amount;
@@ -164,19 +184,23 @@ public class GameManager : MonoBehaviour
         UpdateExpUI();
     }
 
+
     private void LevelUp()
     {
         currentExp -= expToNextLevel;
         currentLevel++;
 
-        float baseCurve = 25f + (currentLevel * 18f) + (Mathf.Pow(currentLevel, 1.85f) * 1.8f);
-        expToNextLevel = Mathf.Round(baseCurve * 1.5f);
+        float baseCurve = 30f + (currentLevel * 15f) + (Mathf.Pow(currentLevel, 1.4f) * 1.5f);
+        expToNextLevel = Mathf.Round(baseCurve * 1.2f);
+
+        Debug.Log($"[GameManager.LevelUp] Level {currentLevel}: Base={baseCurve:F0}, NextExp={expToNextLevel}");
 
         if (UpgradeManager.Instance != null)
         {
             UpgradeManager.Instance.ShowUpgradeSelection();
         }
     }
+
 
     private void UpdateExpUI()
     {
@@ -191,6 +215,7 @@ public class GameManager : MonoBehaviour
             expText.text = $"Lv.{currentLevel} ({currentExp}/{expToNextLevel})";
         }
     }
+
 
     public void TriggerGameOver()
     {
@@ -210,6 +235,7 @@ public class GameManager : MonoBehaviour
         UpdateSummaryUI(gameOverScoreText, gameOverKillsText, gameOverHighscoreText);
     }
 
+
     public void TriggerGameWin()
     {
         Time.timeScale = 0f;
@@ -221,6 +247,7 @@ public class GameManager : MonoBehaviour
 
         UpdateSummaryUI(gameWinScoreText, gameWinKillsText, gameWinHighscoreText);
     }
+
 
     private void UpdateSummaryUI(TextMeshProUGUI txtScore, TextMeshProUGUI txtKills, TextMeshProUGUI txtHighscore)
     {
@@ -241,6 +268,7 @@ public class GameManager : MonoBehaviour
 
         if (txtKills != null) txtKills.text = $"Total Musuh Dikalahkan: \n<size=120%>{totalEnemiesKilled:N0}</size>";
 
+
         if (txtScore != null)
         {
             txtScore.gameObject.SetActive(isEndless);
@@ -251,9 +279,10 @@ public class GameManager : MonoBehaviour
         {
             txtHighscore.gameObject.SetActive(isEndless);
             txtHighscore.text = isNewRecord ? $"<color=yellow>NEW HIGH SCORE!</color> {savedHighscore:N0}" 
-                                            : $"High Score: \n<size=120%>{savedHighscore:N0}</size>";
+                                          : $"High Score: \n<size=120%>{savedHighscore:N0}</size>";
         }
     }
+
 
     public void RestartGame()
     {

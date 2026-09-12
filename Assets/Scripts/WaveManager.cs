@@ -95,18 +95,31 @@ public class WaveManager : MonoBehaviour
 
             if (enemyPrefab != null)
             {
+                EnemyArchetype chosenType = PickEnemyTypeForWave(currentWave, i);
+
+                // Jika yang akan keluar adalah Boss, guncang kamera & bunyikan alarm DULUAN
+                if (chosenType == EnemyArchetype.Boss)
+                {
+                    if (CameraShake.Instance != null)
+                    {
+                        CameraShake.Instance.Shake(0.6f, 0.22f); // Gemuruh awal
+                    }
+
+                    if (AudioManager.Instance != null)
+                    {
+                        AudioManager.Instance.PlayBossIncomingSFX();
+                    }
+
+                    // Jeda tegang 0.35 detik sebelum boss benar-benar turun ke arena
+                    yield return new WaitForSeconds(1f);
+                }
+
                 GameObject newEnemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
                 Enemy enemyComp = newEnemy.GetComponent<Enemy>();
 
                 if (enemyComp != null)
                 {
-                    EnemyArchetype chosenType = PickEnemyTypeForWave(currentWave, i);
                     enemyComp.ApplyArchetype(chosenType, currentWave);
-
-                    if (chosenType == EnemyArchetype.Boss && AudioManager.Instance != null)
-                    {
-                        AudioManager.Instance.PlayBossIncomingSFX();
-                    }
                 }
 
                 activeEnemies.Add(newEnemy);
