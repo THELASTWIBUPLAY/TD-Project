@@ -28,10 +28,9 @@ public class DamageText : MonoBehaviour
 
     void Update()
     {
-        // Bergerak ke atas perlahan
+
         transform.position += Vector3.up * moveSpeed * Time.deltaTime;
 
-        // Memudar (Fade Out)
         elapsed += Time.deltaTime;
         if (textMesh != null)
         {

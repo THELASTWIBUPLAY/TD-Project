@@ -97,12 +97,11 @@ public class WaveManager : MonoBehaviour
             {
                 EnemyArchetype chosenType = PickEnemyTypeForWave(currentWave, i);
 
-                // Jika yang akan keluar adalah Boss, guncang kamera & bunyikan alarm DULUAN
                 if (chosenType == EnemyArchetype.Boss)
                 {
                     if (CameraShake.Instance != null)
                     {
-                        CameraShake.Instance.Shake(0.6f, 0.22f); // Gemuruh awal
+                        CameraShake.Instance.Shake(0.35f, 0.08f); 
                     }
 
                     if (AudioManager.Instance != null)
@@ -110,7 +109,6 @@ public class WaveManager : MonoBehaviour
                         AudioManager.Instance.PlayBossIncomingSFX();
                     }
 
-                    // Jeda tegang 0.35 detik sebelum boss benar-benar turun ke arena
                     yield return new WaitForSeconds(1f);
                 }
 
@@ -146,7 +144,6 @@ public class WaveManager : MonoBehaviour
         int finalCount = stageConfig != null ? stageConfig.finalBossCount : 1;
         int miniCount = stageConfig != null ? stageConfig.miniBossCount : 1;
 
-        // 1. Cek Wave Boss Utama (misal: wave 10, 20, 30...)
         if (finalBossInt > 0 && wave % finalBossInt == 0)
         {
             if (enemyIndex >= totalEnemiesThisWave - finalCount)
@@ -154,7 +151,7 @@ public class WaveManager : MonoBehaviour
                 return EnemyArchetype.Boss;
             }
         }
-        // 2. Cek Wave Miniboss (misal: wave 5, 15, 25...)
+
         else if (miniBossInt > 0 && wave % miniBossInt == 0)
         {
             if (enemyIndex >= totalEnemiesThisWave - miniCount)
@@ -163,7 +160,6 @@ public class WaveManager : MonoBehaviour
             }
         }
 
-        // Variasi mob reguler
         if (wave < 3)
         {
             return EnemyArchetype.Normal;
@@ -207,14 +203,11 @@ public class WaveManager : MonoBehaviour
         isWaveClearing = true;
         Debug.Log($"<color=green>WAVE {currentWave} CLEAR!</color>");
 
-        // Tambah bonus skor wave clear
-        // Tambah bonus skor wave clear HANYA jika Endless Mode
         if (GameManager.Instance != null && stageConfig != null && stageConfig.isEndless)
         {
             GameManager.Instance.AddScore(stageConfig.scoreWaveClearBonus);
         }
 
-        // Kondisi menang hanya jika BUKAN mode Endless
         bool isEndless = stageConfig != null && stageConfig.isEndless;
         int maxWave = stageConfig != null ? stageConfig.maxWave : 10;
 

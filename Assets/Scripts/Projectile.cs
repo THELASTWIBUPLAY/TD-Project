@@ -24,23 +24,19 @@ public class Projectile : MonoBehaviour
     private Rigidbody2D targetRb;
     private Vector2 currentDirection = Vector2.up;
 
-    // Overload 1: jika hanya passing target tunggal
     public void Setup(Transform target)
     {
         Setup(target, false, 1.5f);
     }
 
-    // Overload 2: implementasi utama
     public void Setup(Transform target, bool isAreaDamage, float splashRadius = 1.5f)
     {
         targetEnemy = target;
         isAoE = isAreaDamage;
         aoeRadius = splashRadius;
 
-        // Kunci ke 0 dulu agar tidak membawa data sisa prefab
         ricochetRemaining = 0;
 
-        // Beri jatah 1x pantulan HANYA jika kartu Ricochet memang sudah aktif
         if (GlobalRicochetUnlocked && !isAoE)
         {
             ricochetRemaining = 1;
@@ -97,17 +93,14 @@ public class Projectile : MonoBehaviour
         {
             if (isAoE)
             {
-                // Mainkan SFX ledakan
+
                 if (AudioManager.Instance != null)
                 {
                     AudioManager.Instance.PlayClassShootSFX(CharacterClassType.Bombardier);
                 }
 
-                // --- MUNCULKAN VISUAL RADIUS LEDAKAN ---
                 ExplosionEffect.Create(transform.position, aoeRadius);
-                // ----------------------------------------
 
-                // Berikan damage ke seluruh musuh di radius ledakan
                 Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(transform.position, aoeRadius);
                 foreach (Collider2D col in hitEnemies)
                 {
@@ -125,14 +118,12 @@ public class Projectile : MonoBehaviour
                 return;
             }
 
-            // Hit target tunggal untuk kelas selain Bombardier
             Enemy enemy = collision.GetComponent<Enemy>();
             if (enemy != null)
             {
                 enemy.TakeDamage(damage);
             }
 
-            // Cek pantulan Ricochet jika bukan AoE
             if (ricochetRemaining > 0)
             {
                 ricochetRemaining--;

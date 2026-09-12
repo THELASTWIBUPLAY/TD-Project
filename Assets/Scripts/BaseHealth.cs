@@ -29,7 +29,7 @@ public class BaseHealth : MonoBehaviour
 
         if (CameraShake.Instance != null)
         {
-            CameraShake.Instance.Shake(0.18f, 0.12f); // Getaran cepat & terasa
+            CameraShake.Instance.Shake(0.18f, 0.12f); 
         }
 
         if (currentHealth <= 0)

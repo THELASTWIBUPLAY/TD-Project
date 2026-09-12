@@ -62,35 +62,35 @@ public class Character : MonoBehaviour
                 baseAttackDamage = 12f;
                 baseAttackCooldown = 0.65f;
                 attackRange = 7.5f;
-                if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0.4f, 0.8f); // Pink cerah
+                if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0.4f, 0.8f); 
                 break;
 
             case CharacterClassType.Sniper:
                 baseAttackDamage = 45f;
                 baseAttackCooldown = 1.6f;
                 attackRange = 10f;
-                if (spriteRenderer != null) spriteRenderer.color = new Color(0.2f, 0.85f, 0.3f); // Hijau
+                if (spriteRenderer != null) spriteRenderer.color = new Color(0.2f, 0.85f, 0.3f); 
                 break;
 
             case CharacterClassType.Bombardier:
                 baseAttackDamage = 25f;
                 baseAttackCooldown = 1.1f;
                 attackRange = 6.5f;
-                if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0.45f, 0.1f); // Oranye
+                if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0.45f, 0.1f); 
                 break;
 
             case CharacterClassType.Cryo:
                 baseAttackDamage = 8f;
                 baseAttackCooldown = 0.8f;
                 attackRange = 7f;
-                if (spriteRenderer != null) spriteRenderer.color = new Color(0.4f, 0.8f, 1f); // Biru es muda
+                if (spriteRenderer != null) spriteRenderer.color = new Color(0.4f, 0.8f, 1f); 
                 break;
 
             case CharacterClassType.Gunslinger:
                 baseAttackDamage = 6f;
-                baseAttackCooldown = 0.25f; // Rapid fire
+                baseAttackCooldown = 0.25f; 
                 attackRange = 5.2f;
-                if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0.85f, 0.15f); // Kuning emas
+                if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0.85f, 0.15f); 
                 break;
         }
     }
@@ -135,7 +135,6 @@ public class Character : MonoBehaviour
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, attackRange);
         Transform bestEnemy = null;
 
-        // Sniper memprioritaskan musuh dengan HP tertinggi (Tank/Boss)
         if (classType == CharacterClassType.Sniper)
         {
             float maxFoundHp = -1f;
@@ -154,7 +153,6 @@ public class Character : MonoBehaviour
             if (bestEnemy != null) return bestEnemy;
         }
 
-        // Kelas lainnya menembak musuh yang posisinya paling bawah (terdekat ke Base)
         float lowestY = Mathf.Infinity;
         foreach (Collider2D col in colliders)
         {
@@ -174,7 +172,6 @@ public class Character : MonoBehaviour
     {
         if (target == null || projectilePrefab == null) return;
 
-        // Bunyikan SFX saat menembak hanya untuk kelas selain Bombardier
         if (classType != CharacterClassType.Bombardier && AudioManager.Instance != null)
         {
             AudioManager.Instance.PlayClassShootSFX(classType);
@@ -256,6 +253,8 @@ public class Character : MonoBehaviour
 
     public void PlayMergeCelebration()
     {
+        MergeSparkleEffect.Create(transform.position, starLevel);
+        
         StartCoroutine(MergePopRoutine());
     }
 

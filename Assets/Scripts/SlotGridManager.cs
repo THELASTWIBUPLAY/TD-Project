@@ -8,9 +8,9 @@ public class SlotGridManager : MonoBehaviour
     [Header("Grid Layout (5 Kolom x 3 Baris)")]
     public int columns = 5;
     public int rows = 3;
-    public float spacingX = 1.0f; // Jarak antar slot horizontal
-    public float spacingY = 1.0f; // Jarak antar slot vertikal
-    public Vector2 gridCenterPosition = new Vector2(0f, -2.5f); // Titik pusat formasi
+    public float spacingX = 1.0f;
+    public float spacingY = 1.0f;
+    public Vector2 gridCenterPosition = new Vector2(0f, -2.5f);
 
     [Header("Prefabs")]
     public GameObject slotPrefab;
@@ -40,7 +40,6 @@ public class SlotGridManager : MonoBehaviour
     {
         allSlots.Clear();
 
-        // Hitung batas awal kiri-bawah agar formasi presisi di tengah titik gridCenterPosition
         float startX = gridCenterPosition.x - ((columns - 1) * spacingX / 2f);
         float startY = gridCenterPosition.y - ((rows - 1) * spacingY / 2f);
 
@@ -69,8 +68,7 @@ public class SlotGridManager : MonoBehaviour
         {
             CharacterSlot centerSlot = allSlots[centerIndex];
             GameObject defaultChar = Instantiate(characterPrefab, centerSlot.transform.position, Quaternion.identity);
-            
-            // Beri kelas awal Ranger
+
             Character charComp = defaultChar.GetComponent<Character>();
             if (charComp != null)
             {
@@ -81,12 +79,10 @@ public class SlotGridManager : MonoBehaviour
         }
     }
 
-    // Mencari slot kosong secara acak
     public CharacterSlot GetRandomEmptySlot()
     {
         List<CharacterSlot> emptySlots = new List<CharacterSlot>();
 
-        // 1. Kumpulkan semua slot yang saat ini belum ada karakternya
         foreach (CharacterSlot slot in allSlots)
         {
             if (slot != null && !slot.isOccupied)
@@ -95,19 +91,18 @@ public class SlotGridManager : MonoBehaviour
             }
         }
 
-        // 2. Jika ada slot kosong, pilih salah satu secara acak
         if (emptySlots.Count > 0)
         {
             int randIndex = Random.Range(0, emptySlots.Count);
             return emptySlots[randIndex];
         }
 
-        return null; // Semua 15 slot sudah terisi penuh
+        return null;
     }
-    // Fungsi untuk memicu merge 3 karakter
+
     public void CheckAndExecuteMerge()
     {
-        // Loop untuk bintang 1 -> 2, dan bintang 2 -> 3
+
         for (int star = 1; star <= 2; star++)
         {
             foreach (CharacterClassType cls in System.Enum.GetValues(typeof(CharacterClassType)))
@@ -118,7 +113,7 @@ public class SlotGridManager : MonoBehaviour
                 {
                     if (slot != null && slot.isOccupied && slot.currentCharacter != null)
                     {
-                        // Pastikan mencocokkan bintang dan kelas
+
                         if (slot.currentCharacter.starLevel == star && slot.currentCharacter.classType == cls)
                         {
                             matchingSlots.Add(slot);
@@ -126,12 +121,10 @@ public class SlotGridManager : MonoBehaviour
                     }
                 }
 
-                // Jika sudah terkumpul 3 unit sejenis & sebintang
                 if (matchingSlots.Count >= 3)
                 {
                     ExecuteMerge(matchingSlots[0], matchingSlots[1], matchingSlots[2], star + 1, cls);
-                    
-                    // Panggil ulang untuk mengecek merge berantai (chain merge)
+
                     CheckAndExecuteMerge();
                     return;
                 }
@@ -141,11 +134,10 @@ public class SlotGridManager : MonoBehaviour
 
     void ExecuteMerge(CharacterSlot targetSlot, CharacterSlot sacrificeA, CharacterSlot sacrificeB, int newStar, CharacterClassType cls)
     {
-        // Hancurkan 2 unit tumbal
+
         sacrificeA.ClearSlot();
         sacrificeB.ClearSlot();
 
-        // Naikkan level dan perbarui tampilan slot utama
         if (targetSlot.currentCharacter != null)
         {
             targetSlot.currentCharacter.SetupClass(cls, newStar);

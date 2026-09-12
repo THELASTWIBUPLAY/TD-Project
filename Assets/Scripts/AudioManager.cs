@@ -1,5 +1,5 @@
 using UnityEngine;
-using TMPro; // Tambahkan ini
+using TMPro;
 
 public class AudioManager : MonoBehaviour
 {
@@ -10,7 +10,7 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioSource bgmSource;
 
     [Header("Mute UI Feedback")]
-    public TextMeshProUGUI muteButtonText; // Slot untuk teks tombol Mute
+    public TextMeshProUGUI muteButtonText; 
 
     [Header("Class Shoot SFX")]
     public AudioClip sfxRanger;
@@ -24,7 +24,7 @@ public class AudioManager : MonoBehaviour
     public AudioClip bgmMusic;
 
     private float lastShootSoundTime;
-    public float minSoundInterval = 0.05f; // Jeda 50ms antar tembakan
+    public float minSoundInterval = 0.05f; 
     private bool isMuted = false;
 
     void Awake()
@@ -47,7 +47,7 @@ public class AudioManager : MonoBehaviour
             bgmSource = gameObject.AddComponent<AudioSource>();
             bgmSource.loop = true;
             bgmSource.playOnAwake = false;
-            bgmSource.priority = 0; // Prioritas absolut, BGM tidak akan pernah kena cut!
+            bgmSource.priority = 0; 
         }
         else
         {
@@ -75,7 +75,6 @@ public class AudioManager : MonoBehaviour
     {
         if (isMuted) return;
 
-        // Cegah penumpukan suara di frame yang sama
         if (Time.unscaledTime - lastShootSoundTime < minSoundInterval) return;
         lastShootSoundTime = Time.unscaledTime;
 
@@ -117,7 +116,7 @@ public class AudioManager : MonoBehaviour
         if (muteButtonText != null)
         {
             muteButtonText.text = isMuted ? "Mute: ON" : "Mute: OFF";
-            muteButtonText.ForceMeshUpdate(); // Memaksa TMP me-render ulang seketika
+            muteButtonText.ForceMeshUpdate(); 
         }
         else
         {

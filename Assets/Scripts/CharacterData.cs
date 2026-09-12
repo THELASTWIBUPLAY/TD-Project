@@ -9,5 +9,5 @@ public class CharacterData
     public float baseDamage = 10f;
     public float baseAttackCooldown = 0.7f;
     public float attackRange = 7f;
-    public GameObject classProjectilePrefab; // Opsional: jika tiap kelas punya proyektil beda
+    public GameObject classProjectilePrefab;
 }

@@ -67,7 +67,6 @@ public class GameManager : MonoBehaviour
         if (PausePanel != null) PausePanel.SetActive(false);
         UpdateExpUI();
 
-        // Tampilkan HUD skor HANYA jika masuk Endless Mode
         bool isEndless = (WaveManager.Instance != null && 
                           WaveManager.Instance.stageConfig != null && 
                           WaveManager.Instance.stageConfig.isEndless);
@@ -120,7 +119,7 @@ public class GameManager : MonoBehaviour
     {
         if (speedButtonText != null)
         {
-            // Menampilkan format seperti 0.5x, 1x, 2x, dst.
+
             speedButtonText.text = $"{speedMultipliers[currentSpeedIndex]:0.#}x";
         }
     }
@@ -290,7 +289,7 @@ public class GameManager : MonoBehaviour
         Enemy.ResetGlobalStats();
         Character.GlobalDamageBonusPercent = 0f;
         Character.GlobalAtkSpeedMultiplier = 1f;
-        Projectile.GlobalRicochetUnlocked = false; // Reset status kartu ricochet
+        Projectile.GlobalRicochetUnlocked = false; 
 
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
