@@ -7,7 +7,7 @@ public class ExplosionEffect : MonoBehaviour
     private float timer = 0f;
     private Vector3 initialScale;
     private Vector3 targetScale;
-    private Color startColor = new Color(1f, 0.45f, 0.1f, 0.85f); // Oranye ledakan transparan
+    private Color startColor = new Color(1f, 0.45f, 0.1f, 0.85f); 
 
     public static void Create(Vector3 position, float radius)
     {
@@ -23,7 +23,6 @@ public class ExplosionEffect : MonoBehaviour
         sr = gameObject.AddComponent<SpriteRenderer>();
         sr.sortingOrder = 15;
 
-        // Buat tekstur lingkaran instan tanpa memanggil resource bawaan Unity yang sudah usang
         Texture2D tex = CreateCircleTexture(64);
         sr.sprite = Sprite.Create(tex, new Rect(0, 0, 64, 64), new Vector2(0.5f, 0.5f));
 
@@ -46,7 +45,6 @@ public class ExplosionEffect : MonoBehaviour
             return;
         }
 
-        // Membesar cepat lalu memudar (Fade out)
         transform.localScale = Vector3.Lerp(initialScale, targetScale, Mathf.Sin(progress * Mathf.PI * 0.5f));
         
         Color c = startColor;

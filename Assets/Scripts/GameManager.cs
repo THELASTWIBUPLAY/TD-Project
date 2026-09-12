@@ -3,19 +3,23 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 
+
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
+
     [Header("Speed & Pause Controls")]
     public TextMeshProUGUI speedButtonText;
-    private int currentSpeedIndex = 0;
-    private readonly float[] speedMultipliers = { 1f, 2f, 3f };
+    private int currentSpeedIndex = 1; 
+    private readonly float[] speedMultipliers = { 0.5f, 1f, 2f, 3f, 5f };
     private bool isPaused = false;
     private bool isMuted = false;
 
+
     [Header("Pause Modal")]
-    public GameObject PausePanel; // Panel berisi tombol Resume & Quit
+    public GameObject PausePanel;
+
 
     [Header("EXP & Level System")]
     public Slider expSlider;
@@ -24,26 +28,45 @@ public class GameManager : MonoBehaviour
     public float currentExp = 0f;
     public float expToNextLevel = 20f;
 
+
     [Header("End Game UI Panels")]
     public GameObject gameOverPanel;
     public TextMeshProUGUI gameOverWaveText;
     public GameObject gameWinPanel;
 
+
     [Header("Scoring System")]
     public TextMeshProUGUI scoreText;
     public int currentScore = 0;
 
+
+    [Header("End Game Summary References")]
+    public TextMeshProUGUI gameOverScoreText;
+    public TextMeshProUGUI gameOverKillsText;
+    public TextMeshProUGUI gameOverHighscoreText;
+
+
+    public TextMeshProUGUI gameWinScoreText;
+    public TextMeshProUGUI gameWinKillsText;
+    public TextMeshProUGUI gameWinHighscoreText;
+
+
+    public int totalEnemiesKilled = 0;
+
+
     void Awake()
     {
         Instance = this;
+        Projectile.GlobalRicochetUnlocked = false;
     }
+
 
     void Start()
     {
+        UpdateSpeedUI(); 
         if (PausePanel != null) PausePanel.SetActive(false);
         UpdateExpUI();
 
-        // Tampilkan HUD skor HANYA jika masuk Endless Mode
         bool isEndless = (WaveManager.Instance != null && 
                           WaveManager.Instance.stageConfig != null && 
                           WaveManager.Instance.stageConfig.isEndless);
@@ -55,9 +78,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
+
     public void AddScore(int amount)
     {
-        // Tolak penambahan skor jika bukan Endless Mode
         if (WaveManager.Instance != null && WaveManager.Instance.stageConfig != null)
         {
             if (!WaveManager.Instance.stageConfig.isEndless) return;
@@ -67,28 +90,52 @@ public class GameManager : MonoBehaviour
         UpdateScoreUI();
     }
 
-    public void ToggleSpeed()
+
+    void UpdateScoreUI()
+    {
+        if (scoreText != null)
+        {
+            scoreText.text = $"Score: {currentScore:N0}";
+        }
+    }
+
+
+    public void RegisterKill()
+    {
+        totalEnemiesKilled++;
+    }
+
+   public void ToggleSpeed()
     {
         if (isPaused) return;
         currentSpeedIndex = (currentSpeedIndex + 1) % speedMultipliers.Length;
         Time.timeScale = speedMultipliers[currentSpeedIndex];
 
+        UpdateSpeedUI();
+    }
+
+
+    private void UpdateSpeedUI()
+    {
         if (speedButtonText != null)
         {
-            speedButtonText.text = speedMultipliers[currentSpeedIndex] + "x";
+
+            speedButtonText.text = $"{speedMultipliers[currentSpeedIndex]:0.#}x";
         }
     }
+
 
     public void TogglePause()
     {
         isPaused = !isPaused;
         Time.timeScale = isPaused ? 0f : speedMultipliers[currentSpeedIndex];
-        
+
         if (PausePanel != null)
         {
             PausePanel.SetActive(isPaused);
         }
     }
+
 
     public void ResumeGame()
     {
@@ -97,18 +144,20 @@ public class GameManager : MonoBehaviour
         Time.timeScale = speedMultipliers[currentSpeedIndex];
     }
 
+
     public void QuitGame()
     {
         Time.timeScale = 1f;
-        // Jika ada MainMenu scene nanti, bisa panggil SceneManager.LoadScene("MainMenu");
         Application.Quit();
         Debug.Log("Quit Game dipanggil!");
     }
+
 
     public void RestoreSpeedAfterModal()
     {
         Time.timeScale = speedMultipliers[currentSpeedIndex];
     }
+
 
     public void ToggleMute()
     {
@@ -123,6 +172,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
+
     public void AddExp(float amount)
     {
         currentExp += amount;
@@ -133,26 +183,23 @@ public class GameManager : MonoBehaviour
         UpdateExpUI();
     }
 
+
     private void LevelUp()
     {
         currentExp -= expToNextLevel;
         currentLevel++;
 
-        // Formula Kuadratik Bertahap (Ditingkatkan 1.5x lipat):
-        // Lv 1: ~65 EXP
-        // Lv 10: ~360 EXP
-        // Lv 20: ~1.150 EXP
-        // Lv 50: ~7.000 EXP
-        // Lv 100: ~27.000 EXP
-        float baseCurve = 25f + (currentLevel * 18f) + (Mathf.Pow(currentLevel, 1.85f) * 1.8f);
-        expToNextLevel = Mathf.Round(baseCurve * 1.5f);
+        float baseCurve = 30f + (currentLevel * 15f) + (Mathf.Pow(currentLevel, 1.4f) * 1.5f);
+        expToNextLevel = Mathf.Round(baseCurve * 1.2f);
 
-        // Pengaman: kuras sisa EXP berlebih jika naik level beruntun dalam 1 frame
+        Debug.Log($"[GameManager.LevelUp] Level {currentLevel}: Base={baseCurve:F0}, NextExp={expToNextLevel}");
+
         if (UpgradeManager.Instance != null)
         {
             UpgradeManager.Instance.ShowUpgradeSelection();
         }
     }
+
 
     private void UpdateExpUI()
     {
@@ -168,47 +215,82 @@ public class GameManager : MonoBehaviour
         }
     }
 
+
     public void TriggerGameOver()
     {
-        Time.timeScale = 0f; // Hentikan game
+        Time.timeScale = 0f;
 
         if (gameOverPanel != null)
         {
             gameOverPanel.SetActive(true);
         }
 
-        if (gameOverWaveText != null && WaveManager.Instance != null)
+        int finalWave = WaveManager.Instance != null ? WaveManager.Instance.currentWave : 1;
+        if (gameOverWaveText != null)
         {
-            gameOverWaveText.text = $"Bertahan Sampai: Wave {WaveManager.Instance.currentWave}";
+            gameOverWaveText.text = $"Bertahan Hingga:\n<size=120%>Wave {finalWave}</size>";
         }
+
+        UpdateSummaryUI(gameOverScoreText, gameOverKillsText, gameOverHighscoreText);
     }
+
 
     public void TriggerGameWin()
     {
-        Time.timeScale = 0f; // Hentikan game
+        Time.timeScale = 0f;
 
         if (gameWinPanel != null)
         {
             gameWinPanel.SetActive(true);
         }
+
+        UpdateSummaryUI(gameWinScoreText, gameWinKillsText, gameWinHighscoreText);
     }
 
-    // Dipanggil oleh tombol Retry / Main Lagi di UI
+
+    private void UpdateSummaryUI(TextMeshProUGUI txtScore, TextMeshProUGUI txtKills, TextMeshProUGUI txtHighscore)
+    {
+        bool isEndless = (WaveManager.Instance != null && 
+                          WaveManager.Instance.stageConfig != null && 
+                          WaveManager.Instance.stageConfig.isEndless);
+
+        int savedHighscore = PlayerPrefs.GetInt("Endless_Highscore", 0);
+        bool isNewRecord = false;
+
+        if (isEndless && currentScore > savedHighscore)
+        {
+            savedHighscore = currentScore;
+            PlayerPrefs.SetInt("Endless_Highscore", savedHighscore);
+            PlayerPrefs.Save();
+            isNewRecord = true;
+        }
+
+        if (txtKills != null) txtKills.text = $"Total Musuh Dikalahkan: \n<size=120%>{totalEnemiesKilled:N0}</size>";
+
+
+        if (txtScore != null)
+        {
+            txtScore.gameObject.SetActive(isEndless);
+            txtScore.text = $"Skor Akhir: \n<size=120%>{currentScore:N0}</size>";
+        }
+
+        if (txtHighscore != null)
+        {
+            txtHighscore.gameObject.SetActive(isEndless);
+            txtHighscore.text = isNewRecord ? $"<color=yellow>NEW HIGH SCORE!</color> {savedHighscore:N0}" 
+                                          : $"High Score: \n<size=120%>{savedHighscore:N0}</size>";
+        }
+    }
+
+
     public void RestartGame()
     {
-        Time.timeScale = 1f; // Kembalikan waktu normal
-        Enemy.ResetGlobalStats(); // Reset multiplier musuh
+        Time.timeScale = 1f;
+        Enemy.ResetGlobalStats();
         Character.GlobalDamageBonusPercent = 0f;
         Character.GlobalAtkSpeedMultiplier = 1f;
+        Projectile.GlobalRicochetUnlocked = false; 
 
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-    }
-
-    void UpdateScoreUI()
-    {
-        if (scoreText != null)
-        {
-            scoreText.text = $"Score: {currentScore:N0}";
-        }
     }
 }

@@ -45,7 +45,6 @@ public class UpgradeManager : MonoBehaviour
     {
         cardPool.Clear();
 
-        // 1. Kartu Recruit Acak
         cardPool.Add(new UpgradeCard
         {
             cardName = "Recruit: Random Agent",
@@ -53,7 +52,6 @@ public class UpgradeManager : MonoBehaviour
             mobValues = new float[] { 10f }
         });
 
-        // 2. Kartu Deploy Spesifik untuk 5 Kelas
         foreach (CharacterClassType cls in System.Enum.GetValues(typeof(CharacterClassType)))
         {
             cardPool.Add(new UpgradeCard
@@ -65,7 +63,6 @@ public class UpgradeManager : MonoBehaviour
             });
         }
 
-        // 3. Skill Stacking Stat Pemain
         cardPool.Add(new UpgradeCard
         {
             cardName = "Sharpen Blade",
@@ -98,7 +95,6 @@ public class UpgradeManager : MonoBehaviour
             mobValues = new float[] { 15f, 30f, 50f }
         });
 
-        // 4. Kartu Mekanik Spesial
         cardPool.Add(new UpgradeCard
         {
             cardName = "Ricochet Round",
@@ -131,7 +127,7 @@ public class UpgradeManager : MonoBehaviour
 
         foreach (var card in cardPool)
         {
-            // Cek ketersediaan slot jika kartu bertipe spawn karakter
+
             if (card.buffType == BuffType.AddRandomCharacter || card.buffType == BuffType.AddSpecificCharacter)
             {
                 if (slotMasihAda) available.Add(card);

@@ -10,6 +10,7 @@ public class Enemy : MonoBehaviour
     public float damageToBase = 5f;
     public int expReward = 8;
 
+
     [Header("Visual Feedback")]
     private SpriteRenderer spriteRenderer;
     private Color originalColor;
@@ -17,20 +18,25 @@ public class Enemy : MonoBehaviour
     public float flashDuration = 0.08f;
     private Coroutine flashCoroutine;
 
+
     public static float GlobalHpMultiplier = 1f;
     public static float GlobalSpeedMultiplier = 1f;
     public static float GlobalDamageMultiplier = 1f;
     public static float GlobalExpMultiplier = 1f;
 
+
     [Header("Archetype Setup")]
     public EnemyArchetype archetype = EnemyArchetype.Normal;
+
 
     [Header("Base Safety Boundary")]
     public float baseLineY = -2f;
 
-    public static System.Action<float, float> OnBossHpChanged; // (currentHp, maxHp)
+
+    public static System.Action<float, float> OnBossHpChanged;
     public static System.Action OnBossDefeatedEvent;
     private bool isDead = false;
+
 
     public static void ResetGlobalStats()
     {
@@ -39,6 +45,7 @@ public class Enemy : MonoBehaviour
         GlobalDamageMultiplier = 1f;
         GlobalExpMultiplier = 1f;
     }
+
 
     void Awake()
     {
@@ -49,6 +56,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
+
     void Start()
     {
         maxHp *= GlobalHpMultiplier;
@@ -57,16 +65,17 @@ public class Enemy : MonoBehaviour
         currentHp = maxHp;
     }
 
+
     void Update()
     {
         transform.Translate(Vector3.down * moveSpeed * Time.deltaTime);
 
-        // PENGAMAN: Jika musuh terlalu cepat sampai melompati Collider Base
         if (!isDead && transform.position.y <= baseLineY)
         {
             HitBaseDirectly();
         }
     }
+
 
     private void HitBaseDirectly()
     {
@@ -92,20 +101,19 @@ public class Enemy : MonoBehaviour
         Destroy(gameObject);
     }
 
+
     public void TakeDamage(float damageAmount)
     {
         if (isDead) return;
 
         currentHp -= damageAmount;
 
-        // Picu efek flash
         if (gameObject.activeInHierarchy)
         {
             if (flashCoroutine != null) StopCoroutine(flashCoroutine);
             flashCoroutine = StartCoroutine(HitFlashRoutine());
         }
 
-        // Spawn teks damage melayang
         if (DamageTextManager.Instance != null)
         {
             DamageTextManager.Instance.SpawnDamageText(transform.position, damageAmount);
@@ -122,6 +130,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
+
     IEnumerator HitFlashRoutine()
     {
         if (spriteRenderer != null)
@@ -132,27 +141,29 @@ public class Enemy : MonoBehaviour
         }
     }
 
+
     private void Die()
     {
         if (isDead) return;
         isDead = true;
 
+        Color burstColor = spriteRenderer != null ? spriteRenderer.color : Color.white;
+        DeathBurstEffect.Create(transform.position, burstColor, transform.localScale.x);
+
         int currentWave = WaveManager.Instance != null ? WaveManager.Instance.currentWave : 1;
 
-        // 1. Berikan EXP ke Player
-        // 1. Berikan EXP ke Player
         if (GameManager.Instance != null)
         {
-            // Bonus flat terukur: musuh di wave 40 memberi tambahan yang pas
-            float waveExpBonus = (currentWave - 1) * 2.5f;
-            float totalBaseExp = expReward + waveExpBonus;
+            float baseExp = expReward;
+            float waveExpBonus = Mathf.Min((currentWave - 1) * 1.5f, 200f);
+            float totalBaseExp = baseExp + waveExpBonus;
             int finalExp = Mathf.RoundToInt(totalBaseExp * Enemy.GlobalExpMultiplier);
+
+            Debug.Log($"[Enemy.Die] Wave {currentWave}: Base={baseExp}, Bonus={waveExpBonus}, Total={totalBaseExp}, Final={finalExp}");
 
             GameManager.Instance.AddExp(finalExp);
         }
 
-        // 2. Berikan Skor sesuai StageConfig
-        // 2. Berikan Skor HANYA di Endless Mode
         if (GameManager.Instance != null && WaveManager.Instance != null && WaveManager.Instance.stageConfig != null)
         {
             StageConfig cfg = WaveManager.Instance.stageConfig;
@@ -171,7 +182,6 @@ public class Enemy : MonoBehaviour
             }
         }
 
-        // 3. Notifikasi musuh mati ke WaveManager
         if (WaveManager.Instance != null)
         {
             WaveManager.Instance.OnEnemyDefeated(gameObject);
@@ -180,10 +190,30 @@ public class Enemy : MonoBehaviour
         if (archetype == EnemyArchetype.Boss)
         {
             OnBossDefeatedEvent?.Invoke();
+
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.ReturnToNormalBGM(); 
+            }
+        }
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.RegisterKill();
+        }
+
+        if (archetype == EnemyArchetype.Boss && CameraShake.Instance != null)
+        {
+            CameraShake.Instance.Shake(0.2f, 0.08f); 
+        }
+        else if (archetype == EnemyArchetype.Tank && CameraShake.Instance != null)
+        {
+            CameraShake.Instance.Shake(0.1f, 0.06f);
         }
 
         Destroy(gameObject);
     }
+
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -195,13 +225,14 @@ public class Enemy : MonoBehaviour
         }
     }
 
+
     public void ApplyArchetype(EnemyArchetype type, int wave)
     {
         archetype = type;
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
 
-        // Scaling dasar per wave
         float waveHpFactor = 1f + ((wave - 1) * 0.12f);
+
 
         switch (archetype)
         {
@@ -220,7 +251,7 @@ public class Enemy : MonoBehaviour
                 damageToBase = 4f;
                 expReward = 10;
                 transform.localScale = new Vector3(0.35f, 0.35f, 1f);
-                originalColor = new Color(1f, 0.8f, 0.1f); // Kuning terang
+                originalColor = new Color(1f, 0.8f, 0.1f); 
                 break;
 
             case EnemyArchetype.Tank:
@@ -229,11 +260,11 @@ public class Enemy : MonoBehaviour
                 damageToBase = 15f;
                 expReward = 22;
                 transform.localScale = new Vector3(0.85f, 0.85f, 1f);
-                originalColor = new Color(0.5f, 0.1f, 0.7f); // Ungu gelap
+                originalColor = new Color(0.5f, 0.1f, 0.7f); 
                 break;
 
             case EnemyArchetype.Boss:
-                // Cek apakah ini Miniboss (Wave <= 5) atau Final Boss (Wave >= 10)
+
                 bool isFinalBoss = (wave >= 10);
 
                 moveSpeed = 0.5f;
@@ -247,7 +278,6 @@ public class Enemy : MonoBehaviour
                 break;
         }
 
-        // Terapkan multiplier kartu global
         maxHp *= GlobalHpMultiplier;
         moveSpeed *= GlobalSpeedMultiplier;
         damageToBase *= GlobalDamageMultiplier;

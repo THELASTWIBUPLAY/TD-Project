@@ -18,7 +18,7 @@ public class UpgradeCard
 {
     public string cardName;
     public BuffType buffType;
-    public CharacterClassType targetClassType; // Kelas sasaran jika AddSpecificCharacter
+    public CharacterClassType targetClassType;
     public int currentLevel = 0;
 
     public float[] playerValues = new float[0];
@@ -30,7 +30,7 @@ public class UpgradeCard
         {
             if (buffType == BuffType.AddRandomCharacter || buffType == BuffType.AddSpecificCharacter || buffType == BuffType.EmergencyRepair)
             {
-                return false; // Bisa diambil terus menerus
+                return false;
             }
             if (playerValues == null || playerValues.Length == 0) return false;
             return currentLevel >= playerValues.Length;

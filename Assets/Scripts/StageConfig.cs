@@ -6,11 +6,11 @@ public class StageConfig : ScriptableObject
     [Header("Mode Configuration")]
     public string stageName = "Stage 1";
     public bool isEndless = false;
-    public int maxWave = 10; // Hanya berlaku jika isEndless = false
+    public int maxWave = 10;
 
     [Header("Wave Enemies Progression")]
     public int baseEnemyCount = 5;
-    public float enemyCountWaveMultiplier = 2f; // Tambahan musuh tiap naik wave
+    public float enemyCountWaveMultiplier = 2f;
     public float baseSpawnInterval = 2.2f;
     public float minSpawnInterval = 0.6f;
 

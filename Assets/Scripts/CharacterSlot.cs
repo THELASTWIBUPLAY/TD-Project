@@ -11,7 +11,6 @@ public class CharacterSlot : MonoBehaviour
         isOccupied = true;
         currentCharacter = characterGO.GetComponent<Character>();
 
-        // Kunci posisi karakter tepat di tengah slot
         characterGO.transform.position = transform.position;
         characterGO.transform.SetParent(transform);
     }
@@ -20,14 +19,13 @@ public class CharacterSlot : MonoBehaviour
     {
         isOccupied = false;
 
-        // Hancurkan GameObject fisik karakter jika masih ada
         if (currentCharacter != null)
         {
             Destroy(currentCharacter.gameObject);
         }
         else
         {
-            // Pengaman jika child transform masih tertinggal
+
             foreach (Transform child in transform)
             {
                 Destroy(child.gameObject);

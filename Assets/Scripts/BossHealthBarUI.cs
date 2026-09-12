@@ -10,7 +10,7 @@ public class BossHealthBarUI : MonoBehaviour
 
     void Awake()
     {
-        // Daftarkan event di Awake agar tetap menangkap sinyal
+
         Enemy.OnBossHpChanged += HandleBossHpChanged;
         Enemy.OnBossDefeatedEvent += HandleBossDefeated;
 
