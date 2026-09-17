@@ -144,8 +144,17 @@ public class SlotGridManager : MonoBehaviour
 
             if (newStar >= 3 && UpgradeManager.Instance != null)
             {
-                UpgradeManager.Instance.UnlockEvolutionCards(cls);
+                StartCoroutine(OpenEvolutionModalNextFrame(targetSlot.currentCharacter));
             }
+        }
+    }
+
+    private System.Collections.IEnumerator OpenEvolutionModalNextFrame(Character charTarget)
+    {
+        yield return null; 
+        if (UpgradeManager.Instance != null)
+        {
+            UpgradeManager.Instance.TriggerInstantEvolutionChoice(charTarget);
         }
     }
 }

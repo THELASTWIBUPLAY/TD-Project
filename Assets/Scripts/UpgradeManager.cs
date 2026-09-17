@@ -19,6 +19,17 @@ public class UpgradeManager : MonoBehaviour
     [Header("Auto Battle")]
     public bool isAutoBattle = false;
 
+    [Header("Evolution Modal UI")]
+    public GameObject evolutionChoicePanel;
+    public CardUI cardPathA;
+    public CardUI cardPathB;
+
+    [Header("Black Market UI")]
+    public GameObject classPickModalPanel;
+    public TextMeshProUGUI blackMarketTitleText;
+    private int remainingPicks = 0;
+    private bool isPickingClass = false;
+
     public static bool HasThornsPlating = false;
     public static bool HasArcaneOvercharge = false;
     public static bool HasDesperateGambit = false;
@@ -26,6 +37,7 @@ public class UpgradeManager : MonoBehaviour
 
     private List<UpgradeCard> cardPool = new List<UpgradeCard>();
     private List<UpgradeCard> currentOptions = new List<UpgradeCard>();
+    private Character targetEvolutionChar;
 
     void Awake()
     {
@@ -124,45 +136,45 @@ public class UpgradeManager : MonoBehaviour
             mobValues = new float[] { 15f }
         });
 
-        cardPool.Add(new UpgradeCard
-        {
-            cardName = "Glass Cannon Core",
-            buffType = BuffType.GlassCannonCore,
-            playerValues = new float[] { 35f },
-            mobValues = new float[] { 25f }
-        });
+        // cardPool.Add(new UpgradeCard
+        // {
+        //     cardName = "Glass Cannon Core",
+        //     buffType = BuffType.GlassCannonCore,
+        //     playerValues = new float[] { 35f },
+        //     mobValues = new float[] { 25f }
+        // });
 
-        cardPool.Add(new UpgradeCard
-        {
-            cardName = "Deep Freeze",
-            buffType = BuffType.DeepFreeze,
-            playerValues = new float[] { 10f },
-            mobValues = new float[] { 2f }
-        });
+        // cardPool.Add(new UpgradeCard
+        // {
+        //     cardName = "Deep Freeze",
+        //     buffType = BuffType.DeepFreeze,
+        //     playerValues = new float[] { 10f },
+        //     mobValues = new float[] { 2f }
+        // });
 
-        cardPool.Add(new UpgradeCard
-        {
-            cardName = "Heavy Caliber",
-            buffType = BuffType.HeavyCaliber,
-            playerValues = new float[] { 25f },
-            mobValues = new float[] { 1.0f }
-        });
+        // cardPool.Add(new UpgradeCard
+        // {
+        //     cardName = "Heavy Caliber",
+        //     buffType = BuffType.HeavyCaliber,
+        //     playerValues = new float[] { 25f },
+        //     mobValues = new float[] { 1.0f }
+        // });
 
-        cardPool.Add(new UpgradeCard
-        {
-            cardName = "Thorns Plating",
-            buffType = BuffType.ThornsPlating,
-            playerValues = new float[] { 1f },
-            mobValues = new float[] { 25f }
-        });
+        // cardPool.Add(new UpgradeCard
+        // {
+        //     cardName = "Thorns Plating",
+        //     buffType = BuffType.ThornsPlating,
+        //     playerValues = new float[] { 1f },
+        //     mobValues = new float[] { 25f }
+        // });
 
-        cardPool.Add(new UpgradeCard
-        {
-            cardName = "Arcane Overcharge",
-            buffType = BuffType.ArcaneOvercharge,
-            playerValues = new float[] { 15f },
-            mobValues = new float[] { 1.0f }
-        });
+        // cardPool.Add(new UpgradeCard
+        // {
+        //     cardName = "Arcane Overcharge",
+        //     buffType = BuffType.ArcaneOvercharge,
+        //     playerValues = new float[] { 15f },
+        //     mobValues = new float[] { 1.0f }
+        // });
 
         cardPool.Add(new UpgradeCard
         {
@@ -394,6 +406,11 @@ public class UpgradeManager : MonoBehaviour
             return 45f;
         }
 
+        if (card.buffType == BuffType.DesperateGambit)
+        {
+            return 3f; 
+        }
+
         return 70f;
     }
 
@@ -407,6 +424,8 @@ public class UpgradeManager : MonoBehaviour
 
     public void ApplyUpgrade(UpgradeCard card)
     {
+        bool isBlackMarket = (card.buffType == BuffType.BlackMarketDeal);
+
         if (card.buffType == BuffType.AddRandomCharacter)
         {
             var values = System.Enum.GetValues(typeof(CharacterClassType));
@@ -418,18 +437,6 @@ public class UpgradeManager : MonoBehaviour
         {
             SpawnCharacterToGrid(card.targetClassType);
             Enemy.GlobalHpMultiplier += 0.08f;
-        }
-        else if (card.buffType == BuffType.BlackMarketDeal)
-        {
-
-            for (int i = 0; i < 2; i++)
-            {
-                var values = System.Enum.GetValues(typeof(CharacterClassType));
-                CharacterClassType randomClass = (CharacterClassType)values.GetValue(Random.Range(0, values.Length));
-                SpawnCharacterToGrid(randomClass);
-            }
-
-            Enemy.GlobalHpMultiplier += 0.15f;
         }
         else if (card.buffType == BuffType.EvolvePathA || card.buffType == BuffType.EvolvePathB)
         {
@@ -509,28 +516,43 @@ public class UpgradeManager : MonoBehaviour
                     BaseHealth gHealth = FindFirstObjectByType<BaseHealth>();
                     if (gHealth != null)
                     {
-                        gHealth.currentHealth = Mathf.Max(1f, gHealth.currentHealth - (gHealth.maxHealth * 0.25f));
+                        gHealth.ReduceMaxHpPermanently(25f);
+                        gHealth.repairEffectivenessMultiplier *= 0.75f;
                     }
+                    cardPool.Remove(card);
                     break;
 
                 case BuffType.DeepFreeze:
                     Enemy.GlobalSpeedMultiplier = Mathf.Max(0.2f, Enemy.GlobalSpeedMultiplier - 0.1f);
+                    cardPool.Remove(card);
                     break;
 
                 case BuffType.HeavyCaliber:
                     HasHeavyCaliber = true;
+                    cardPool.Remove(card);
                     break;
 
                 case BuffType.ThornsPlating:
                     HasThornsPlating = true;
+                    BaseHealth tpHealth = FindFirstObjectByType<BaseHealth>();
+                    if (tpHealth != null) tpHealth.repairEffectivenessMultiplier *= 0.75f;
+                    cardPool.Remove(card);
                     break;
 
                 case BuffType.ArcaneOvercharge:
                     HasArcaneOvercharge = true;
+                    cardPool.Remove(card);
                     break;
 
                 case BuffType.DesperateGambit:
                     HasDesperateGambit = true;
+                    cardPool.Remove(card);
+                    break;
+                
+                case BuffType.BlackMarketDeal:
+                    Enemy.GlobalExpMultiplier = Mathf.Max(0.1f, Enemy.GlobalExpMultiplier - 0.30f);
+                    cardPool.Remove(card); 
+                    StartBlackMarketPicks(2);
                     break;
             }
         }
@@ -538,7 +560,8 @@ public class UpgradeManager : MonoBehaviour
         UpdateBuffListDisplay();
 
         cardChoicePanel.SetActive(false);
-        if (!isAutoBattle && GameManager.Instance != null)
+
+        if (!isBlackMarket && !isAutoBattle && GameManager.Instance != null)
         {
             GameManager.Instance.RestoreSpeedAfterModal();
         }
@@ -668,5 +691,208 @@ public class UpgradeManager : MonoBehaviour
         });
 
         Debug.Log($"[UpgradeManager] Kartu evolusi untuk {cls} berhasil dibuka!");
+    }
+
+    public void TriggerInstantEvolutionChoice(Character character)
+    {
+        if (character == null) return;
+
+        targetEvolutionChar = character;
+
+        if (evolutionChoicePanel != null)
+        {
+            evolutionChoicePanel.SetActive(true);
+        }
+
+        string titleA = "", descA = "";
+        string titleB = "", descB = "";
+
+        switch (character.classType)
+        {
+            case CharacterClassType.Fighter:
+                titleA = "Path A: Clawslash";
+                descA = "Jangkauan cakar tak terbatas, menembus musuh (-10% DMG/hit).";
+                titleB = "Path B: Claw Claw Claw";
+                descB = "Setiap serangan ke-4 meluncurkan 3 cakaran beruntun.";
+                break;
+
+            case CharacterClassType.Mage:
+                titleA = "Path A: Ignis Alchemist";
+                descA = "Ledakan meninggalkan kubangan api DoT yang membakar musuh.";
+                titleB = "Path B: Cataclysm Cannon";
+                descB = "ASPD lambat, radius ledakan masif + knockback kuat.";
+                break;
+
+            case CharacterClassType.Support:
+                titleA = "Path A: Absolute Zero";
+                descA = "Slow menumpuk hingga 8x; tumpukan penuh membekukan musuh 0,8 detik.";
+                titleB = "Path B: Permafrost Conduit";
+                descB = "Musuh slow yang gugur menyebarkan efek slow ke musuh terdekat.";
+                break;
+
+            case CharacterClassType.Tank:
+                titleA = "Path A: Ironclad Fortress";
+                descA = "Area depan base menjadi zona AoE yang melambatkan & mendamage musuh.";
+                titleB = "Path B: Riot Punisher";
+                descB = "Tembakan shotgun cone jarak dekat dengan knockback masif.";
+                break;
+
+            case CharacterClassType.Ranged:
+                titleA = "Path A: Headhunter";
+                descA = "Bonus Critical Damage masif khusus ke musuh Tank dan Boss.";
+                titleB = "Path B: Execute Protocol";
+                descB = "Langsung melenyapkan musuh non-Boss berdarah sekarat (<5%).";
+                break;
+        }
+
+        if (cardPathA != null) cardPathA.Setup(titleA, descA, 0);
+        if (cardPathB != null) cardPathB.Setup(titleB, descB, 1);
+
+        Time.timeScale = 0f;
+    }
+
+    public void SelectEvolutionByIndex(int pathIndex)
+    {
+        EvolutionPath chosen = (pathIndex == 0) ? EvolutionPath.PathA : EvolutionPath.PathB;
+
+        if (targetEvolutionChar != null)
+        {
+            targetEvolutionChar.ApplyEvolution(chosen);
+            UnlockStar3SpecialCard(targetEvolutionChar.classType);
+        }
+
+        if (evolutionChoicePanel != null)
+        {
+            evolutionChoicePanel.SetActive(false);
+        }
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.RestoreSpeedAfterModal();
+        }
+        else
+        {
+            Time.timeScale = 1f;
+        }
+    }
+
+    public void UnlockStar3SpecialCard(CharacterClassType cls)
+    {
+        switch (cls)
+        {
+            case CharacterClassType.Fighter:
+                cardPool.Add(new UpgradeCard
+                {
+                    cardName = "Glass Cannon Core",
+                    buffType = BuffType.GlassCannonCore,
+                    playerValues = new float[] { 35f },
+                    mobValues = new float[] { 25f }
+                });
+                break;
+
+            case CharacterClassType.Support:
+                cardPool.Add(new UpgradeCard
+                {
+                    cardName = "Deep Freeze",
+                    buffType = BuffType.DeepFreeze,
+                    playerValues = new float[] { 10f },
+                    mobValues = new float[] { 2f }
+                });
+                break;
+
+            case CharacterClassType.Ranged:
+                cardPool.Add(new UpgradeCard
+                {
+                    cardName = "Heavy Caliber",
+                    buffType = BuffType.HeavyCaliber,
+                    playerValues = new float[] { 25f },
+                    mobValues = new float[] { 1.0f }
+                });
+                break;
+
+            case CharacterClassType.Tank:
+                cardPool.Add(new UpgradeCard
+                {
+                    cardName = "Thorns Plating",
+                    buffType = BuffType.ThornsPlating,
+                    playerValues = new float[] { 1f },
+                    mobValues = new float[] { 25f }
+                });
+                break;
+
+            case CharacterClassType.Mage:
+                cardPool.Add(new UpgradeCard
+                {
+                    cardName = "Arcane Overcharge",
+                    buffType = BuffType.ArcaneOvercharge,
+                    playerValues = new float[] { 15f },
+                    mobValues = new float[] { 1.0f }
+                });
+                break;
+        }
+
+        Debug.Log($"[UpgradeManager] Kartu eksklusif B3 untuk {cls} resmi dibuka ke pool upgrade!");
+    }
+
+    public void StartBlackMarketPicks(int tickets)
+    {
+        remainingPicks = tickets;
+        isPickingClass = true;
+
+        Time.timeScale = 0f; 
+
+        if (classPickModalPanel != null)
+        {
+            classPickModalPanel.SetActive(true);
+        }
+
+        UpdateBlackMarketTitle();
+        Debug.Log($"[Black Market] Dimulai! Sisa tiket: {remainingPicks}");
+    }
+
+    public void OnClassPickSelected(int classIndex)
+    {
+
+        if (!isPickingClass || remainingPicks <= 0) return;
+
+        classIndex = Mathf.Clamp(classIndex, 0, 4);
+        CharacterClassType selectedClass = (CharacterClassType)classIndex;
+
+        Debug.Log($"[Black Market] Memilih Class: {selectedClass} (Index: {classIndex})");
+        SpawnCharacterToGrid(selectedClass);
+
+        remainingPicks--;
+        UpdateBlackMarketTitle();
+
+        Time.timeScale = 0f;
+
+        if (remainingPicks <= 0)
+        {
+            isPickingClass = false;
+
+            if (classPickModalPanel != null)
+            {
+                classPickModalPanel.SetActive(false);
+            }
+
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.RestoreSpeedAfterModal();
+            }
+            else
+            {
+                Time.timeScale = 1f;
+            }
+
+            Debug.Log("[Black Market] Selesai! Panel ditutup dan waktu dilanjutkan.");
+        }
+    }
+
+    void UpdateBlackMarketTitle()
+    {
+        if (blackMarketTitleText != null)
+        {
+            blackMarketTitleText.text = $"PILIH AGEN ({remainingPicks} TIKET TERSISA)";
+        }
     }
 }

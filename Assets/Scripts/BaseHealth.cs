@@ -11,6 +11,9 @@ public class BaseHealth : MonoBehaviour
     public Slider healthBar;
     public TextMeshProUGUI healthText;
 
+    [Header("Debuff Multipliers")]
+    public float repairEffectivenessMultiplier = 1.0f;
+
     private bool isGameOverTriggered = false;
 
     void Start()
@@ -56,9 +59,27 @@ public class BaseHealth : MonoBehaviour
         }
     }
 
+   public void ReduceMaxHpPermanently(float percentLoss)
+    {
+        float amount = maxHealth * (percentLoss / 100f);
+        maxHealth = Mathf.Max(1f, maxHealth - amount);
+        currentHealth = Mathf.Min(currentHealth, maxHealth);
+
+        UpdateUI(); 
+    }
+
+    public void ReduceMaxHpFlat(float flatLoss)
+    {
+        maxHealth = Mathf.Max(1f, maxHealth - flatLoss);
+        currentHealth = Mathf.Min(currentHealth, maxHealth);
+
+        UpdateUI();
+    }
+
     public void HealBase(float amount)
     {
-        currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
+        float adjustedAmount = amount * repairEffectivenessMultiplier;
+        currentHealth = Mathf.Min(maxHealth, currentHealth + adjustedAmount);
         UpdateUI();
     }
 }

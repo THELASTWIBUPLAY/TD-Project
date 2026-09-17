@@ -114,6 +114,8 @@ public class Character : MonoBehaviour
 
     void Update()
     {
+        if (Time.timeScale <= 0f) return;
+
         fireCountdown -= Time.deltaTime;
 
         float starSpeedMult = starLevel == 1 ? 1f : (starLevel == 2 ? 1.3f : 1.8f);

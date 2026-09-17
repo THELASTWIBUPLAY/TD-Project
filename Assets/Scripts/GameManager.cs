@@ -155,6 +155,21 @@ public class GameManager : MonoBehaviour
 
     public void RestoreSpeedAfterModal()
     {
+        if (UpgradeManager.Instance != null)
+        {
+            if (UpgradeManager.Instance.evolutionChoicePanel != null && UpgradeManager.Instance.evolutionChoicePanel.activeSelf)
+            {
+                Time.timeScale = 0f;
+                return;
+            }
+
+            if (UpgradeManager.Instance.classPickModalPanel != null && UpgradeManager.Instance.classPickModalPanel.activeSelf)
+            {
+                Time.timeScale = 0f;
+                return;
+            }
+        }
+        
         Time.timeScale = speedMultipliers[currentSpeedIndex];
     }
 
