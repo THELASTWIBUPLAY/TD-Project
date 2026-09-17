@@ -72,7 +72,7 @@ public class SlotGridManager : MonoBehaviour
             Character charComp = defaultChar.GetComponent<Character>();
             if (charComp != null)
             {
-                charComp.SetupClass(CharacterClassType.Ranger, 1);
+                charComp.SetupClass(CharacterClassType.Fighter, 1);
             }
 
             centerSlot.AssignCharacter(defaultChar);
@@ -134,7 +134,6 @@ public class SlotGridManager : MonoBehaviour
 
     void ExecuteMerge(CharacterSlot targetSlot, CharacterSlot sacrificeA, CharacterSlot sacrificeB, int newStar, CharacterClassType cls)
     {
-
         sacrificeA.ClearSlot();
         sacrificeB.ClearSlot();
 
@@ -142,6 +141,11 @@ public class SlotGridManager : MonoBehaviour
         {
             targetSlot.currentCharacter.SetupClass(cls, newStar);
             targetSlot.currentCharacter.PlayMergeCelebration();
+
+            if (newStar >= 3 && UpgradeManager.Instance != null)
+            {
+                UpgradeManager.Instance.UnlockEvolutionCards(cls);
+            }
         }
     }
 }

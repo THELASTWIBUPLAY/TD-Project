@@ -155,11 +155,11 @@ public class AudioManager : MonoBehaviour
 
         AudioClip clip = classType switch
         {
-            CharacterClassType.Ranger => sfxRanger,
-            CharacterClassType.Sniper => sfxSniper,
-            CharacterClassType.Bombardier => sfxBombardier,
-            CharacterClassType.Cryo => sfxCryo,
-            CharacterClassType.Gunslinger => sfxGunslinger,
+            CharacterClassType.Fighter => sfxRanger,
+            CharacterClassType.Ranged => sfxSniper,
+            CharacterClassType.Mage => sfxBombardier,
+            CharacterClassType.Support => sfxCryo,
+            CharacterClassType.Tank => sfxGunslinger,
             _ => sfxRanger
         };
 

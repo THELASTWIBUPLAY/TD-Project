@@ -19,6 +19,11 @@ public class UpgradeManager : MonoBehaviour
     [Header("Auto Battle")]
     public bool isAutoBattle = false;
 
+    public static bool HasThornsPlating = false;
+    public static bool HasArcaneOvercharge = false;
+    public static bool HasDesperateGambit = false;
+    public static bool HasHeavyCaliber = false;
+
     private List<UpgradeCard> cardPool = new List<UpgradeCard>();
     private List<UpgradeCard> currentOptions = new List<UpgradeCard>();
 
@@ -97,26 +102,82 @@ public class UpgradeManager : MonoBehaviour
 
         cardPool.Add(new UpgradeCard
         {
-            cardName = "Ricochet Round",
-            buffType = BuffType.Ricochet,
+            cardName = "Field Repair",
+            buffType = BuffType.EmergencyRepair,
+            playerValues = new float[] { 35f, 35f, 35f },
+            mobValues = new float[] { 5f, 5f, 5f }
+        });
+
+        cardPool.Add(new UpgradeCard
+        {
+            cardName = "Fortified Bastion",
+            buffType = BuffType.FortifiedBastion,
+            playerValues = new float[] { 50f },
+            mobValues = new float[] { 20f }
+        });
+
+        cardPool.Add(new UpgradeCard
+        {
+            cardName = "Trickshot Ricochet",
+            buffType = BuffType.TrickshotFighter,
             playerValues = new float[] { 1f },
             mobValues = new float[] { 15f }
         });
 
         cardPool.Add(new UpgradeCard
         {
-            cardName = "Overdrive Protocol",
-            buffType = BuffType.Overdrive,
-            playerValues = new float[] { 45f },
-            mobValues = new float[] { 10f }
+            cardName = "Glass Cannon Core",
+            buffType = BuffType.GlassCannonCore,
+            playerValues = new float[] { 35f },
+            mobValues = new float[] { 25f }
         });
 
         cardPool.Add(new UpgradeCard
         {
-            cardName = "Field Repair",
-            buffType = BuffType.EmergencyRepair,
-            playerValues = new float[] { 35f, 35f, 35f },
-            mobValues = new float[] { 5f, 5f, 5f }
+            cardName = "Deep Freeze",
+            buffType = BuffType.DeepFreeze,
+            playerValues = new float[] { 10f },
+            mobValues = new float[] { 2f }
+        });
+
+        cardPool.Add(new UpgradeCard
+        {
+            cardName = "Heavy Caliber",
+            buffType = BuffType.HeavyCaliber,
+            playerValues = new float[] { 25f },
+            mobValues = new float[] { 1.0f }
+        });
+
+        cardPool.Add(new UpgradeCard
+        {
+            cardName = "Thorns Plating",
+            buffType = BuffType.ThornsPlating,
+            playerValues = new float[] { 1f },
+            mobValues = new float[] { 25f }
+        });
+
+        cardPool.Add(new UpgradeCard
+        {
+            cardName = "Arcane Overcharge",
+            buffType = BuffType.ArcaneOvercharge,
+            playerValues = new float[] { 15f },
+            mobValues = new float[] { 1.0f }
+        });
+
+        cardPool.Add(new UpgradeCard
+        {
+            cardName = "Black Market Deal",
+            buffType = BuffType.BlackMarketDeal,
+            playerValues = new float[] { 2f },
+            mobValues = new float[] { 1f }
+        });
+
+        cardPool.Add(new UpgradeCard
+        {
+            cardName = "Desperate Gambit",
+            buffType = BuffType.DesperateGambit,
+            playerValues = new float[] { 60f },
+            mobValues = new float[] { 2f }
         });
     }
 
@@ -127,8 +188,7 @@ public class UpgradeManager : MonoBehaviour
 
         foreach (var card in cardPool)
         {
-
-            if (card.buffType == BuffType.AddRandomCharacter || card.buffType == BuffType.AddSpecificCharacter)
+            if (card.buffType == BuffType.AddRandomCharacter || card.buffType == BuffType.AddSpecificCharacter || card.buffType == BuffType.BlackMarketDeal)
             {
                 if (slotMasihAda) available.Add(card);
             }
@@ -150,11 +210,32 @@ public class UpgradeManager : MonoBehaviour
 
         currentOptions.Clear();
         int countToPick = Mathf.Min(cardButtons.Length, available.Count);
+
         for (int i = 0; i < countToPick; i++)
         {
-            int randIdx = Random.Range(0, available.Count);
-            currentOptions.Add(available[randIdx]);
-            available.RemoveAt(randIdx);
+
+            float totalWeight = 0f;
+            foreach (var card in available)
+            {
+                totalWeight += GetCardWeight(card);
+            }
+
+            float randomRoll = Random.Range(0f, totalWeight);
+            float cumulativeWeight = 0f;
+            UpgradeCard selected = available[0];
+
+            for (int j = 0; j < available.Count; j++)
+            {
+                cumulativeWeight += GetCardWeight(available[j]);
+                if (randomRoll <= cumulativeWeight)
+                {
+                    selected = available[j];
+                    break;
+                }
+            }
+
+            currentOptions.Add(selected);
+            available.Remove(selected);
         }
 
         if (isAutoBattle)
@@ -219,32 +300,59 @@ public class UpgradeManager : MonoBehaviour
                             mobStatLabel = $"Damage Musuh ke Base +{nextMob}%";
                             break;
 
-                        case BuffType.Ricochet:
-                            playerStatLabel = "Peluru Memantul ke 1 Musuh Ekstra";
-                            mobStatLabel = $"HP Musuh +{nextMob}%";
-                            break;
-
-                        case BuffType.Overdrive:
-                            playerStatLabel = "Attack Speed +45%, tapi Jarak Tembak -20%";
-                            mobStatLabel = $"Kecepatan Gerak Musuh +{nextMob}%";
-                            break;
-
                         case BuffType.EmergencyRepair:
                             playerStatLabel = $"Pulihkan HP Base Sebanyak +{nextVal}";
                             mobStatLabel = $"Damage Musuh ke Base +{nextMob}%";
                             break;
+
+                        case BuffType.FortifiedBastion:
+                            playerStatLabel = $"Max HP Base +{nextVal} & Heal Seketika";
+                            mobStatLabel = $"HP Musuh +{nextMob}%, Spawn +10% saat base kena hit";
+                            break;
+
+                        case BuffType.TrickshotFighter:
+                            playerStatLabel = "Proyektil Fighter Memantul (Hit ke-2 -40%)";
+                            mobStatLabel = $"Kecepatan Musuh +{nextMob}%, 15% Miss Chance";
+                            break;
+
+                        case BuffType.GlassCannonCore:
+                            playerStatLabel = $"Fighter & Mage ATK +{nextVal}%, Ranged ATK +15%";
+                            mobStatLabel = "Base HP -25%, Efisiensi Repair -25%";
+                            break;
+
+                        case BuffType.DeepFreeze:
+                            playerStatLabel = $"Slow Support +{nextVal}%, Durasi 2x Lipat";
+                            mobStatLabel = "Boss punya peluang kebal efek Slow";
+                            break;
+
+                        case BuffType.HeavyCaliber:
+                            playerStatLabel = $"Ranged tembus armor, DMG Boss/Tank +{nextVal}%";
+                            mobStatLabel = "Jeda tembak Ranged +1.0s (berkurang per Ranged di grid)";
+                            break;
+
+                        case BuffType.ThornsPlating:
+                            playerStatLabel = "Shockwave Damage saat musuh nabrak base (5-50%)";
+                            mobStatLabel = "Repair -25%, Setiap shockwave kurangi 1% Max Base HP";
+                            break;
+
+                        case BuffType.ArcaneOvercharge:
+                            playerStatLabel = $"AoE Damage Mage +{nextVal}% (Sinergi Evolusi)";
+                            mobStatLabel = "Jeda tembak Mage +1.0s";
+                            break;
+
+                        case BuffType.BlackMarketDeal:
+                            displayTitle = "Black Market Deal";
+                            playerStatLabel = "Dapatkan 2 Tiket Deploy Instan";
+                            mobStatLabel = "Peluang spawn Mini-Tank ekstra tiap wave";
+                            break;
+
+                        case BuffType.DesperateGambit:
+                            playerStatLabel = $"Jika HP Base < 30%: ASPD +{nextVal}%, ATK +15%";
+                            mobStatLabel = "Jika musuh nabrak base, damage diterima x2 lipat";
+                            break;
                     }
 
-                    if (c.currentLevel == 0)
-                    {
-                        displayDesc = $"[Efek]: {playerStatLabel}\n[Musuh]: {mobStatLabel}";
-                    }
-                    else
-                    {
-                        int prevIdx = Mathf.Clamp(c.currentLevel - 1, 0, c.playerValues.Length - 1);
-                        float prevVal = c.playerValues.Length > 0 ? c.playerValues[prevIdx] : 0f;
-                        displayDesc = $"[Upgrade]: {prevVal}% -> {nextVal}%\n[Efek]: {playerStatLabel}\n[Musuh]: {mobStatLabel}";
-                    }
+                    displayDesc = $"[Efek]: {playerStatLabel}\n[Musuh]: {mobStatLabel}";
                 }
 
                 cardButtons[i].Setup(displayTitle, displayDesc, i);
@@ -254,6 +362,39 @@ public class UpgradeManager : MonoBehaviour
                 cardButtons[i].gameObject.SetActive(false);
             }
         }
+    }
+
+    private float GetCardWeight(UpgradeCard card)
+    {
+
+        bool isSingleUse = (card.playerValues != null && card.playerValues.Length == 1) ||
+                           card.buffType == BuffType.Ricochet ||
+                           card.buffType == BuffType.Overdrive ||
+                           card.buffType == BuffType.GlassCannonCore ||
+                           card.buffType == BuffType.FortifiedBastion ||
+                           card.buffType == BuffType.TrickshotFighter ||
+                           card.buffType == BuffType.DeepFreeze ||
+                           card.buffType == BuffType.HeavyCaliber ||
+                           card.buffType == BuffType.ThornsPlating ||
+                           card.buffType == BuffType.ArcaneOvercharge ||
+                           card.buffType == BuffType.DesperateGambit;
+
+        if (isSingleUse)
+
+        {
+
+            return 15f;
+        }
+
+        if (card.buffType == BuffType.AddRandomCharacter || 
+            card.buffType == BuffType.AddSpecificCharacter || 
+            card.buffType == BuffType.EmergencyRepair ||
+            card.buffType == BuffType.BlackMarketDeal)
+        {
+            return 45f;
+        }
+
+        return 70f;
     }
 
     public void ApplyUpgradeByIndex(int index)
@@ -278,6 +419,38 @@ public class UpgradeManager : MonoBehaviour
             SpawnCharacterToGrid(card.targetClassType);
             Enemy.GlobalHpMultiplier += 0.08f;
         }
+        else if (card.buffType == BuffType.BlackMarketDeal)
+        {
+
+            for (int i = 0; i < 2; i++)
+            {
+                var values = System.Enum.GetValues(typeof(CharacterClassType));
+                CharacterClassType randomClass = (CharacterClassType)values.GetValue(Random.Range(0, values.Length));
+                SpawnCharacterToGrid(randomClass);
+            }
+
+            Enemy.GlobalHpMultiplier += 0.15f;
+        }
+        else if (card.buffType == BuffType.EvolvePathA || card.buffType == BuffType.EvolvePathB)
+        {
+            EvolutionPath chosen = (card.buffType == BuffType.EvolvePathA) ? EvolutionPath.PathA : EvolutionPath.PathB;
+            if (SlotGridManager.Instance != null)
+            {
+                foreach (var slot in SlotGridManager.Instance.allSlots)
+                {
+                    if (slot != null && slot.isOccupied && slot.currentCharacter != null)
+                    {
+                        if (slot.currentCharacter.classType == card.targetClassType && slot.currentCharacter.starLevel >= 3)
+                        {
+                            slot.currentCharacter.ApplyEvolution(chosen);
+                        }
+                    }
+                }
+            }
+
+            cardPool.RemoveAll(c => c.targetClassType == card.targetClassType && 
+                                   (c.buffType == BuffType.EvolvePathA || c.buffType == BuffType.EvolvePathB));
+        }
         else
         {
             float playerVal = card.GetNextPlayerValue();
@@ -288,12 +461,12 @@ public class UpgradeManager : MonoBehaviour
             switch (card.buffType)
             {
                 case BuffType.BoostAttack:
-                    Character.GlobalDamageBonusPercent = playerVal;
-                    Enemy.GlobalHpMultiplier = 1f + (mobVal / 100f);
+                    Character.GlobalDamageBonusPercent += playerVal;
+                    Enemy.GlobalHpMultiplier += (mobVal / 100f);
                     break;
 
                 case BuffType.BoostAttackSpeed:
-                    Character.GlobalAtkSpeedMultiplier = 1f + (playerVal / 100f);
+                    Character.GlobalAtkSpeedMultiplier += (playerVal / 100f);
                     if (WaveManager.Instance != null)
                     {
                         WaveManager.Instance.spawnInterval = Mathf.Max(0.4f, 1.5f * (1f - (mobVal / 100f)));
@@ -302,41 +475,62 @@ public class UpgradeManager : MonoBehaviour
 
                 case BuffType.SlowMob:
                     Enemy.GlobalSpeedMultiplier = Mathf.Max(0.3f, 1f - (playerVal / 100f));
-                    Enemy.GlobalHpMultiplier = 1f + (mobVal / 100f);
-                    break;
-
-                case BuffType.ExpGain:
-                    Enemy.GlobalExpMultiplier = 1f + (playerVal / 100f);
-                    Enemy.GlobalDamageMultiplier = 1f + (mobVal / 100f);
-                    break;
-
-                case BuffType.Ricochet:
-                    Projectile.GlobalRicochetUnlocked = true;
                     Enemy.GlobalHpMultiplier += (mobVal / 100f);
                     break;
 
-                case BuffType.Overdrive:
-                    Character.GlobalAtkSpeedMultiplier += 0.45f;
-                    if (SlotGridManager.Instance != null)
-                    {
-                        foreach (var slot in SlotGridManager.Instance.allSlots)
-                        {
-                            if (slot.isOccupied && slot.currentCharacter != null)
-                            {
-                                slot.currentCharacter.attackRange = Mathf.Max(3.5f, slot.currentCharacter.attackRange * 0.8f);
-                            }
-                        }
-                    }
-                    Enemy.GlobalSpeedMultiplier += (mobVal / 100f);
+                case BuffType.ExpGain:
+                    Enemy.GlobalExpMultiplier += (playerVal / 100f);
+                    Enemy.GlobalDamageMultiplier += (mobVal / 100f);
                     break;
 
                 case BuffType.EmergencyRepair:
                     BaseHealth baseHp = FindFirstObjectByType<BaseHealth>();
-                    if (baseHp != null)
-                    {
-                        baseHp.HealBase(playerVal);
-                    }
+                    if (baseHp != null) baseHp.HealBase(playerVal);
                     Enemy.GlobalDamageMultiplier += (mobVal / 100f);
+                    break;
+
+                case BuffType.FortifiedBastion:
+                    BaseHealth bHealth = FindFirstObjectByType<BaseHealth>();
+                    if (bHealth != null)
+                    {
+                        bHealth.maxHealth += playerVal;
+                        bHealth.HealBase(playerVal);
+                    }
+                    Enemy.GlobalHpMultiplier += (mobVal / 100f);
+                    break;
+
+                case BuffType.TrickshotFighter:
+                    Projectile.GlobalRicochetUnlocked = true;
+                    Enemy.GlobalSpeedMultiplier += (mobVal / 100f);
+                    break;
+
+                case BuffType.GlassCannonCore:
+                    Character.GlobalDamageBonusPercent += playerVal;
+                    BaseHealth gHealth = FindFirstObjectByType<BaseHealth>();
+                    if (gHealth != null)
+                    {
+                        gHealth.currentHealth = Mathf.Max(1f, gHealth.currentHealth - (gHealth.maxHealth * 0.25f));
+                    }
+                    break;
+
+                case BuffType.DeepFreeze:
+                    Enemy.GlobalSpeedMultiplier = Mathf.Max(0.2f, Enemy.GlobalSpeedMultiplier - 0.1f);
+                    break;
+
+                case BuffType.HeavyCaliber:
+                    HasHeavyCaliber = true;
+                    break;
+
+                case BuffType.ThornsPlating:
+                    HasThornsPlating = true;
+                    break;
+
+                case BuffType.ArcaneOvercharge:
+                    HasArcaneOvercharge = true;
+                    break;
+
+                case BuffType.DesperateGambit:
+                    HasDesperateGambit = true;
                     break;
             }
         }
@@ -407,36 +601,7 @@ public class UpgradeManager : MonoBehaviour
             if (c.buffType != BuffType.AddRandomCharacter && c.buffType != BuffType.AddSpecificCharacter && c.currentLevel > 0)
             {
                 hasActiveBuff = true;
-                int safeIdx = Mathf.Clamp(c.currentLevel - 1, 0, c.playerValues.Length - 1);
-                float val = c.playerValues.Length > 0 ? c.playerValues[safeIdx] : 0f;
-                string statDetail = "";
-
-                switch (c.buffType)
-                {
-                    case BuffType.BoostAttack:
-                        statDetail = $"Base Damage +{val}%";
-                        break;
-                    case BuffType.BoostAttackSpeed:
-                        statDetail = $"Attack Speed +{val}%";
-                        break;
-                    case BuffType.SlowMob:
-                        statDetail = $"Enemy Slow +{val}%";
-                        break;
-                    case BuffType.ExpGain:
-                        statDetail = $"EXP Bonus +{val}%";
-                        break;
-                    case BuffType.Ricochet:
-                        statDetail = "Ricochet Active (1x Bounce)";
-                        break;
-                    case BuffType.Overdrive:
-                        statDetail = "Overdrive (ASPD +45%, Range -20%)";
-                        break;
-                    case BuffType.EmergencyRepair:
-                        statDetail = $"Base Repaired ({c.currentLevel}x)";
-                        break;
-                }
-
-                summary += $"{c.cardName} (Lv.{c.currentLevel})\n -> {statDetail}\n\n";
+                summary += $"{c.cardName} (Lv.{c.currentLevel})\n\n";
             }
         }
 
@@ -446,5 +611,62 @@ public class UpgradeManager : MonoBehaviour
         }
 
         buffListText.text = summary;
+    }
+
+    public void UnlockEvolutionCards(CharacterClassType cls)
+    {
+
+        foreach (var c in cardPool)
+        {
+            if (c.targetClassType == cls && (c.buffType == BuffType.EvolvePathA || c.buffType == BuffType.EvolvePathB))
+            {
+                return;
+            }
+        }
+
+        string nameA = "";
+        string nameB = "";
+
+        switch (cls)
+        {
+            case CharacterClassType.Fighter:
+                nameA = "Evolve: Clawslash (Piercing)";
+                nameB = "Evolve: Claw Claw Claw (Triple)";
+                break;
+            case CharacterClassType.Mage:
+                nameA = "Evolve: Ignis Alchemist (Burn DoT)";
+                nameB = "Evolve: Cataclysm Cannon (Nuke AoE)";
+                break;
+            case CharacterClassType.Support:
+                nameA = "Evolve: Absolute Zero (Freeze)";
+                nameB = "Evolve: Permafrost Conduit (Spread)";
+                break;
+            case CharacterClassType.Tank:
+                nameA = "Evolve: Ironclad Fortress (Aura Slow)";
+                nameB = "Evolve: Riot Punisher (Shotgun Cone)";
+                break;
+            case CharacterClassType.Ranged:
+                nameA = "Evolve: Headhunter (Crit Boss)";
+                nameB = "Evolve: Execute Protocol (Execute <5%)";
+                break;
+        }
+
+        cardPool.Add(new UpgradeCard
+        {
+            cardName = nameA,
+            buffType = BuffType.EvolvePathA,
+            targetClassType = cls,
+            playerValues = new float[] { 1f }
+        });
+
+        cardPool.Add(new UpgradeCard
+        {
+            cardName = nameB,
+            buffType = BuffType.EvolvePathB,
+            targetClassType = cls,
+            playerValues = new float[] { 1f }
+        });
+
+        Debug.Log($"[UpgradeManager] Kartu evolusi untuk {cls} berhasil dibuka!");
     }
 }

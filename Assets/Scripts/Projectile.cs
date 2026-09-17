@@ -7,6 +7,11 @@ public class Projectile : MonoBehaviour
     public float damage = 10f;
     public float lifetime = 4f;
 
+    [Header("Critical & Class")]
+    public bool isCrit = false;
+    public CharacterClassType shooterClass = CharacterClassType.Fighter;
+    public EvolutionPath evolution = EvolutionPath.None;
+
     [Header("AoE Configuration")]
     public bool isAoE = false;
     public float aoeRadius = 1.5f;
@@ -20,16 +25,15 @@ public class Projectile : MonoBehaviour
     private int ricochetRemaining = 0;
     private Transform lastHitTarget;
 
+    [Header("Piercing (Fighter Path A)")]
+    public bool isPiercing = false;
+    private int pierceCount = 0;
+
     private Transform targetEnemy;
     private Rigidbody2D targetRb;
     private Vector2 currentDirection = Vector2.up;
 
-    public void Setup(Transform target)
-    {
-        Setup(target, false, 1.5f);
-    }
-
-    public void Setup(Transform target, bool isAreaDamage, float splashRadius = 1.5f)
+    public void Setup(Transform target, bool isAreaDamage = false, float splashRadius = 1.5f)
     {
         targetEnemy = target;
         isAoE = isAreaDamage;
@@ -57,7 +61,7 @@ public class Projectile : MonoBehaviour
 
     void Update()
     {
-        if (targetEnemy != null)
+        if (!isPiercing && targetEnemy != null)
         {
             Vector3 predictedTargetPos = targetEnemy.position;
 
@@ -91,12 +95,13 @@ public class Projectile : MonoBehaviour
     {
         if (collision.CompareTag("Enemy"))
         {
+            Enemy enemy = collision.GetComponent<Enemy>();
+
             if (isAoE)
             {
-
                 if (AudioManager.Instance != null)
                 {
-                    AudioManager.Instance.PlayClassShootSFX(CharacterClassType.Bombardier);
+                    AudioManager.Instance.PlayClassShootSFX(CharacterClassType.Mage);
                 }
 
                 ExplosionEffect.Create(transform.position, aoeRadius);
@@ -109,7 +114,7 @@ public class Projectile : MonoBehaviour
                         Enemy e = col.GetComponent<Enemy>();
                         if (e != null)
                         {
-                            e.TakeDamage(damage);
+                            ApplyHitEffects(e, damage);
                         }
                     }
                 }
@@ -118,10 +123,21 @@ public class Projectile : MonoBehaviour
                 return;
             }
 
-            Enemy enemy = collision.GetComponent<Enemy>();
+            if (isPiercing)
+            {
+                if (enemy != null)
+                {
+                    ApplyHitEffects(enemy, damage);
+                    damage *= 0.90f;
+                    pierceCount++;
+                    if (pierceCount >= 4) Destroy(gameObject);
+                }
+                return;
+            }
+
             if (enemy != null)
             {
-                enemy.TakeDamage(damage);
+                ApplyHitEffects(enemy, damage);
             }
 
             if (ricochetRemaining > 0)
@@ -135,13 +151,33 @@ public class Projectile : MonoBehaviour
                     targetEnemy = nextTarget;
                     targetRb = targetEnemy.GetComponent<Rigidbody2D>();
                     currentDirection = (targetEnemy.position - transform.position).normalized;
-                    damage *= 0.75f;
+                    damage *= 0.60f;
                     return;
                 }
             }
 
             Destroy(gameObject);
         }
+    }
+
+    void ApplyHitEffects(Enemy enemy, float dmg)
+    {
+
+        if (shooterClass == CharacterClassType.Ranged && evolution == EvolutionPath.PathB)
+        {
+            if (enemy.archetype != EnemyArchetype.Boss)
+            {
+                dmg *= 2.0f; 
+            }
+        }
+
+        if (shooterClass == CharacterClassType.Support)
+        {
+            float slowFactor = (evolution == EvolutionPath.PathA) ? 0.4f : 0.6f;
+            enemy.moveSpeed = Mathf.Max(0.3f, enemy.moveSpeed * slowFactor);
+        }
+
+        enemy.TakeDamage(dmg);
     }
 
     Transform FindNextBounceTarget()
@@ -168,14 +204,5 @@ public class Projectile : MonoBehaviour
     private void OnBecameInvisible()
     {
         Destroy(gameObject);
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        if (isAoE)
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(transform.position, aoeRadius);
-        }
     }
 }
