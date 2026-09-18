@@ -16,7 +16,7 @@ public class DamageTextManager : MonoBehaviour
         Instance = this;
     }
 
-    public void SpawnDamageText(Vector3 position, float damage)
+    public void SpawnDamageText(Vector3 position, float damage, bool isCrit = false)
     {
         if (damageTextPrefab == null) return;
 
@@ -26,7 +26,7 @@ public class DamageTextManager : MonoBehaviour
         DamageText dt = obj.GetComponent<DamageText>();
         if (dt != null)
         {
-            dt.Setup(damage);
+            dt.Setup(damage, isCrit);
         }
     }
 }

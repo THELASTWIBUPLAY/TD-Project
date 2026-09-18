@@ -102,7 +102,7 @@ public class Enemy : MonoBehaviour
     }
 
 
-    public void TakeDamage(float damageAmount)
+    public void TakeDamage(float damageAmount, bool isCrit = false)
     {
         if (isDead) return;
 
@@ -116,7 +116,7 @@ public class Enemy : MonoBehaviour
 
         if (DamageTextManager.Instance != null)
         {
-            DamageTextManager.Instance.SpawnDamageText(transform.position, damageAmount);
+            DamageTextManager.Instance.SpawnDamageText(transform.position, damageAmount, isCrit);
         }
 
         if (archetype == EnemyArchetype.Boss)

@@ -122,7 +122,15 @@ public class Character : MonoBehaviour
         fireCountdown -= Time.deltaTime;
 
         float starSpeedMult = starLevel == 1 ? 1f : (starLevel == 2 ? 1.3f : 1.8f);
-        float currentCooldown = baseAttackCooldown / (GlobalAtkSpeedMultiplier * starSpeedMult);
+
+        float effectiveCooldown = baseAttackCooldown;
+
+        if (classType == CharacterClassType.Fighter && currentEvolution == EvolutionPath.PathA)
+        {
+            effectiveCooldown = 1f; 
+        }
+
+        float currentCooldown = effectiveCooldown / (GlobalAtkSpeedMultiplier * starSpeedMult);
 
         if (fireCountdown <= 0f)
         {

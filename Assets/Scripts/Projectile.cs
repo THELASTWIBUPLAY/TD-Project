@@ -162,7 +162,6 @@ public class Projectile : MonoBehaviour
 
     void ApplyHitEffects(Enemy enemy, float dmg)
     {
-
         if (shooterClass == CharacterClassType.Ranged && evolution == EvolutionPath.PathB)
         {
             if (enemy.archetype != EnemyArchetype.Boss)
@@ -177,7 +176,7 @@ public class Projectile : MonoBehaviour
             enemy.moveSpeed = Mathf.Max(0.3f, enemy.moveSpeed * slowFactor);
         }
 
-        enemy.TakeDamage(dmg);
+        enemy.TakeDamage(dmg, isCrit);
     }
 
     Transform FindNextBounceTarget()
