@@ -36,6 +36,9 @@ public class Character : MonoBehaviour
     [Header("Evolution")]
     public EvolutionPath currentEvolution = EvolutionPath.None;
 
+    private int fighterAttackCount = 0;
+    private Transform lastFighterTarget = null;
+
     void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -193,6 +196,16 @@ public class Character : MonoBehaviour
     {
         if (target == null || projectilePrefab == null) return;
 
+        if (classType == CharacterClassType.Fighter)
+        {
+            if (lastFighterTarget != target)
+            {
+                fighterAttackCount = 0;
+                lastFighterTarget = target;
+            }
+            fighterAttackCount++;
+        }
+
         attackCount++;
 
         if (classType != CharacterClassType.Mage && AudioManager.Instance != null)
@@ -223,7 +236,7 @@ public class Character : MonoBehaviour
         {
             SpawnPiercingClaw(target, calculatedDamage, isCritical);
         }
-        else if (classType == CharacterClassType.Fighter && currentEvolution == EvolutionPath.PathB && attackCount % 4 == 0)
+        else if (classType == CharacterClassType.Fighter && currentEvolution == EvolutionPath.PathB && fighterAttackCount % 4 == 0)
         {
             StartCoroutine(TripleClawRoutine(target, calculatedDamage, isCritical));
         }

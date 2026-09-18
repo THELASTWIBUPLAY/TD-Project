@@ -72,7 +72,21 @@ public class SlotGridManager : MonoBehaviour
             Character charComp = defaultChar.GetComponent<Character>();
             if (charComp != null)
             {
-                charComp.SetupClass(CharacterClassType.Fighter, 1);
+
+                CharacterClassType initialClass = CharacterClassType.Fighter;
+                if (UpgradeManager.Instance != null)
+                {
+                    foreach (CharacterClassType cls in System.Enum.GetValues(typeof(CharacterClassType)))
+                    {
+                        if (!UpgradeManager.Instance.IsClassBanned(cls))
+                        {
+                            initialClass = cls;
+                            break;
+                        }
+                    }
+                }
+
+                charComp.SetupClass(initialClass, 1);
             }
 
             centerSlot.AssignCharacter(defaultChar);

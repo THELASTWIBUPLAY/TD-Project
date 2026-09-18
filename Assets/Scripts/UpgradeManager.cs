@@ -26,9 +26,13 @@ public class UpgradeManager : MonoBehaviour
 
     [Header("Black Market UI")]
     public GameObject classPickModalPanel;
+    public UnityEngine.UI.Button[] classPickButtons;
     public TextMeshProUGUI blackMarketTitleText;
     private int remainingPicks = 0;
     private bool isPickingClass = false;
+
+    [Header("Debug & Ban System")]
+    public List<CharacterClassType> bannedClasses = new List<CharacterClassType>();
 
     public static bool HasThornsPlating = false;
     public static bool HasArcaneOvercharge = false;
@@ -71,6 +75,8 @@ public class UpgradeManager : MonoBehaviour
 
         foreach (CharacterClassType cls in System.Enum.GetValues(typeof(CharacterClassType)))
         {
+            if (IsClassBanned(cls)) continue;
+
             cardPool.Add(new UpgradeCard
             {
                 cardName = $"Deploy: {cls}",
@@ -428,8 +434,7 @@ public class UpgradeManager : MonoBehaviour
 
         if (card.buffType == BuffType.AddRandomCharacter)
         {
-            var values = System.Enum.GetValues(typeof(CharacterClassType));
-            CharacterClassType randomClass = (CharacterClassType)values.GetValue(Random.Range(0, values.Length));
+            CharacterClassType randomClass = GetRandomAllowedClass();
             SpawnCharacterToGrid(randomClass);
             Enemy.GlobalHpMultiplier += 0.10f;
         }
@@ -839,7 +844,19 @@ public class UpgradeManager : MonoBehaviour
         remainingPicks = tickets;
         isPickingClass = true;
 
-        Time.timeScale = 0f; 
+        Time.timeScale = 0f;
+
+        if (classPickButtons != null)
+        {
+            for (int i = 0; i < classPickButtons.Length; i++)
+            {
+                if (classPickButtons[i] != null)
+                {
+                    CharacterClassType cls = (CharacterClassType)i;
+                    classPickButtons[i].interactable = !IsClassBanned(cls);
+                }
+            }
+        }
 
         if (classPickModalPanel != null)
         {
@@ -850,13 +867,18 @@ public class UpgradeManager : MonoBehaviour
         Debug.Log($"[Black Market] Dimulai! Sisa tiket: {remainingPicks}");
     }
 
-    public void OnClassPickSelected(int classIndex)
+   public void OnClassPickSelected(int classIndex)
     {
-
         if (!isPickingClass || remainingPicks <= 0) return;
 
         classIndex = Mathf.Clamp(classIndex, 0, 4);
         CharacterClassType selectedClass = (CharacterClassType)classIndex;
+
+        if (IsClassBanned(selectedClass))
+        {
+            Debug.LogWarning($"[Black Market] Kelas {selectedClass} sedang di-banned dan tidak bisa dipilih!");
+            return;
+        }
 
         Debug.Log($"[Black Market] Memilih Class: {selectedClass} (Index: {classIndex})");
         SpawnCharacterToGrid(selectedClass);
@@ -894,5 +916,27 @@ public class UpgradeManager : MonoBehaviour
         {
             blackMarketTitleText.text = $"PILIH AGEN ({remainingPicks} TIKET TERSISA)";
         }
+    }
+
+    public bool IsClassBanned(CharacterClassType cls)
+    {
+        return bannedClasses != null && bannedClasses.Contains(cls);
+    }
+
+    public CharacterClassType GetRandomAllowedClass()
+    {
+        List<CharacterClassType> allowed = new List<CharacterClassType>();
+
+        foreach (CharacterClassType cls in System.Enum.GetValues(typeof(CharacterClassType)))
+        {
+            if (!IsClassBanned(cls))
+            {
+                allowed.Add(cls);
+            }
+        }
+
+        if (allowed.Count == 0) return CharacterClassType.Fighter;
+
+        return allowed[Random.Range(0, allowed.Count)];
     }
 }
