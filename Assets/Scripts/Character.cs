@@ -130,14 +130,12 @@ public class Character : MonoBehaviour
 
         if (classType == CharacterClassType.Fighter && currentEvolution == EvolutionPath.PathA)
         {
-            effectiveCooldown = 1f; 
+            effectiveCooldown = 1.5f; 
         }
 
-        bool isCritical = Random.value < critRate;
-
-        if (classType == CharacterClassType.Ranged && currentEvolution == EvolutionPath.PathB)
+        else if (classType == CharacterClassType.Mage && currentEvolution == EvolutionPath.PathB)
         {
-            isCritical = false;
+            effectiveCooldown = 3.0f; 
         }
 
         float currentCooldown = effectiveCooldown / (GlobalAtkSpeedMultiplier * starSpeedMult);
@@ -287,11 +285,22 @@ public class Character : MonoBehaviour
             projectile.evolution = currentEvolution;
 
             bool isAoE = (classType == CharacterClassType.Mage);
-            float splashRadius = (starLevel >= 3) ? 2.2f : 1.5f;
 
-            if (classType == CharacterClassType.Mage && currentEvolution == EvolutionPath.PathB)
+            float splashRadius = 1.2f;
+            if (starLevel == 2)
             {
-                splashRadius = 3.8f;
+                splashRadius = 2.0f;
+            }
+            else if (starLevel >= 3)
+            {
+                if (currentEvolution == EvolutionPath.PathB)
+                {
+                    splashRadius = 4.0f; 
+                }
+                else
+                {
+                    splashRadius = 2.4f; 
+                }
             }
 
             projectile.Setup(target, isAoE, splashRadius);

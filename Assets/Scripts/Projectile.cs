@@ -29,6 +29,9 @@ public class Projectile : MonoBehaviour
     public bool isPiercing = false;
     private int pierceCount = 0;
 
+    [Header("Mage Path A Burn Puddle Prefab")]
+    public GameObject burnPuddlePrefab;
+
     private Transform targetEnemy;
     private Rigidbody2D targetRb;
     private Vector2 currentDirection = Vector2.up;
@@ -105,6 +108,17 @@ public class Projectile : MonoBehaviour
                 }
 
                 ExplosionEffect.Create(transform.position, aoeRadius);
+
+                if (shooterClass == CharacterClassType.Mage && evolution == EvolutionPath.PathA)
+                {
+                    GameObject puddleObj = new GameObject("Ignis_BurnPuddle");
+                    puddleObj.transform.position = transform.position;
+
+                    BurnPuddle bp = puddleObj.AddComponent<BurnPuddle>();
+                    bp.radius = aoeRadius;
+                    bp.dpsDamage = damage * 0.35f; 
+                    bp.duration = 4.0f;            
+                }
 
                 Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(transform.position, aoeRadius);
                 foreach (Collider2D col in hitEnemies)
