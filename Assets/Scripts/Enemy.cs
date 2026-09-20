@@ -5,7 +5,7 @@ public class Enemy : MonoBehaviour
 {
     [Header("Attributes")]
     public float maxHp = 15f;
-    private float currentHp;
+    public float currentHp;
     public float moveSpeed = 1.3f;
     public float damageToBase = 5f;
     public int expReward = 8;

@@ -41,7 +41,7 @@ public class Projectile : MonoBehaviour
 
         ricochetRemaining = 0;
 
-        if (GlobalRicochetUnlocked && !isAoE)
+        if (GlobalRicochetUnlocked && shooterClass == CharacterClassType.Fighter && !isAoE)
         {
             ricochetRemaining = 1;
         }
@@ -166,7 +166,10 @@ public class Projectile : MonoBehaviour
         {
             if (enemy.archetype != EnemyArchetype.Boss)
             {
-                dmg *= 2.0f; 
+                if (enemy.currentHp <= (enemy.maxHp * 0.10f))
+                {
+                    dmg = enemy.currentHp + 999f;
+                }
             }
         }
 

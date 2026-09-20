@@ -204,8 +204,29 @@ public class UpgradeManager : MonoBehaviour
         List<UpgradeCard> available = new List<UpgradeCard>();
         bool slotMasihAda = SlotGridManager.Instance != null && SlotGridManager.Instance.GetRandomEmptySlot() != null;
 
+        bool hasFighterOnGrid = false;
+        if (SlotGridManager.Instance != null)
+        {
+            foreach (var slot in SlotGridManager.Instance.allSlots)
+            {
+                if (slot != null && slot.isOccupied && slot.currentCharacter != null)
+                {
+                    if (slot.currentCharacter.classType == CharacterClassType.Fighter)
+                    {
+                        hasFighterOnGrid = true;
+                        break;
+                    }
+                }
+            }
+        }
+
         foreach (var card in cardPool)
         {
+            if (card.buffType == BuffType.TrickshotFighter)
+            {
+                if (!hasFighterOnGrid || IsClassBanned(CharacterClassType.Fighter)) continue;
+            }
+
             if (card.buffType == BuffType.AddRandomCharacter || card.buffType == BuffType.AddSpecificCharacter || card.buffType == BuffType.BlackMarketDeal)
             {
                 if (slotMasihAda) available.Add(card);
@@ -621,15 +642,68 @@ public class UpgradeManager : MonoBehaviour
     {
         if (buffListText == null) return;
 
-        string summary = "=== ACTIVE BUFFS ===\n\n";
+        string summary = "<b><size=120%>=== ACTIVE BUFFS ===</size></b>\n\n";
         bool hasActiveBuff = false;
 
         foreach (var c in cardPool)
         {
-            if (c.buffType != BuffType.AddRandomCharacter && c.buffType != BuffType.AddSpecificCharacter && c.currentLevel > 0)
+            if (c.buffType != BuffType.AddRandomCharacter && 
+                c.buffType != BuffType.AddSpecificCharacter && 
+                c.buffType != BuffType.BlackMarketDeal && 
+                c.currentLevel > 0)
             {
                 hasActiveBuff = true;
-                summary += $"{c.cardName} (Lv.{c.currentLevel})\n\n";
+
+                float currentVal = c.playerValues != null && c.playerValues.Length > 0 
+                    ? c.playerValues[Mathf.Min(c.currentLevel - 1, c.playerValues.Length - 1)] 
+                    : 0f;
+
+                string effectDesc = "";
+
+                switch (c.buffType)
+                {
+                    case BuffType.BoostAttack:
+                        effectDesc = $"ATK Karakter +{currentVal}%";
+                        break;
+                    case BuffType.BoostAttackSpeed:
+                        effectDesc = $"Attack Speed +{currentVal}%";
+                        break;
+                    case BuffType.SlowMob:
+                        effectDesc = $"Slow Musuh {currentVal}%";
+                        break;
+                    case BuffType.ExpGain:
+                        effectDesc = $"Bonus EXP +{currentVal}%";
+                        break;
+                    case BuffType.FortifiedBastion:
+                        effectDesc = $"Max Base HP +{currentVal}";
+                        break;
+                    case BuffType.TrickshotFighter:
+                        effectDesc = "Proyektil Fighter Ricochet";
+                        break;
+                    case BuffType.GlassCannonCore:
+                        effectDesc = "Fighter & Mage ATK +35%, Base HP -25%";
+                        break;
+                    case BuffType.DeepFreeze:
+                        effectDesc = "Slow Support +10% (Durasi 2x)";
+                        break;
+                    case BuffType.HeavyCaliber:
+                        effectDesc = "Ranged Pierce Armor, Boss DMG +25%";
+                        break;
+                    case BuffType.ThornsPlating:
+                        effectDesc = "Base Shockwave Damage Aktif";
+                        break;
+                    case BuffType.ArcaneOvercharge:
+                        effectDesc = "Mage AoE Damage +15%";
+                        break;
+                    case BuffType.DesperateGambit:
+                        effectDesc = "HP < 30%: ASPD +60%, ATK +15%";
+                        break;
+                    default:
+                        effectDesc = "Aktif";
+                        break;
+                }
+
+                summary += $"• <b>{c.cardName} (Lv.{c.currentLevel})</b>\n   <color=#B0BEC5>{effectDesc}</color>\n\n";
             }
         }
 
@@ -938,5 +1012,29 @@ public class UpgradeManager : MonoBehaviour
         if (allowed.Count == 0) return CharacterClassType.Fighter;
 
         return allowed[Random.Range(0, allowed.Count)];
+    }
+
+    public void SkipUpgradeSelection()
+    {
+        Debug.Log("[UpgradeManager] Pemain memilih Skip pada pemilihan kartu buff.");
+
+        currentOptions.Clear();
+
+        if (cardChoicePanel != null)
+        {
+            cardChoicePanel.SetActive(false);
+        }
+
+        bool isEvolutionOpen = (evolutionChoicePanel != null && evolutionChoicePanel.activeSelf);
+        bool isBlackMarketOpen = (classPickModalPanel != null && classPickModalPanel.activeSelf);
+
+        if (!isEvolutionOpen && !isBlackMarketOpen && !isAutoBattle && GameManager.Instance != null)
+        {
+            GameManager.Instance.RestoreSpeedAfterModal();
+        }
+        else if (!isEvolutionOpen && !isBlackMarketOpen)
+        {
+            Time.timeScale = 1f;
+        }
     }
 }

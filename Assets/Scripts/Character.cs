@@ -36,6 +36,9 @@ public class Character : MonoBehaviour
     [Header("Evolution")]
     public EvolutionPath currentEvolution = EvolutionPath.None;
 
+    [Header("Evolution Indicator")]
+    public TextMeshPro evolutionBadgeText;
+
     private int fighterAttackCount = 0;
     private Transform lastFighterTarget = null;
 
@@ -128,6 +131,13 @@ public class Character : MonoBehaviour
         if (classType == CharacterClassType.Fighter && currentEvolution == EvolutionPath.PathA)
         {
             effectiveCooldown = 1f; 
+        }
+
+        bool isCritical = Random.value < critRate;
+
+        if (classType == CharacterClassType.Ranged && currentEvolution == EvolutionPath.PathB)
+        {
+            isCritical = false;
         }
 
         float currentCooldown = effectiveCooldown / (GlobalAtkSpeedMultiplier * starSpeedMult);
@@ -226,7 +236,11 @@ public class Character : MonoBehaviour
 
         bool isCritical = Random.value < critRate;
 
-        if (classType == CharacterClassType.Ranged && currentEvolution == EvolutionPath.PathA)
+        if (classType == CharacterClassType.Ranged && currentEvolution == EvolutionPath.PathB)
+        {
+            isCritical = false;
+        }
+        else if (classType == CharacterClassType.Ranged && currentEvolution == EvolutionPath.PathA)
         {
             Enemy targetEnemy = target.GetComponent<Enemy>();
             if (targetEnemy != null && (targetEnemy.archetype == EnemyArchetype.Tank || targetEnemy.archetype == EnemyArchetype.Boss))
@@ -387,6 +401,17 @@ public class Character : MonoBehaviour
         {
             if (path == EvolutionPath.PathA) spriteRenderer.color = Color.magenta;
             else if (path == EvolutionPath.PathB) spriteRenderer.color = Color.cyan;
+        }
+
+        if (evolutionBadgeText != null)
+        {
+            evolutionBadgeText.text = (path == EvolutionPath.PathA) ? "[A]" : "[B]";
+            evolutionBadgeText.color = (path == EvolutionPath.PathA) ? Color.magenta : Color.cyan;
+        }
+        else if (starText3D != null)
+        {
+            string badge = (path == EvolutionPath.PathA) ? "A" : "B";
+            starText3D.text = $"{starLevel} ({badge})";
         }
     }
 }
