@@ -22,6 +22,9 @@ public class Character : MonoBehaviour
     [Header("Buff Multipliers (Global)")]
     public static float GlobalDamageBonusPercent = 0f;
     public static float GlobalAtkSpeedMultiplier = 1f;
+    public static float GlobalCritRateBonus = 0f;
+    public static float GlobalCritDmgBonus = 0f;
+    public static float GlobalRangeMultiplier = 1f;
 
     [Header("References")]
     public GameObject projectilePrefab;
@@ -173,7 +176,10 @@ public class Character : MonoBehaviour
 
     Transform PickTargetForClass()
     {
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, attackRange);
+        float maxRangedCap = 10f;
+        float effectiveRange = Mathf.Min(attackRange * GlobalRangeMultiplier, maxRangedCap);
+
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, effectiveRange);
         Transform bestEnemy = null;
 
         if (classType == CharacterClassType.Ranged)
@@ -237,10 +243,19 @@ public class Character : MonoBehaviour
             AudioManager.Instance.PlayClassShootSFX(classType);
         }
 
-        float starDamageMult = starLevel == 1 ? 1f : (starLevel == 2 ? 2.2f : 4.5f);
+        float starDamageMult;
+        if (classType == CharacterClassType.Support)
+        {
+            starDamageMult = starLevel == 1 ? 1f : (starLevel == 2 ? 1.3f : 1.6f);
+        }
+        else
+        {
+            starDamageMult = starLevel == 1 ? 1f : (starLevel == 2 ? 2.2f : 4.5f);
+        }
         float calculatedDamage = baseAttackDamage * starDamageMult * (1f + (GlobalDamageBonusPercent / 100f));
 
-        bool isCritical = Random.value < critRate;
+        float effectiveCritRate = (critRate > 0f) ? (critRate + GlobalCritRateBonus) : 0f;
+        bool isCritical = Random.value < effectiveCritRate;
 
         if (classType == CharacterClassType.Ranged && currentEvolution == EvolutionPath.PathB)
         {
@@ -252,12 +267,12 @@ public class Character : MonoBehaviour
             if (targetEnemy != null && (targetEnemy.archetype == EnemyArchetype.Tank || targetEnemy.archetype == EnemyArchetype.Boss))
             {
                 isCritical = true;
-                calculatedDamage *= (critDamage * 1.5f);
+                calculatedDamage *= ((critDamage + GlobalCritDmgBonus) * 1.5f);
             }
         }
         else if (isCritical)
         {
-            calculatedDamage *= critDamage;
+            calculatedDamage *= (critDamage + GlobalCritDmgBonus);
         }
 
         if (classType == CharacterClassType.Fighter && currentEvolution == EvolutionPath.PathA)
@@ -444,6 +459,15 @@ public class Character : MonoBehaviour
                 shieldObj.AddComponent<BaseShieldBarrier>();
             }
         }
+
+        if (classType == CharacterClassType.Support && path == EvolutionPath.PathB)
+        {
+            if (GetComponent<SupportRouletteBuff>() == null)
+            {
+                gameObject.AddComponent<SupportRouletteBuff>();
+            }
+        }
+        
         if (evolutionBadgeText != null)
         {
             evolutionBadgeText.text = (path == EvolutionPath.PathA) ? "[A]" : "[B]";

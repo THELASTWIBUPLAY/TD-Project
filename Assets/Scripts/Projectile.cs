@@ -199,10 +199,27 @@ public class Projectile : MonoBehaviour
             }
         }
 
-        if (shooterClass == CharacterClassType.Support)
+        if (shooterClass == CharacterClassType.Support && evolution == EvolutionPath.PathA)
         {
-            float slowFactor = (evolution == EvolutionPath.PathA) ? 0.4f : 0.6f;
-            enemy.moveSpeed = Mathf.Max(0.3f, enemy.moveSpeed * slowFactor);
+            float splashRadius = 1.3f;
+
+            GameObject fx = new GameObject("FrostNovaFX");
+            fx.transform.position = transform.position;
+            FrostNovaVisual nova = fx.AddComponent<FrostNovaVisual>();
+            nova.Play(splashRadius, 0.25f); 
+
+            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, splashRadius);
+            foreach (var col in hits)
+            {
+                if (col.CompareTag("Enemy"))
+                {
+                    Enemy nearbyEnemy = col.GetComponent<Enemy>();
+                    if (nearbyEnemy != null)
+                    {
+                        nearbyEnemy.ApplyChilledSlow(0.45f, 2.5f);
+                    }
+                }
+            }
         }
 
         enemy.TakeDamage(dmg, isCrit);
@@ -240,4 +257,5 @@ public class Projectile : MonoBehaviour
         currentDirection = direction.normalized;
         UpdateRotation(currentDirection);
     }
+
 }

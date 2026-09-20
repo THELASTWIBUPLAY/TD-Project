@@ -732,24 +732,24 @@ public class UpgradeManager : MonoBehaviour
         switch (cls)
         {
             case CharacterClassType.Fighter:
-                nameA = "Evolve: Clawslash (Piercing)";
-                nameB = "Evolve: Claw Claw Claw (Triple)";
+                nameA = "Evolve: Piercing Claw ";
+                nameB = "Evolve: Triple Rend ";
                 break;
             case CharacterClassType.Mage:
-                nameA = "Evolve: Ignis Alchemist (Burn DoT)";
-                nameB = "Evolve: Cataclysm Cannon (Nuke AoE)";
+                nameA = "Evolve: Ignis Puddle ";
+                nameB = "Evolve: Heavy Concussion ";
                 break;
             case CharacterClassType.Support:
-                nameA = "Evolve: Absolute Zero (Freeze)";
-                nameB = "Evolve: Permafrost Conduit (Spread)";
+                nameA = "Evolve: Polar Vortex ";
+                nameB = "Evolve: Roulette Fortune ";
                 break;
             case CharacterClassType.Tank:
-                nameA = "Evolve: Ironclad Fortress (Aura Slow)";
-                nameB = "Evolve: Riot Punisher (Shotgun Cone)";
+                nameA = "Evolve: Ironclad Fortress ";
+                nameB = "Evolve: Scatter Blast ";
                 break;
             case CharacterClassType.Ranged:
-                nameA = "Evolve: Headhunter (Crit Boss)";
-                nameB = "Evolve: Execute Protocol (Execute <5%)";
+                nameA = "Evolve: Armor Piercer ";
+                nameB = "Evolve: Headhunter ";
                 break;
         }
 
@@ -789,38 +789,38 @@ public class UpgradeManager : MonoBehaviour
         switch (character.classType)
         {
             case CharacterClassType.Fighter:
-                titleA = "Path A: Clawslash";
-                descA = "Jangkauan cakar tak terbatas, menembus musuh (-10% DMG/hit).";
-                titleB = "Path B: Claw Claw Claw";
-                descB = "Setiap serangan ke-4 meluncurkan 3 cakaran beruntun.";
+                titleA = "Path A: Piercing Claw";
+                descA = "Serangan cakar menembus hingga 4 musuh sekaligus secara lurus (-10% DMG/hit).";
+                titleB = "Path B: Triple Rend";
+                descB = "Setiap serangan ke-4 meluncurkan 3 cakaran beruntun secara instan.";
                 break;
 
             case CharacterClassType.Mage:
-                titleA = "Path A: Ignis Alchemist";
-                descA = "Ledakan meninggalkan kubangan api DoT yang membakar musuh.";
-                titleB = "Path B: Cataclysm Cannon";
-                descB = "ASPD lambat, radius ledakan masif + knockback kuat.";
+                titleA = "Path A: Ignis Puddle";
+                descA = "Ledakan meninggalkan kubangan api selama 4 detik yang membakar musuh (35% DPS).";
+                titleB = "Path B: Heavy Concussion";
+                descB = "Jeda tembak lebih lambat, radius ledakan masif + knockback kuat (3.5f).";
                 break;
 
             case CharacterClassType.Support:
-                titleA = "Path A: Absolute Zero";
-                descA = "Slow menumpuk hingga 8x; tumpukan penuh membekukan musuh 0,8 detik.";
-                titleB = "Path B: Permafrost Conduit";
-                descB = "Musuh slow yang gugur menyebarkan efek slow ke musuh terdekat.";
+                titleA = "Path A: Polar Vortex";
+                descA = "Ledakan es memperlambat musuh 45% (2.5s) dan memberi status Chilled (+15% DMG tim).";
+                titleB = "Path B: Roulette Fortune";
+                descB = "Tiap 60s memutar 1 buff tim acak selama 20s (ASPD, Crit Rate, Crit DMG, ATK, atau Range x1.5).";
                 break;
 
             case CharacterClassType.Tank:
                 titleA = "Path A: Ironclad Fortress";
-                descA = "Area depan base menjadi zona AoE yang melambatkan & mendamage musuh.";
-                titleB = "Path B: Riot Punisher";
-                descB = "Tembakan shotgun cone jarak dekat dengan knockback masif.";
+                descA = "Berhenti menyerang untuk memanggil perisai base (Aegis) penahan 1 serangan (cooldown 60s).";
+                titleB = "Path B: Scatter Blast";
+                descB = "Tembakan shotgun cone 3 arah jarak dekat dengan efek knockback memukul mundur musuh.";
                 break;
 
             case CharacterClassType.Ranged:
-                titleA = "Path A: Headhunter";
-                descA = "Bonus Critical Damage masif khusus ke musuh Tank dan Boss.";
-                titleB = "Path B: Execute Protocol";
-                descB = "Langsung melenyapkan musuh non-Boss berdarah sekarat (<5%).";
+                titleA = "Path A: Armor Piercer";
+                descA = "Serangan terhadap musuh tipe Tank dan Boss selalu menghasilkan Critical Damage ekstra tinggi.";
+                titleB = "Path B: Headhunter";
+                descB = "Tidak bisa crit, namun langsung mengeksekusi musuh non-Boss saat HP berada di bawah 10%.";
                 break;
         }
 
