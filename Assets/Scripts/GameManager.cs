@@ -50,6 +50,9 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI gameWinKillsText;
     public TextMeshProUGUI gameWinHighscoreText;
 
+    [Header("UI Dependencies")]
+    [SerializeField] private CanvasGroup _confirmPanel;
+
 
     public int totalEnemiesKilled = 0;
 
@@ -147,9 +150,23 @@ public class GameManager : MonoBehaviour
 
     public void QuitGame()
     {
+        _confirmPanel.alpha = 1;
+        _confirmPanel.interactable = true;
+        _confirmPanel.blocksRaycasts = true;
+    }
+
+    public void OnQuitYes()
+    {
         Time.timeScale = 1f;
-        Application.Quit();
-        Debug.Log("Quit Game dipanggil!");
+        SceneManager.LoadScene("MainMenu");
+        Debug.Log("Quit Game dipanggil! Kembali ke Main Menu.");
+    }
+
+    public void OnQuitNo()
+    {
+        _confirmPanel.alpha = 0;
+        _confirmPanel.interactable = false;
+        _confirmPanel.blocksRaycasts = false;
     }
 
 
