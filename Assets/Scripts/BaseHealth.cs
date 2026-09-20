@@ -26,6 +26,12 @@ public class BaseHealth : MonoBehaviour
     {
         if (isGameOverTriggered) return;
 
+        if (BaseShieldBarrier.Instance != null && BaseShieldBarrier.Instance.TryAbsorbHit())
+        {
+            Debug.Log($"[BaseHealth] {damage} damage berhasil ditangkis 100% oleh perisai Tank!");
+            return; 
+        }
+
         currentHealth -= damage;
         currentHealth = Mathf.Max(0, currentHealth);
         UpdateUI();

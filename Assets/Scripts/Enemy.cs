@@ -288,4 +288,27 @@ public class Enemy : MonoBehaviour
             spriteRenderer.color = originalColor;
         }
     }
+
+    public void ApplyKnockback(float force, float duration = 0.15f)
+    {
+        if (isDead) return;
+
+        if (archetype == EnemyArchetype.Boss)
+        {
+            force *= 0.15f; 
+        }
+
+        StartCoroutine(KnockbackRoutine(force, duration));
+    }
+
+    private IEnumerator KnockbackRoutine(float force, float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            transform.position += Vector3.up * force * Time.deltaTime;
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+    }
 }

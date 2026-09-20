@@ -130,10 +130,13 @@ public class Character : MonoBehaviour
 
         if (classType == CharacterClassType.Fighter && currentEvolution == EvolutionPath.PathA)
         {
-            effectiveCooldown = 1.5f; 
+            effectiveCooldown = 1f; 
         }
-
         else if (classType == CharacterClassType.Mage && currentEvolution == EvolutionPath.PathB)
+        {
+            effectiveCooldown = 2.0f;
+        }
+        else if (classType == CharacterClassType.Tank && currentEvolution == EvolutionPath.PathB)
         {
             effectiveCooldown = 3.0f; 
         }
@@ -210,6 +213,11 @@ public class Character : MonoBehaviour
 
     void Shoot(Transform target)
     {
+        if (classType == CharacterClassType.Tank && currentEvolution == EvolutionPath.PathA)
+        {
+            return; 
+        }
+
         if (target == null || projectilePrefab == null) return;
 
         if (classType == CharacterClassType.Fighter)
@@ -325,7 +333,10 @@ public class Character : MonoBehaviour
 
     void SpawnShotgunCone(Transform target, float dmg, bool isCritical)
     {
-        float[] angles = { -15f, 0f, 15f };
+        if (target == null) return;
+
+        Vector2 baseDir = (target.position - transform.position).normalized;
+        float[] angles = { -22f, 0f, 22f };
 
         foreach (float ang in angles)
         {
@@ -333,11 +344,15 @@ public class Character : MonoBehaviour
             Projectile p = projGO.GetComponent<Projectile>();
             if (p != null)
             {
-                p.damage = dmg * 0.7f;
+                p.damage = dmg * 0.45f;
                 p.isCrit = isCritical;
                 p.shooterClass = classType;
                 p.evolution = currentEvolution;
-                p.Setup(target, false);
+
+                Quaternion rot = Quaternion.Euler(0, 0, ang);
+                Vector2 spreadDir = rot * baseDir;
+
+                p.SetupDirection(spreadDir);
             }
         }
     }
@@ -412,6 +427,23 @@ public class Character : MonoBehaviour
             else if (path == EvolutionPath.PathB) spriteRenderer.color = Color.cyan;
         }
 
+        if (classType == CharacterClassType.Tank && path == EvolutionPath.PathA)
+        {
+            if (FindFirstObjectByType<BaseShieldBarrier>() == null)
+            {
+                GameObject shieldObj = new GameObject("Base_Shield_Barrier");
+
+                float shieldY = -1f;
+                GameObject baseLine = GameObject.Find("BaseLine");
+                if (baseLine != null)
+                {
+                    shieldY = baseLine.transform.position.y + 0.35f;
+                }
+
+                shieldObj.transform.position = new Vector3(0f, shieldY, 0f);
+                shieldObj.AddComponent<BaseShieldBarrier>();
+            }
+        }
         if (evolutionBadgeText != null)
         {
             evolutionBadgeText.text = (path == EvolutionPath.PathA) ? "[A]" : "[B]";

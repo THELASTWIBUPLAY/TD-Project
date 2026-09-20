@@ -176,6 +176,18 @@ public class Projectile : MonoBehaviour
 
     void ApplyHitEffects(Enemy enemy, float dmg)
     {
+        if (enemy == null) return;
+
+        if (shooterClass == CharacterClassType.Tank && evolution == EvolutionPath.PathB)
+        {
+            enemy.ApplyKnockback(2.5f, 0.08f); 
+        }
+
+        if (shooterClass == CharacterClassType.Mage && evolution == EvolutionPath.PathB)
+        {
+            enemy.ApplyKnockback(3.5f, 0.1f);
+        }
+
         if (shooterClass == CharacterClassType.Ranged && evolution == EvolutionPath.PathB)
         {
             if (enemy.archetype != EnemyArchetype.Boss)
@@ -220,5 +232,12 @@ public class Projectile : MonoBehaviour
     private void OnBecameInvisible()
     {
         Destroy(gameObject);
+    }
+
+    public void SetupDirection(Vector2 direction)
+    {
+        targetEnemy = null; 
+        currentDirection = direction.normalized;
+        UpdateRotation(currentDirection);
     }
 }

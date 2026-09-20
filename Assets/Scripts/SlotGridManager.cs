@@ -171,4 +171,58 @@ public class SlotGridManager : MonoBehaviour
             UpgradeManager.Instance.TriggerInstantEvolutionChoice(charTarget);
         }
     }
+
+    void Update()
+    {
+        #if UNITY_EDITOR
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            DebugPromoteCenterToStar3();
+        }
+        #endif
+    }
+
+    [ContextMenu("Debug: Set Center to Star 3 & Evolve")]
+    public void DebugPromoteCenterToStar3()
+    {
+        CharacterSlot targetSlot = null;
+
+        int centerIndex = allSlots.Count / 2;
+        if (allSlots.Count > centerIndex && allSlots[centerIndex].isOccupied && allSlots[centerIndex].currentCharacter != null)
+        {
+            targetSlot = allSlots[centerIndex];
+        }
+        else
+        {
+            foreach (var slot in allSlots)
+            {
+                if (slot != null && slot.isOccupied && slot.currentCharacter != null)
+                {
+                    targetSlot = slot;
+                    break;
+                }
+            }
+        }
+
+        if (targetSlot != null && targetSlot.currentCharacter != null)
+        {
+            Character targetChar = targetSlot.currentCharacter;
+
+            // 
+            targetChar.SetStarLevel(3);
+            targetChar.ApplyClassStats();
+            targetChar.PlayMergeCelebration();
+
+            Debug.Log($"[DEBUG] Unit {targetChar.classType} berhasil dinaikkan ke Bintang 3 instan!");
+
+            if (UpgradeManager.Instance != null)
+            {
+                UpgradeManager.Instance.TriggerInstantEvolutionChoice(targetChar);
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[DEBUG] Tidak ada karakter yang ditemukan di grid untuk dinaikkan ke Bintang 3!");
+        }
+    }
 }
