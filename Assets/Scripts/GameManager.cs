@@ -58,6 +58,8 @@ public class GameManager : MonoBehaviour
     {
         Instance = this;
         Projectile.GlobalRicochetUnlocked = false;
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = 60;
     }
 
 
