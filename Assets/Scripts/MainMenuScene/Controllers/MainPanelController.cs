@@ -18,14 +18,6 @@ public class MainPanelController : MonoBehaviour
             MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.LevelSelectorPanel, true);
         }
     }
-    public void OnLoadButtonClicked()
-    {
-        if (MainMenuManager.Instance != null)
-        {
-            MainMenuManager.Instance.TogglePanel(_myPanel, false);
-            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.LoadPanel, true);
-        }
-    }
 
     public void OnSettingsButtonClicked()
     {
