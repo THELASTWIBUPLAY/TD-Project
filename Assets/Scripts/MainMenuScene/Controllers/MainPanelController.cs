@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class MainPanelController : MonoBehaviour
 {
+    [SerializeField] private CreditsPanelController _creditsPanelController;
     private CanvasGroup _myPanel;
 
     private void Awake()
@@ -41,6 +42,7 @@ public class MainPanelController : MonoBehaviour
         {
             MainMenuManager.Instance.TogglePanel(_myPanel, false);
             MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.CreditsPanel, true);
+            _creditsPanelController.StartScroll();
         }
     }
 

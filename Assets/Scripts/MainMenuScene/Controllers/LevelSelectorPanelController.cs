@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 [RequireComponent(typeof(CanvasGroup))]
 public class LevelSelectorController : MonoBehaviour
