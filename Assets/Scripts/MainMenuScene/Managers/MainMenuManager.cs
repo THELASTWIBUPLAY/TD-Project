@@ -43,6 +43,7 @@ public class MainMenuManager : MonoBehaviour
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
+            return;
         }
         Instance = this;
     }
