@@ -7,6 +7,10 @@ public class Projectile : MonoBehaviour
     public float damage = 10f;
     public float lifetime = 4f;
 
+    [Header("5-Step Acceleration Config")]
+    public float[] speedSteps = { 8f, 14f, 20f, 26f, 32f };
+    public float stepDuration = 0.12f;
+
     [Header("Critical & Class")]
     public bool isCrit = false;
     public CharacterClassType shooterClass = CharacterClassType.Fighter;
@@ -18,7 +22,7 @@ public class Projectile : MonoBehaviour
 
     [Header("Soft Homing Config")]
     public float turnSpeed = 280f; 
-    public float leadPredictionTime = 0.25f;
+    public float leadPredictionTime = 0.15f;
 
     [Header("Ricochet Mechanic")]
     public static bool GlobalRicochetUnlocked = false;
@@ -36,13 +40,36 @@ public class Projectile : MonoBehaviour
     private Rigidbody2D targetRb;
     private Vector2 currentDirection = Vector2.up;
 
+    private float currentSpeed;
+    private float timeAlive = 0f;
+
+    // --- REFERENSI TRAIL RENDERER ---
+    private TrailRenderer trailRenderer;
+
+    // --- HIGH-SPEED TUNNELING PREVENTION (2x+) ---
+    private Vector3 lastPosition;
+    private bool hasHitProcessed = false;
+
+    void Awake()
+    {
+        trailRenderer = GetComponent<TrailRenderer>();
+    }
+
     public void Setup(Transform target, bool isAreaDamage = false, float splashRadius = 1.5f)
     {
         targetEnemy = target;
         isAoE = isAreaDamage;
         aoeRadius = splashRadius;
-
         ricochetRemaining = 0;
+        hasHitProcessed = false;
+
+        timeAlive = 0f;
+        ResetTrail();
+
+        if (speedSteps != null && speedSteps.Length > 0)
+        {
+            currentSpeed = speedSteps[0];
+        }
 
         if (GlobalRicochetUnlocked && shooterClass == CharacterClassType.Fighter && !isAoE)
         {
@@ -55,22 +82,45 @@ public class Projectile : MonoBehaviour
             currentDirection = (targetEnemy.position - transform.position).normalized;
             UpdateRotation(currentDirection);
         }
+
+        lastPosition = transform.position;
+    }
+
+    public void ResetTrail()
+    {
+        if (trailRenderer != null)
+        {
+            trailRenderer.Clear();
+        }
     }
 
     void Start()
     {
+        lastPosition = transform.position;
         Destroy(gameObject, lifetime);
     }
 
     void Update()
     {
+        timeAlive += Time.deltaTime;
+
+        // 1. Calculate 5-Step Speed
+        if (speedSteps != null && speedSteps.Length > 0)
+        {
+            int currentStepIndex = Mathf.FloorToInt(timeAlive / stepDuration);
+            currentStepIndex = Mathf.Clamp(currentStepIndex, 0, speedSteps.Length - 1);
+            currentSpeed = speedSteps[currentStepIndex];
+        }
+
+        // 2. Soft Homing Logic
         if (!isPiercing && targetEnemy != null)
         {
             Vector3 predictedTargetPos = targetEnemy.position;
 
             if (targetRb != null)
             {
-                predictedTargetPos += (Vector3)(targetRb.linearVelocity * leadPredictionTime);
+                Vector2 vel = targetRb.linearVelocity; 
+                predictedTargetPos += (Vector3)(vel * leadPredictionTime);
             }
             else
             {
@@ -85,7 +135,29 @@ public class Projectile : MonoBehaviour
             UpdateRotation(currentDirection);
         }
 
-        transform.position += (Vector3)(currentDirection * speed * Time.deltaTime);
+        // 3. Movement Execution
+        Vector3 moveDelta = (Vector3)(currentDirection * currentSpeed * Time.deltaTime);
+        transform.position += moveDelta;
+
+        // 4. Continuous Linecast Sweep (Anti-Tunneling untuk 2x+ Speed)
+        if (!hasHitProcessed)
+        {
+            Vector3 currentPos = transform.position;
+            float dist = Vector3.Distance(lastPosition, currentPos);
+            if (dist > 0.001f)
+            {
+                RaycastHit2D[] hits = Physics2D.LinecastAll(lastPosition, currentPos);
+                foreach (var hit in hits)
+                {
+                    if (hit.collider != null && hit.collider.CompareTag("Enemy"))
+                    {
+                        ProcessEnemyHit(hit.collider);
+                        break;
+                    }
+                }
+            }
+            lastPosition = currentPos;
+        }
     }
 
     void UpdateRotation(Vector2 dir)
@@ -96,82 +168,94 @@ public class Projectile : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Enemy"))
+        if (!hasHitProcessed && collision.CompareTag("Enemy"))
         {
-            Enemy enemy = collision.GetComponent<Enemy>();
+            ProcessEnemyHit(collision);
+        }
+    }
 
-            if (isAoE)
+    private void ProcessEnemyHit(Collider2D collision)
+    {
+        if (hasHitProcessed) return;
+
+        Enemy enemy = collision.GetComponent<Enemy>();
+
+        if (isAoE)
+        {
+            hasHitProcessed = true;
+            if (AudioManager.Instance != null)
             {
-                if (AudioManager.Instance != null)
+                AudioManager.Instance.PlayClassShootSFX(CharacterClassType.Mage);
+            }
+
+            ExplosionEffect.Create(transform.position, aoeRadius);
+
+            if (shooterClass == CharacterClassType.Mage && evolution == EvolutionPath.PathA)
+            {
+                GameObject puddleObj = new GameObject("Ignis_BurnPuddle");
+                puddleObj.transform.position = transform.position;
+
+                BurnPuddle bp = puddleObj.AddComponent<BurnPuddle>();
+                bp.radius = aoeRadius;
+                bp.dpsDamage = damage * 0.35f; 
+                bp.duration = 4.0f;            
+            }
+
+            Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(transform.position, aoeRadius);
+            foreach (Collider2D col in hitEnemies)
+            {
+                if (col.CompareTag("Enemy"))
                 {
-                    AudioManager.Instance.PlayClassShootSFX(CharacterClassType.Mage);
-                }
-
-                ExplosionEffect.Create(transform.position, aoeRadius);
-
-                if (shooterClass == CharacterClassType.Mage && evolution == EvolutionPath.PathA)
-                {
-                    GameObject puddleObj = new GameObject("Ignis_BurnPuddle");
-                    puddleObj.transform.position = transform.position;
-
-                    BurnPuddle bp = puddleObj.AddComponent<BurnPuddle>();
-                    bp.radius = aoeRadius;
-                    bp.dpsDamage = damage * 0.35f; 
-                    bp.duration = 4.0f;            
-                }
-
-                Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(transform.position, aoeRadius);
-                foreach (Collider2D col in hitEnemies)
-                {
-                    if (col.CompareTag("Enemy"))
+                    Enemy e = col.GetComponent<Enemy>();
+                    if (e != null)
                     {
-                        Enemy e = col.GetComponent<Enemy>();
-                        if (e != null)
-                        {
-                            ApplyHitEffects(e, damage);
-                        }
+                        ApplyHitEffects(e, damage);
                     }
-                }
-
-                Destroy(gameObject);
-                return;
-            }
-
-            if (isPiercing)
-            {
-                if (enemy != null)
-                {
-                    ApplyHitEffects(enemy, damage);
-                    damage *= 0.90f;
-                    pierceCount++;
-                    if (pierceCount >= 4) Destroy(gameObject);
-                }
-                return;
-            }
-
-            if (enemy != null)
-            {
-                ApplyHitEffects(enemy, damage);
-            }
-
-            if (ricochetRemaining > 0)
-            {
-                ricochetRemaining--;
-                lastHitTarget = collision.transform;
-                Transform nextTarget = FindNextBounceTarget();
-
-                if (nextTarget != null)
-                {
-                    targetEnemy = nextTarget;
-                    targetRb = targetEnemy.GetComponent<Rigidbody2D>();
-                    currentDirection = (targetEnemy.position - transform.position).normalized;
-                    damage *= 0.60f;
-                    return;
                 }
             }
 
             Destroy(gameObject);
+            return;
         }
+
+        if (isPiercing)
+        {
+            if (enemy != null)
+            {
+                ApplyHitEffects(enemy, damage);
+                damage *= 0.90f;
+                pierceCount++;
+                lastPosition = transform.position; 
+                if (pierceCount >= 4) Destroy(gameObject);
+            }
+            return;
+        }
+
+        if (enemy != null)
+        {
+            ApplyHitEffects(enemy, damage);
+        }
+
+        if (ricochetRemaining > 0)
+        {
+            ricochetRemaining--;
+            lastHitTarget = collision.transform;
+            Transform nextTarget = FindNextBounceTarget();
+
+            if (nextTarget != null)
+            {
+                targetEnemy = nextTarget;
+                targetRb = targetEnemy.GetComponent<Rigidbody2D>();
+                currentDirection = (targetEnemy.position - transform.position).normalized;
+                damage *= 0.60f;
+                ResetTrail(); 
+                lastPosition = transform.position; 
+                return;
+            }
+        }
+
+        hasHitProcessed = true;
+        Destroy(gameObject);
     }
 
     void ApplyHitEffects(Enemy enemy, float dmg)
@@ -256,6 +340,7 @@ public class Projectile : MonoBehaviour
         targetEnemy = null; 
         currentDirection = direction.normalized;
         UpdateRotation(currentDirection);
+        ResetTrail();
+        lastPosition = transform.position;
     }
-
 }

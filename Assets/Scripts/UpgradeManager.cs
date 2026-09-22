@@ -22,7 +22,7 @@ public class UpgradeManager : MonoBehaviour
     [Header("Evolution Modal UI")]
     public GameObject evolutionChoicePanel;
     public CardUI cardPathA;
-    public CardUI cardPathB;
+    public CardUI cardPathB; 
 
     [Header("Black Market UI")]
     public GameObject classPickModalPanel;
@@ -33,6 +33,17 @@ public class UpgradeManager : MonoBehaviour
 
     [Header("Debug & Ban System")]
     public List<CharacterClassType> bannedClasses = new List<CharacterClassType>();
+
+    [Header("Card UI Setup")]
+    public GameObject cardPrefab; // <-- Drag prefab card kamu ke sini di Inspector!
+    public Transform cardContainer; // <-- Tempat spawn card (bisa ke CardChoicePanel atau anak layout-nya)
+
+    [Header("Dynamic Card Spawn")]     // Masukkan Prefab UpgradeCardUI
+    public Transform cardSpawnParent;    // Tempat kartu di-spawn (opsional)
+
+    private List<GameObject> spawnedCards = new List<GameObject>(); // <-- Pastikan ini ada!
+
+    private List<GameObject> activeSpawnedCards = new List<GameObject>();
 
     public static bool HasThornsPlating = false;
     public static bool HasArcaneOvercharge = false;
@@ -142,46 +153,6 @@ public class UpgradeManager : MonoBehaviour
             mobValues = new float[] { 15f }
         });
 
-        // cardPool.Add(new UpgradeCard
-        // {
-        //     cardName = "Glass Cannon Core",
-        //     buffType = BuffType.GlassCannonCore,
-        //     playerValues = new float[] { 35f },
-        //     mobValues = new float[] { 25f }
-        // });
-
-        // cardPool.Add(new UpgradeCard
-        // {
-        //     cardName = "Deep Freeze",
-        //     buffType = BuffType.DeepFreeze,
-        //     playerValues = new float[] { 10f },
-        //     mobValues = new float[] { 2f }
-        // });
-
-        // cardPool.Add(new UpgradeCard
-        // {
-        //     cardName = "Heavy Caliber",
-        //     buffType = BuffType.HeavyCaliber,
-        //     playerValues = new float[] { 25f },
-        //     mobValues = new float[] { 1.0f }
-        // });
-
-        // cardPool.Add(new UpgradeCard
-        // {
-        //     cardName = "Thorns Plating",
-        //     buffType = BuffType.ThornsPlating,
-        //     playerValues = new float[] { 1f },
-        //     mobValues = new float[] { 25f }
-        // });
-
-        // cardPool.Add(new UpgradeCard
-        // {
-        //     cardName = "Arcane Overcharge",
-        //     buffType = BuffType.ArcaneOvercharge,
-        //     playerValues = new float[] { 15f },
-        //     mobValues = new float[] { 1.0f }
-        // });
-
         cardPool.Add(new UpgradeCard
         {
             cardName = "Black Market Deal",
@@ -252,7 +223,6 @@ public class UpgradeManager : MonoBehaviour
 
         for (int i = 0; i < countToPick; i++)
         {
-
             float totalWeight = 0f;
             foreach (var card in available)
             {
@@ -284,15 +254,26 @@ public class UpgradeManager : MonoBehaviour
         }
 
         Time.timeScale = 0f;
-        cardChoicePanel.SetActive(true);
+        if (cardChoicePanel != null) cardChoicePanel.SetActive(true);
 
-        for (int i = 0; i < cardButtons.Length; i++)
+        // Hapus spawn kartu lama jika ada
+        foreach (var obj in spawnedCards)
         {
-            if (i < currentOptions.Count)
-            {
-                cardButtons[i].gameObject.SetActive(true);
-                UpgradeCard c = currentOptions[i];
+            if (obj != null) Destroy(obj);
+        }
+        spawnedCards.Clear();
 
+        // Tentukan parent tempat kartu muncul (default ke cardChoicePanel atau transform anak "Card")
+        Transform parentToUse = cardSpawnParent != null ? cardSpawnParent : cardChoicePanel.transform;
+
+        for (int i = 0; i < currentOptions.Count; i++)
+        {
+            if (cardPrefab != null)
+            {
+                GameObject cardObj = Instantiate(cardPrefab, parentToUse);
+                spawnedCards.Add(cardObj);
+
+                UpgradeCard c = currentOptions[i];
                 string displayTitle = "";
                 string displayDesc = "";
 
@@ -308,11 +289,11 @@ public class UpgradeManager : MonoBehaviour
                 }
                 else
                 {
-                    int nextLv = c.currentLevel + 1;
                     float nextVal = c.GetNextPlayerValue();
                     float nextMob = c.GetNextMobValue();
 
-                    displayTitle = $"{c.cardName} (Lv.{nextLv})";
+                    // Judul bersih tanpa info level (Lv.X dihapus)
+                    displayTitle = c.cardName;
 
                     string playerStatLabel = "";
                     string mobStatLabel = "";
@@ -320,92 +301,85 @@ public class UpgradeManager : MonoBehaviour
                     switch (c.buffType)
                     {
                         case BuffType.BoostAttack:
-                            playerStatLabel = $"Damage Karakter +{nextVal}%";
+                            playerStatLabel = $"DMG Karakter +{nextVal}%";
                             mobStatLabel = $"HP Musuh +{nextMob}%";
                             break;
-
                         case BuffType.BoostAttackSpeed:
-                            playerStatLabel = $"Attack Speed +{nextVal}%";
+                            playerStatLabel = $"ASPD +{nextVal}%";
                             mobStatLabel = $"Spawn Musuh +{nextMob}% lebih cepat";
                             break;
-
                         case BuffType.SlowMob:
-                            playerStatLabel = $"Gerakan Musuh -{nextVal}% (Slow)";
+                            playerStatLabel = $"Slow Musuh -{nextVal}%";
                             mobStatLabel = $"HP Musuh +{nextMob}%";
                             break;
-
                         case BuffType.ExpGain:
                             playerStatLabel = $"Bonus EXP +{nextVal}%";
-                            mobStatLabel = $"Damage Musuh ke Base +{nextMob}%";
+                            mobStatLabel = $"DMG Musuh ke Base +{nextMob}%";
                             break;
-
                         case BuffType.EmergencyRepair:
-                            playerStatLabel = $"Pulihkan HP Base Sebanyak +{nextVal}";
-                            mobStatLabel = $"Damage Musuh ke Base +{nextMob}%";
+                            playerStatLabel = $"Heal Base +{nextVal}";
+                            mobStatLabel = $"DMG Musuh ke Base +{nextMob}%";
                             break;
-
                         case BuffType.FortifiedBastion:
-                            playerStatLabel = $"Max HP Base +{nextVal} & Heal Seketika";
-                            mobStatLabel = $"HP Musuh +{nextMob}%, Spawn +10% saat base kena hit";
+                            playerStatLabel = $"Max HP Base +{nextVal} & Heal";
+                            mobStatLabel = $"HP Musuh +{nextMob}%";
                             break;
-
                         case BuffType.TrickshotFighter:
-                            playerStatLabel = "Proyektil Fighter Memantul (Hit ke-2 -40%)";
-                            mobStatLabel = $"Kecepatan Musuh +{nextMob}%, 15% Miss Chance";
+                            playerStatLabel = "Ricochet Fighter (Hit ke-2 -40%)";
+                            mobStatLabel = $"Kecepatan Musuh +{nextMob}%";
                             break;
-
                         case BuffType.GlassCannonCore:
-                            playerStatLabel = $"Fighter & Mage ATK +{nextVal}%, Ranged ATK +15%";
-                            mobStatLabel = "Base HP -25%, Efisiensi Repair -25%";
+                            playerStatLabel = $"Fighter/Mage ATK +{nextVal}%";
+                            mobStatLabel = "Base HP -25%";
                             break;
-
                         case BuffType.DeepFreeze:
-                            playerStatLabel = $"Slow Support +{nextVal}%, Durasi 2x Lipat";
-                            mobStatLabel = "Boss punya peluang kebal efek Slow";
+                            playerStatLabel = $"Slow Support +{nextVal}% (2x Durasi)";
+                            mobStatLabel = "Boss kebal slow pelan";
                             break;
-
                         case BuffType.HeavyCaliber:
-                            playerStatLabel = $"Ranged tembus armor, DMG Boss/Tank +{nextVal}%";
-                            mobStatLabel = "Jeda tembak Ranged +1.0s (berkurang per Ranged di grid)";
+                            playerStatLabel = $"Ranged Tembus Armor +{nextVal}%";
+                            mobStatLabel = "Jeda tembak Ranged +1.0s";
                             break;
-
                         case BuffType.ThornsPlating:
-                            playerStatLabel = "Shockwave Damage saat musuh nabrak base (5-50%)";
-                            mobStatLabel = "Repair -25%, Setiap shockwave kurangi 1% Max Base HP";
+                            playerStatLabel = "Shockwave Base Damager";
+                            mobStatLabel = "Repair -25%";
                             break;
-
                         case BuffType.ArcaneOvercharge:
-                            playerStatLabel = $"AoE Damage Mage +{nextVal}% (Sinergi Evolusi)";
+                            playerStatLabel = $"AoE Damage Mage +{nextVal}%";
                             mobStatLabel = "Jeda tembak Mage +1.0s";
                             break;
-
                         case BuffType.BlackMarketDeal:
                             displayTitle = "Black Market Deal";
-                            playerStatLabel = "Dapatkan 2 Tiket Deploy Instan";
-                            mobStatLabel = "Peluang spawn Mini-Tank ekstra tiap wave";
+                            playerStatLabel = "2 Tiket Deploy Instan";
+                            mobStatLabel = "Ekstra peluang Mini-Tank";
                             break;
-
                         case BuffType.DesperateGambit:
-                            playerStatLabel = $"Jika HP Base < 30%: ASPD +{nextVal}%, ATK +15%";
-                            mobStatLabel = "Jika musuh nabrak base, damage diterima x2 lipat";
+                            playerStatLabel = $"HP <30%: ASPD +{nextVal}%, ATK +15%";
+                            mobStatLabel = "Musuh tabrak base DMG x2";
+                            break;
+                        default:
+                            playerStatLabel = $"Efek +{nextVal}";
+                            mobStatLabel = $"Mob +{nextMob}";
                             break;
                     }
 
-                    displayDesc = $"[Efek]: {playerStatLabel}\n[Musuh]: {mobStatLabel}";
+                    // Digabung jadi 1 baris panjang dengan pemisah " | "
+                    displayDesc = $"{playerStatLabel} | {mobStatLabel}";
                 }
 
-                cardButtons[i].Setup(displayTitle, displayDesc, i);
-            }
-            else
-            {
-                cardButtons[i].gameObject.SetActive(false);
+                CardUI cardUI = cardObj.GetComponent<CardUI>();
+                if (cardUI != null)
+                {
+                    int cardIndex = i;
+                    int requiredStars = c.currentLevel + 1; // Contoh: butuh bintang sesuai level berikutnya
+                    cardUI.SetupCard(displayTitle, displayDesc, null, requiredStars, () => ApplyUpgradeByIndex(cardIndex));
+                }
             }
         }
     }
 
     private float GetCardWeight(UpgradeCard card)
     {
-
         bool isSingleUse = (card.playerValues != null && card.playerValues.Length == 1) ||
                            card.buffType == BuffType.Ricochet ||
                            card.buffType == BuffType.Overdrive ||
@@ -419,9 +393,7 @@ public class UpgradeManager : MonoBehaviour
                            card.buffType == BuffType.DesperateGambit;
 
         if (isSingleUse)
-
         {
-
             return 15f;
         }
 
@@ -717,7 +689,6 @@ public class UpgradeManager : MonoBehaviour
 
     public void UnlockEvolutionCards(CharacterClassType cls)
     {
-
         foreach (var c in cardPool)
         {
             if (c.targetClassType == cls && (c.buffType == BuffType.EvolvePathA || c.buffType == BuffType.EvolvePathB))
@@ -824,8 +795,8 @@ public class UpgradeManager : MonoBehaviour
                 break;
         }
 
-        if (cardPathA != null) cardPathA.Setup(titleA, descA, 0);
-        if (cardPathB != null) cardPathB.Setup(titleB, descB, 1);
+        if (cardPathA != null) cardPathA.SetupCard(titleA, descA, null, 1, () => SelectEvolutionByIndex(0));
+        if (cardPathB != null) cardPathB.SetupCard(titleB, descB, null, 1, () => SelectEvolutionByIndex(1));
 
         Time.timeScale = 0f;
     }
@@ -941,7 +912,7 @@ public class UpgradeManager : MonoBehaviour
         Debug.Log($"[Black Market] Dimulai! Sisa tiket: {remainingPicks}");
     }
 
-   public void OnClassPickSelected(int classIndex)
+    public void OnClassPickSelected(int classIndex)
     {
         if (!isPickingClass || remainingPicks <= 0) return;
 
