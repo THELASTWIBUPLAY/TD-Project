@@ -21,12 +21,14 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private CanvasGroup _loadPanel;
     [SerializeField] private CanvasGroup _settingPanel;
     [SerializeField] private CanvasGroup _creditsPanel;
+    [SerializeField] private CanvasGroup _shopPanel;
 
     public CanvasGroup MainPanel => _mainPanel;
     public CanvasGroup LevelSelectorPanel => _levelSelectorPanel;
     public CanvasGroup LoadPanel => _loadPanel;
     public CanvasGroup SettingsPanel => _settingPanel;
     public CanvasGroup CreditsPanel => _creditsPanel;
+    public CanvasGroup ShopPanel => _shopPanel;
 
     // UI Dependencies
     [Header("UI Dependencies")]

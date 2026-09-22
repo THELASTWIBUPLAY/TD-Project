@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Unity.VisualScripting;
 
 public class PlayTimeRewardUI : MonoBehaviour
 {
@@ -14,7 +15,7 @@ public class PlayTimeRewardUI : MonoBehaviour
 
     private void OnEnable()
     {
-        _controller.OnRewardClaimed += HandleRewardReady;
+        _controller.OnRewardReady += HandleRewardReady;
         _controller.OnRewardClaimed += HandleRewardClaimed;
 
         _claimBtn.onClick.AddListener(_controller.ClaimReward);
@@ -22,10 +23,15 @@ public class PlayTimeRewardUI : MonoBehaviour
 
     private void OnDisable()
     {
-        _controller.OnRewardClaimed -= HandleRewardReady;
+        _controller.OnRewardReady -= HandleRewardReady;
         _controller.OnRewardClaimed -= HandleRewardClaimed;
 
         _claimBtn.onClick.RemoveListener(_controller.ClaimReward);
+    }
+
+    private void Start()
+    {
+        RefreshUIState();
     }
 
     private void Update()

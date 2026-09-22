@@ -13,7 +13,6 @@ public class PlayTimeRewardController : MonoBehaviour
     [Tooltip("Reward duration in seconds. Default 30 Minutes = 1800 seconds.")]
     [SerializeField] private float _claimInterval = 1800f; // In seconds
     [SerializeField] private int _baseGoldReward = 100;
-    [SerializeField] private int _baseDiamondReward = 0;
 
     // Events
     public event Action OnRewardReady;
@@ -25,13 +24,10 @@ public class PlayTimeRewardController : MonoBehaviour
 
     // UI Access
     public RewardState CurrentState => _currentState;
-    public float RemainingSeconds => MathF.Max(0f, _targetTime - Time.unscaledTime);
+    public float RemainingSeconds => MathF.Max(0f, _targetTime - Time.time);
     public float ProgressNormalized => Mathf.Clamp01(1f - (RemainingSeconds / _claimInterval));
 
     public string SourceName => GetType().Name;
-
-    private float _currentTimer;
-    private bool _isRewarded;
 
     private void Start()
     {
@@ -42,7 +38,7 @@ public class PlayTimeRewardController : MonoBehaviour
     {
         if (_currentState == RewardState.CountingDown)
         {
-            if (Time.unscaledTime >= _targetTime)
+            if (Time.time >= _targetTime)
             {
                 SetReadyToClaim();
             }
@@ -51,7 +47,7 @@ public class PlayTimeRewardController : MonoBehaviour
 
     private void StartNewCycle()
     {
-        _targetTime = Time.unscaledTime + _claimInterval;
+        _targetTime = Time.time + _claimInterval;
         _currentState = RewardState.CountingDown;
     }
 
@@ -81,7 +77,7 @@ public class PlayTimeRewardController : MonoBehaviour
     {
         if (EconomyManager.Instance != null)
         {
-            EconomyManager.Instance.AddGold(_baseGoldReward);
+            EconomyManager.Instance.ModifyGold(_baseGoldReward);
         }
 
         AlertManager.Instance.Show("Reward is claimed!");

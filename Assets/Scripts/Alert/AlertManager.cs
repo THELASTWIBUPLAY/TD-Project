@@ -16,7 +16,7 @@ public class AlertManager : MonoBehaviour
 
     [Header("Cooldown Settings")]
     [Tooltip("Minimal pause interval between alert")]
-    [SerializeField] private float _alertCooldown = 30f;
+    [SerializeField] private float _alertCooldown = 1.5f;
 
     private Coroutine _currentAlertCoroutine;
     private float _nextAllowedAlertTime;
