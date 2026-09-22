@@ -82,7 +82,6 @@ public class PlayTimeRewardController : MonoBehaviour
         if (EconomyManager.Instance != null)
         {
             EconomyManager.Instance.AddGold(_baseGoldReward);
-            EconomyManager.Instance.AddDiamond(_baseDiamondReward);
         }
 
         AlertManager.Instance.Show("Reward is claimed!");

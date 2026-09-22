@@ -5,7 +5,6 @@ public class EconomyManager : MonoBehaviour
     public static EconomyManager Instance;
 
     private int _gold;
-    private int _diamond;
     private int _gem;
     private int _energy;
 
@@ -23,11 +22,6 @@ public class EconomyManager : MonoBehaviour
     public void AddGold(int gold)
     {
         _gold += gold;
-    }
-
-    public void AddDiamond(int diamond)
-    {
-        _diamond += diamond;
     }
 
     public void AddGem(int gem)
