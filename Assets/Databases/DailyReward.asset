@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96630aa06ee41d142a7ab22ce3c5272a, type: 3}
+  m_Name: DailyReward
+  m_EditorClassIdentifier: 
+  _rewards:
+  - day: 1
+    gold: 100
+    gem: 5
+    rewardIcon: {fileID: 0}
+  - day: 2
+    gold: 150
+    gem: 15
+    rewardIcon: {fileID: 0}
+  - day: 3
+    gold: 200
+    gem: 25
+    rewardIcon: {fileID: 0}
+  - day: 4
+    gold: 250
+    gem: 50
+    rewardIcon: {fileID: 0}
+  - day: 5
+    gold: 350
+    gem: 70
+    rewardIcon: {fileID: 0}
+  - day: 6
+    gold: 500
+    gem: 100
+    rewardIcon: {fileID: 0}
+  - day: 7
+    gold: 700
+    gem: 150
+    rewardIcon: {fileID: 0}
