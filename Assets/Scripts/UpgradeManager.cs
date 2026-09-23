@@ -9,7 +9,6 @@ public class UpgradeManager : MonoBehaviour
 {
     public static UpgradeManager Instance { get; private set; }
 
-    // Static Flags untuk Buff Spesifik Eksklusif
     public static bool HasThornsPlating = false;
     public static bool HasArcaneOvercharge = false;
     public static bool HasDesperateGambit = false;
@@ -43,7 +42,12 @@ public class UpgradeManager : MonoBehaviour
     public bool isAutoBattle = false;
     public List<CharacterClassType> bannedClasses = new List<CharacterClassType>();
 
-    // Field Internal
+    [Header("Reroll System Setup")]
+    [SerializeField] private Button rerollButton; 
+    [SerializeField] private TextMeshProUGUI rerollText; 
+    public int maxRerollCount = 3; 
+    private int currentRerollCount;
+
     private List<UpgradeCard> cardPool = new List<UpgradeCard>();
     private List<UpgradeCard> currentOptions = new List<UpgradeCard>();
     private List<GameObject> spawnedCards = new List<GameObject>();
@@ -71,6 +75,7 @@ public class UpgradeManager : MonoBehaviour
         if (cardChoicePanel != null) cardChoicePanel.SetActive(false);
         if (buffListPanel != null) buffListPanel.SetActive(false);
         if (evolutionChoicePanel != null) evolutionChoicePanel.SetActive(false);
+        InitRerollSystem();
         UpdateAutoBattleUI();
     }
     #endregion
@@ -80,7 +85,6 @@ public class UpgradeManager : MonoBehaviour
     {
         cardPool.Clear();
 
-        // Kartu Rekrutmen Utama
         cardPool.Add(new UpgradeCard
         {
             cardName = "Recruit: Random Agent",
@@ -101,7 +105,6 @@ public class UpgradeManager : MonoBehaviour
             });
         }
 
-        // Kartu Stat Standard
         cardPool.Add(new UpgradeCard
         {
             cardName = "Sharpen Blade",
@@ -173,6 +176,78 @@ public class UpgradeManager : MonoBehaviour
             playerValues = new float[] { 60f },
             mobValues = new float[] { 2f }
         });
+    }
+
+    private void InitRerollSystem()
+    {
+        currentRerollCount = maxRerollCount;
+        UpdateRerollUI();
+
+        if (rerollButton != null)
+        {
+            rerollButton.onClick.RemoveAllListeners();
+            rerollButton.onClick.AddListener(RerollUpgradeCards);
+        }
+    }
+
+    public void RerollUpgradeCards()
+    {
+        if (currentRerollCount <= 0)
+        {
+            Debug.Log("[UpgradeManager] Kesempatan Reroll sudah habis!");
+            return;
+        }
+
+        List<UpgradeCard> available = GetAvailableCards();
+
+        if (available.Count == 0) return;
+
+        currentRerollCount--;
+        UpdateRerollUI();
+
+        ClearSpawnedCards();
+        currentOptions.Clear();
+
+        int countToPick = Mathf.Min(cardButtons != null && cardButtons.Length > 0 ? cardButtons.Length : 3, available.Count);
+
+        for (int i = 0; i < countToPick; i++)
+        {
+            float totalWeight = 0f;
+            foreach (var card in available) totalWeight += GetCardWeight(card);
+
+            float randomRoll = Random.Range(0f, totalWeight);
+            float cumulativeWeight = 0f;
+            UpgradeCard selected = available[0];
+
+            for (int j = 0; j < available.Count; j++)
+            {
+                cumulativeWeight += GetCardWeight(available[j]);
+                if (randomRoll <= cumulativeWeight)
+                {
+                    selected = available[j];
+                    break;
+                }
+            }
+
+            currentOptions.Add(selected);
+            available.Remove(selected);
+        }
+
+        SpawnCardUIElements();
+        Debug.Log($"[UpgradeManager] Card di-reroll! Sisa Reroll: {currentRerollCount}");
+    }
+
+    private void UpdateRerollUI()
+    {
+        if (rerollButton != null)
+        {
+            rerollButton.interactable = currentRerollCount > 0;
+        }
+
+        if (rerollText != null)
+        {
+            rerollText.text = $"Reroll ({currentRerollCount})";
+        }
     }
     #endregion
 
@@ -670,7 +745,6 @@ public class UpgradeManager : MonoBehaviour
 
     private void SpawnEvolutionCard(int index, string title, string desc, Sprite icon)
     {
-        // Cek apakah evolutionCardPrefab sudah diisi
         if (evolutionCardPrefab == null)
         {
             Debug.LogError("PERHATIAN: Slot 'Evolution Card Prefab' di Inspector UpgradeManager MASIH KOSONG!");
@@ -679,7 +753,6 @@ public class UpgradeManager : MonoBehaviour
 
         Transform containerToUse = evolutionCardContainer != null ? evolutionCardContainer : evolutionChoicePanel.transform;
 
-        // Paksa Instantiate evolutionCardPrefab
         GameObject cardObj = Instantiate(evolutionCardPrefab, containerToUse);
         spawnedEvolutionCards.Add(cardObj);
 

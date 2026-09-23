@@ -3,15 +3,47 @@ using UnityEngine;
 [RequireComponent(typeof(SpriteRenderer))]
 public class BackgroundFitter : MonoBehaviour
 {
-    private void Start()
+    [Header("Sprite Variants")]
+    [Tooltip("Sprite untuk layar standar (misal 9:16)")]
+    public Sprite sprite916;
+
+    [Tooltip("Sprite untuk layar jangkung/panjang (misal 9:19, 9:20)")]
+    public Sprite sprite919;
+
+    private SpriteRenderer sr;
+
+    private void Awake()
     {
+        sr = GetComponent<SpriteRenderer>();
+        ApplyBackground();
+    }
+
+    public void ApplyBackground()
+    {
+        if (sr == null) return;
+
+        SelectSpriteByAspectRatio();
+
         FitToScreenKeepAspect();
+    }
+
+    private void SelectSpriteByAspectRatio()
+    {
+        float screenAspect = (float)Screen.height / Screen.width;
+
+        if (screenAspect >= 1.95f && sprite919 != null)
+        {
+            sr.sprite = sprite919;
+        }
+        else if (sprite916 != null)
+        {
+            sr.sprite = sprite916;
+        }
     }
 
     public void FitToScreenKeepAspect()
     {
-        SpriteRenderer sr = GetComponent<SpriteRenderer>();
-        if (sr == null || sr.sprite == null) return;
+        if (sr.sprite == null) return;
 
         transform.localScale = Vector3.one;
 

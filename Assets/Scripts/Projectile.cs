@@ -36,6 +36,10 @@ public class Projectile : MonoBehaviour
     [Header("Mage Path A Burn Puddle Prefab")]
     public GameObject burnPuddlePrefab;
 
+    [Header("Visual Components")]
+    [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private TrailRenderer trailRenderer;
+
     private Transform targetEnemy;
     private Rigidbody2D targetRb;
     private Vector2 currentDirection = Vector2.up;
@@ -43,16 +47,13 @@ public class Projectile : MonoBehaviour
     private float currentSpeed;
     private float timeAlive = 0f;
 
-    // --- REFERENSI TRAIL RENDERER ---
-    private TrailRenderer trailRenderer;
-
-    // --- HIGH-SPEED TUNNELING PREVENTION (2x+) ---
     private Vector3 lastPosition;
     private bool hasHitProcessed = false;
 
     void Awake()
     {
-        trailRenderer = GetComponent<TrailRenderer>();
+        if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+        if (trailRenderer == null) trailRenderer = GetComponentInChildren<TrailRenderer>();
     }
 
     public void Setup(Transform target, bool isAreaDamage = false, float splashRadius = 1.5f)
@@ -86,6 +87,31 @@ public class Projectile : MonoBehaviour
         lastPosition = transform.position;
     }
 
+    public void SetColor(Color targetColor)
+    {
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = targetColor;
+        }
+
+        if (trailRenderer != null)
+        {
+            Gradient gradient = new Gradient();
+            gradient.SetKeys(
+                new GradientColorKey[] { 
+                    new GradientColorKey(targetColor, 0.0f), 
+                    new GradientColorKey(targetColor, 1.0f) 
+                },
+                new GradientAlphaKey[] { 
+                    new GradientAlphaKey(1.0f, 0.0f), 
+                    new GradientAlphaKey(0.0f, 1.0f) 
+                }
+            );
+
+            trailRenderer.colorGradient = gradient;
+        }
+    }
+
     public void ResetTrail()
     {
         if (trailRenderer != null)
@@ -104,7 +130,6 @@ public class Projectile : MonoBehaviour
     {
         timeAlive += Time.deltaTime;
 
-        // 1. Calculate 5-Step Speed
         if (speedSteps != null && speedSteps.Length > 0)
         {
             int currentStepIndex = Mathf.FloorToInt(timeAlive / stepDuration);
@@ -112,7 +137,6 @@ public class Projectile : MonoBehaviour
             currentSpeed = speedSteps[currentStepIndex];
         }
 
-        // 2. Soft Homing Logic
         if (!isPiercing && targetEnemy != null)
         {
             Vector3 predictedTargetPos = targetEnemy.position;
@@ -135,11 +159,9 @@ public class Projectile : MonoBehaviour
             UpdateRotation(currentDirection);
         }
 
-        // 3. Movement Execution
         Vector3 moveDelta = (Vector3)(currentDirection * currentSpeed * Time.deltaTime);
         transform.position += moveDelta;
 
-        // 4. Continuous Linecast Sweep (Anti-Tunneling untuk 2x+ Speed)
         if (!hasHitProcessed)
         {
             Vector3 currentPos = transform.position;
@@ -259,55 +281,60 @@ public class Projectile : MonoBehaviour
     }
 
     void ApplyHitEffects(Enemy enemy, float dmg)
+{
+    if (enemy == null) return;
+
+    if (isCrit && CameraShake.Instance != null)
     {
-        if (enemy == null) return;
-
-        if (shooterClass == CharacterClassType.Tank && evolution == EvolutionPath.PathB)
-        {
-            enemy.ApplyKnockback(2.5f, 0.08f); 
-        }
-
-        if (shooterClass == CharacterClassType.Mage && evolution == EvolutionPath.PathB)
-        {
-            enemy.ApplyKnockback(3.5f, 0.1f);
-        }
-
-        if (shooterClass == CharacterClassType.Ranged && evolution == EvolutionPath.PathB)
-        {
-            if (enemy.archetype != EnemyArchetype.Boss)
-            {
-                if (enemy.currentHp <= (enemy.maxHp * 0.10f))
-                {
-                    dmg = enemy.currentHp + 999f;
-                }
-            }
-        }
-
-        if (shooterClass == CharacterClassType.Support && evolution == EvolutionPath.PathA)
-        {
-            float splashRadius = 1.3f;
-
-            GameObject fx = new GameObject("FrostNovaFX");
-            fx.transform.position = transform.position;
-            FrostNovaVisual nova = fx.AddComponent<FrostNovaVisual>();
-            nova.Play(splashRadius, 0.25f); 
-
-            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, splashRadius);
-            foreach (var col in hits)
-            {
-                if (col.CompareTag("Enemy"))
-                {
-                    Enemy nearbyEnemy = col.GetComponent<Enemy>();
-                    if (nearbyEnemy != null)
-                    {
-                        nearbyEnemy.ApplyChilledSlow(0.45f, 2.5f);
-                    }
-                }
-            }
-        }
-
-        enemy.TakeDamage(dmg, isCrit);
+        CameraShake.Instance.Shake(0.08f, 0.06f);
     }
+
+    if (shooterClass == CharacterClassType.Tank && evolution == EvolutionPath.PathB)
+    {
+        enemy.ApplyKnockback(2.5f, 0.08f); 
+    }
+
+    if (shooterClass == CharacterClassType.Mage && evolution == EvolutionPath.PathB)
+    {
+        enemy.ApplyKnockback(3.5f, 0.1f);
+    }
+
+    if (shooterClass == CharacterClassType.Ranged && evolution == EvolutionPath.PathB)
+    {
+        if (enemy.archetype != EnemyArchetype.Boss)
+        {
+            if (enemy.currentHp <= (enemy.maxHp * 0.10f))
+            {
+                dmg = enemy.currentHp + 999f;
+            }
+        }
+    }
+
+    if (shooterClass == CharacterClassType.Support && evolution == EvolutionPath.PathA)
+    {
+        float splashRadius = 1.3f;
+
+        GameObject fx = new GameObject("FrostNovaFX");
+        fx.transform.position = transform.position;
+        FrostNovaVisual nova = fx.AddComponent<FrostNovaVisual>();
+        nova.Play(splashRadius, 0.25f); 
+
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, splashRadius);
+        foreach (var col in hits)
+        {
+            if (col.CompareTag("Enemy"))
+            {
+                Enemy nearbyEnemy = col.GetComponent<Enemy>();
+                if (nearbyEnemy != null)
+                {
+                    nearbyEnemy.ApplyChilledSlow(0.45f, 2.5f);
+                }
+            }
+        }
+    }
+
+    enemy.TakeDamage(dmg, isCrit);
+}
 
     Transform FindNextBounceTarget()
     {

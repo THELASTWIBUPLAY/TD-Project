@@ -22,7 +22,6 @@ public class CardUI : MonoBehaviour
         if (actionButton == null) actionButton = GetComponent<Button>();
     }
 
-    // Menggunakan optional parameter (= 1) agar pemanggilan lama tidak error CS7036
     public void SetupCard(string title, string desc, Sprite icon, int requiredStars, Action onClickAction)
     {
         if (titleText != null) titleText.text = title;

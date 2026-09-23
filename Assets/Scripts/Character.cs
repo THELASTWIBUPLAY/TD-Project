@@ -296,6 +296,12 @@ public class Character : MonoBehaviour
         bounceCoroutine = StartCoroutine(BounceEffect());
     }
 
+    private Color GetCurrentColor()
+    {
+        if (spriteRenderer != null) return spriteRenderer.color;
+        return Color.white;
+    }
+
     void SpawnProjectile(Transform target, float dmg, bool isCritical)
     {
         GameObject projGO = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
@@ -306,6 +312,8 @@ public class Character : MonoBehaviour
             projectile.isCrit = isCritical;
             projectile.shooterClass = classType;
             projectile.evolution = currentEvolution;
+
+            projectile.SetColor(GetCurrentColor());
 
             bool isAoE = (classType == CharacterClassType.Mage);
 
@@ -342,6 +350,9 @@ public class Character : MonoBehaviour
             projectile.isPiercing = true;
             projectile.shooterClass = classType;
             projectile.evolution = currentEvolution;
+
+            projectile.SetColor(GetCurrentColor());
+
             projectile.Setup(target, false);
         }
     }
@@ -363,6 +374,8 @@ public class Character : MonoBehaviour
                 p.isCrit = isCritical;
                 p.shooterClass = classType;
                 p.evolution = currentEvolution;
+
+                p.SetColor(GetCurrentColor());
 
                 Quaternion rot = Quaternion.Euler(0, 0, ang);
                 Vector2 spreadDir = rot * baseDir;

@@ -208,7 +208,6 @@ public class SlotGridManager : MonoBehaviour
         {
             Character targetChar = targetSlot.currentCharacter;
 
-            // 
             targetChar.SetStarLevel(3);
             targetChar.ApplyClassStats();
             targetChar.PlayMergeCelebration();

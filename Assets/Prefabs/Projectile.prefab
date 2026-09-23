@@ -199,6 +199,8 @@ MonoBehaviour:
   leadPredictionTime: 0.25
   isPiercing: 0
   burnPuddlePrefab: {fileID: 0}
+  spriteRenderer: {fileID: 1690722210130455995}
+  trailRenderer: {fileID: -525478985026960859}
 --- !u!96 &-525478985026960859
 TrailRenderer:
   serializedVersion: 3
