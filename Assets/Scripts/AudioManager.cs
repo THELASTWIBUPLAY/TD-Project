@@ -191,7 +191,7 @@ public class AudioManager : MonoBehaviour
     {
         if (muteButtonText != null)
         {
-            muteButtonText.text = isMuted ? "Mute: ON" : "Mute: OFF";
+            muteButtonText.text = isMuted ? "ON" : "OFF";
             muteButtonText.ForceMeshUpdate(); 
         }
         else

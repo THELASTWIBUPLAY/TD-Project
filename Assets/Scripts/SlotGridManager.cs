@@ -174,12 +174,7 @@ public class SlotGridManager : MonoBehaviour
 
     void Update()
     {
-        #if UNITY_EDITOR
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            DebugPromoteCenterToStar3();
-        }
-        #endif
+
     }
 
     [ContextMenu("Debug: Set Center to Star 3 & Evolve")]
