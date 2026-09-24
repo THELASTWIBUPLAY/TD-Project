@@ -188,6 +188,7 @@ GameObject:
   - component: {fileID: 3285634578550131521}
   - component: {fileID: 7315250056938265476}
   - component: {fileID: 6115288393015829821}
+  - component: {fileID: 7146474564715095512}
   m_Layer: 0
   m_Name: Character
   m_TagString: Untagged
@@ -278,10 +279,42 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e15821fd41e72246adfeedcd2a2e330, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  classType: 0
   starLevel: 1
   starText3D: {fileID: 3113196829953619147}
   baseAttackDamage: 10
   baseAttackCooldown: 0.5
   attackRange: 7
+  critRate: 0.05
+  critDamage: 1.5
   projectilePrefab: {fileID: 7934798365187595461, guid: 3440ba879d174b340b9a30f2ba3b896f, type: 3}
   bounceDuration: 0.15
+  currentEvolution: 0
+  evolutionBadgeText: {fileID: 0}
+  fighterController: {fileID: 9100000, guid: 9f3f6344f066e9644890bef822ed65e6, type: 2}
+  rangedController: {fileID: 9100000, guid: 5821d33ef2a38144ab0d62d162f5a731, type: 2}
+  mageController: {fileID: 9100000, guid: 8048c352a7c4e9243b3bcc5a056783ae, type: 2}
+  supportController: {fileID: 9100000, guid: 52f23df9d4f2a3144ad245e09f91255a, type: 2}
+  tankController: {fileID: 9100000, guid: 9cc3be5cb826bab4bbc2adace156a7e0, type: 2}
+--- !u!95 &7146474564715095512
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8036335337543512908}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 9f3f6344f066e9644890bef822ed65e6, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

@@ -13,9 +13,6 @@ public class BuffItemUI : MonoBehaviour
     public Transform starContainer; 
     public GameObject starPrefab;    
 
-    /// <summary>
-    /// Setup data UI Buff dan spawn bintang sesuai level
-    /// </summary>
     public void SetupBuff(Sprite icon, string title, string desc, int starLevel)
     {
         if (buffIcon != null) buffIcon.sprite = icon;

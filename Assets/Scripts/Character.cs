@@ -45,9 +45,19 @@ public class Character : MonoBehaviour
     private int fighterAttackCount = 0;
     private Transform lastFighterTarget = null;
 
+    [Header("Animation Controllers")]
+    public RuntimeAnimatorController fighterController;
+    public RuntimeAnimatorController rangedController;
+    public RuntimeAnimatorController mageController;
+    public RuntimeAnimatorController supportController;
+    public RuntimeAnimatorController tankController;
+
+    private Animator anim;
+
     void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        anim = GetComponent<Animator>(); // <-- Tambahkan baris ini
         if (transform.localScale != Vector3.zero)
         {
             basePresetScale = transform.localScale;
@@ -71,6 +81,7 @@ public class Character : MonoBehaviour
     public void ApplyClassStats()
     {
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+        if (anim == null) anim = GetComponent<Animator>(); // Ambil komponen Animator
 
         switch (classType)
         {
@@ -81,6 +92,7 @@ public class Character : MonoBehaviour
                 critRate = 0.10f;
                 critDamage = 1.5f;
                 if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0.4f, 0.8f); 
+                if (anim != null && fighterController != null) anim.runtimeAnimatorController = fighterController; // Ganti Controller
                 break;
 
             case CharacterClassType.Ranged: 
@@ -90,6 +102,7 @@ public class Character : MonoBehaviour
                 critRate = 0.20f;
                 critDamage = 2.0f;
                 if (spriteRenderer != null) spriteRenderer.color = new Color(0.2f, 0.85f, 0.3f); 
+                if (anim != null && rangedController != null) anim.runtimeAnimatorController = rangedController;
                 break;
 
             case CharacterClassType.Mage: 
@@ -99,6 +112,7 @@ public class Character : MonoBehaviour
                 critRate = 0.05f;
                 critDamage = 1.5f;
                 if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0.45f, 0.1f); 
+                if (anim != null && mageController != null) anim.runtimeAnimatorController = mageController;
                 break;
 
             case CharacterClassType.Support:
@@ -108,6 +122,7 @@ public class Character : MonoBehaviour
                 critRate = 0.05f;
                 critDamage = 1.3f;
                 if (spriteRenderer != null) spriteRenderer.color = new Color(0.4f, 0.8f, 1f); 
+                if (anim != null && supportController != null) anim.runtimeAnimatorController = supportController;
                 break;
 
             case CharacterClassType.Tank: 
@@ -117,6 +132,7 @@ public class Character : MonoBehaviour
                 critRate = 0.05f;
                 critDamage = 1.4f;
                 if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0.85f, 0.15f); 
+                if (anim != null && tankController != null) anim.runtimeAnimatorController = tankController;
                 break;
         }
     }
@@ -225,6 +241,11 @@ public class Character : MonoBehaviour
         }
 
         if (target == null || projectilePrefab == null) return;
+
+        if (anim != null)
+        {
+            anim.SetTrigger("DoAttack");
+        }
 
         if (classType == CharacterClassType.Fighter)
         {
