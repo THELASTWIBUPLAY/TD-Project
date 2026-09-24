@@ -23,6 +23,10 @@ public class UpgradeManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI buffListText;
     [SerializeField] private TextMeshProUGUI autoBattleText;
 
+    [Header("Buff List UI (Dynamic)")]
+    [SerializeField] private Transform buffListContainer;
+    [SerializeField] private GameObject buffItemPrefab;    
+
     [Header("Dynamic Card Spawn")]
     [SerializeField] private GameObject cardPrefab;
     [SerializeField] private Transform cardSpawnParent;
@@ -834,6 +838,39 @@ public class UpgradeManager : MonoBehaviour
 
     private void UpdateBuffListDisplay()
     {
+        if (buffListContainer != null && buffItemPrefab != null)
+        {
+            foreach (Transform child in buffListContainer)
+            {
+                if (child.GetComponent<TMPro.TextMeshProUGUI>() != null) continue;  
+                Destroy(child.gameObject);
+            }
+
+            foreach (var c in cardPool)
+            {
+                if (c.buffType != BuffType.AddRandomCharacter && 
+                    c.buffType != BuffType.AddSpecificCharacter && 
+                    c.buffType != BuffType.BlackMarketDeal && 
+                    c.currentLevel > 0)
+                {
+                    float currentVal = c.playerValues != null && c.playerValues.Length > 0 
+                        ? c.playerValues[Mathf.Min(c.currentLevel - 1, c.playerValues.Length - 1)] 
+                        : 0f;
+
+                    string effectDesc = GetActiveBuffDescription(c.buffType, currentVal);
+
+                    GameObject obj = Instantiate(buffItemPrefab, buffListContainer);
+                    BuffItemUI itemUI = obj.GetComponent<BuffItemUI>();
+
+                    if (itemUI != null)
+                    {
+                        itemUI.SetupBuff(null, c.cardName, effectDesc, c.currentLevel);
+                    }
+                }
+            }
+            return; 
+        }
+
         if (buffListText == null) return;
 
         string summary = "<b><size=120%>=== ACTIVE BUFFS ===</size></b>\n\n";

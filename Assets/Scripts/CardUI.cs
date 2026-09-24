@@ -13,7 +13,7 @@ public class CardUI : MonoBehaviour
 
     [Header("Star System")]
     public Transform starContainer;
-    public Image[] starImages;
+    public GameObject starPrefab; 
 
     private Action onCardClicked;
 
@@ -49,15 +49,16 @@ public class CardUI : MonoBehaviour
 
     private void UpdateStars(int count)
     {
-        if (starImages != null && starImages.Length > 0)
+        if (starContainer == null || starPrefab == null) return;
+
+        foreach (Transform child in starContainer)
         {
-            for (int i = 0; i < starImages.Length; i++)
-            {
-                if (starImages[i] != null)
-                {
-                    starImages[i].gameObject.SetActive(i < count);
-                }
-            }
+            Destroy(child.gameObject);
+        }
+
+        for (int i = 0; i < count; i++)
+        {
+            Instantiate(starPrefab, starContainer);
         }
     }
 }
