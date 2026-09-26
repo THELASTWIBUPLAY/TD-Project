@@ -284,6 +284,11 @@ public class Projectile : MonoBehaviour
 {
     if (enemy == null) return;
 
+    if (GameManager.Instance != null)
+    {
+        GameManager.Instance.RecordDamage(shooterClass, dmg);
+    }
+
     if (isCrit && CameraShake.Instance != null)
     {
         CameraShake.Instance.Shake(0.08f, 0.06f);

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
+using System.Collections.Generic;
 
 
 public class GameManager : MonoBehaviour
@@ -45,6 +46,8 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI gameOverKillsText;
     public TextMeshProUGUI gameOverHighscoreText;
 
+    [Header("Damage Tracker System")]
+    public Dictionary<CharacterClassType, float> classTotalDamage = new Dictionary<CharacterClassType, float>();
 
     public TextMeshProUGUI gameWinScoreText;
     public TextMeshProUGUI gameWinKillsText;
@@ -60,6 +63,8 @@ public class GameManager : MonoBehaviour
         Projectile.GlobalRicochetUnlocked = false;
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = 60;
+
+        ResetDamageTracker();
     }
 
 
@@ -309,5 +314,39 @@ public class GameManager : MonoBehaviour
         Projectile.GlobalRicochetUnlocked = false; 
 
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void ResetDamageTracker()
+    {
+        classTotalDamage.Clear();
+        foreach (CharacterClassType classType in System.Enum.GetValues(typeof(CharacterClassType)))
+        {
+            classTotalDamage[classType] = 0f;
+        }
+    }
+
+    public void RecordDamage(CharacterClassType classType, float amount)
+    {
+        if (classTotalDamage.ContainsKey(classType))
+        {
+            classTotalDamage[classType] += amount;
+        }
+    }
+
+    public float GetGlobalTotalDamage()
+    {
+        float total = 0f;
+        foreach (var val in classTotalDamage.Values) total += val;
+        return total > 0 ? total : 1f; 
+    }
+
+    public static string FormatNumber(float value)
+    {
+        if (value >= 1_000_000f)
+            return (value / 1_000_000f).ToString("0.#") + "M";
+        if (value >= 1_000f)
+            return (value / 1_000f).ToString("0.#") + "K";
+        
+        return value.ToString("F0");
     }
 }

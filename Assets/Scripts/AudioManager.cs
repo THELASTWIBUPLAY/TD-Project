@@ -123,28 +123,35 @@ public class AudioManager : MonoBehaviour
     }
 
     private IEnumerator ToNormalRoutine()
+{
+    float duration = 1.0f;
+    float elapsed = 0f;
+    float startBossVol = bgmBossSource.volume;
+
+    if (!bgmNormalSource.isPlaying)
     {
-        float duration = 1.0f;
-        float elapsed = 0f;
-        float startBossVol = bgmBossSource.volume;
-
         bgmNormalSource.UnPause();
-
-        while (elapsed < duration)
+        if (!bgmNormalSource.isPlaying)
         {
-            float t = elapsed / duration;
-            bgmBossSource.volume = Mathf.Lerp(startBossVol, 0f, t);
-            bgmNormalSource.volume = Mathf.Lerp(0f, defaultBgmVolume, t);
-
-            elapsed += Time.unscaledDeltaTime;
-            yield return null;
+            bgmNormalSource.Play();
         }
-
-        bgmNormalSource.volume = defaultBgmVolume;
-        bgmBossSource.volume = 0f;
-        bgmBossSource.Stop();
-        transitionCoroutine = null;
     }
+
+    while (elapsed < duration)
+    {
+        float t = elapsed / duration;
+        bgmBossSource.volume = Mathf.Lerp(startBossVol, 0f, t);
+        bgmNormalSource.volume = Mathf.Lerp(0f, defaultBgmVolume, t);
+
+        elapsed += Time.unscaledDeltaTime;
+        yield return null;
+    }
+
+    bgmNormalSource.volume = defaultBgmVolume;
+    bgmBossSource.volume = 0f;
+    bgmBossSource.Stop();
+    transitionCoroutine = null;
+}
 
     public void PlayClassShootSFX(CharacterClassType classType)
     {
