@@ -13,7 +13,7 @@ namespace Assets.Scripts.Economy
                 Debug.Log("[TEST] Kill progress +1");
             }
 
-            if (Input.GetKeyDown(KeyCode.K))
+            if (Input.GetKeyDown(KeyCode.J))
             {
                 DailyQuestManager.Instance?.AddProgress(DailyQuestType.Gather, 1);
                 Debug.Log("[TEST] Gather Progress +1");

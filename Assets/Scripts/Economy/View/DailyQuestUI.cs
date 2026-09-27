@@ -15,31 +15,40 @@ public class DailyQuestUI : MonoBehaviour
 
     private CanvasGroup _myCanvas;
 
+    private bool _isSubscribed = false;
+
     private void Awake()
     {
         _myCanvas = GetComponent<CanvasGroup>();
     }
 
-    private void Start()
+    private void OnEnable()
     {
+        TrySubscribe();
         RefreshUI();
     }
 
-    private void OnEnable()
+    private void Start()
     {
-        if (DailyQuestManager.Instance != null)
-        {
-            DailyQuestManager.Instance.OnQuestUpdated += RefreshUI;
-        }
-
+        TrySubscribe();
         RefreshUI();
     }
 
     private void OnDisable()
     {
-        if (DailyQuestManager.Instance != null)
+        if (DailyQuestManager.Instance != null && _isSubscribed)
         {
             DailyQuestManager.Instance.OnQuestUpdated -= RefreshUI;
+            _isSubscribed = false;
+        }
+    }
+
+    private void TrySubscribe()
+    {
+        if (!_isSubscribed && DailyQuestManager.Instance != null)
+        {
+            DailyQuestManager.Instance.OnQuestUpdated += RefreshUI;
+            _isSubscribed = true;
         }
     }
 
@@ -51,7 +60,7 @@ public class DailyQuestUI : MonoBehaviour
         var db = DailyQuestManager.Instance.QuestDatabase;
 
         // Quest
-        var questList = db.Quests;
+        var activeList = DailyQuestManager.Instance.ActiveQuest;
         for (int i = 0; i < _slots.Length; i++)
         {
             if (_slots[i] == null)
@@ -60,11 +69,11 @@ public class DailyQuestUI : MonoBehaviour
                 continue;
             }
 
-            if (i < questList.Count)
+            if (i < activeList.Count)
             {
                 _slots[i].gameObject.SetActive(true);
 
-                var quest = questList[i];
+                var quest = activeList[i];
                 int progress = DailyQuestManager.Instance.GetProgress(quest.questID);
                 var state = DailyQuestManager.Instance.GetQuestState(quest);
 

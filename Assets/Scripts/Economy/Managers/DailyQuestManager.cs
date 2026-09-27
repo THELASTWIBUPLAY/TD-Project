@@ -9,6 +9,13 @@ public class DailyQuestManager : MonoBehaviour
     [SerializeField] private DailyQuestSO _questDatabase;
     public DailyQuestSO QuestDatabase => _questDatabase;
 
+    [Header("Random Quest Settings")]
+    [Tooltip("Quest total for each day")]
+    [SerializeField] private int _questCountToPick = 3;
+
+    private readonly List<DailyQuestData> _activeQuest = new List<DailyQuestData>();
+    public IReadOnlyList<DailyQuestData> ActiveQuest => _activeQuest;
+
     // Quest Runtime
     private readonly Dictionary<string, int> _questProgress = new Dictionary<string, int>();
     private readonly HashSet<string> _claimedQuest = new HashSet<string>();
@@ -21,6 +28,7 @@ public class DailyQuestManager : MonoBehaviour
     // Reset tracking
     private DateTime _lastQuestDate;
     private const string LastQuestResetKey = "DailyQuest_LastResetDateUtc";
+    private const string ActiveQuestsKey = "DailyQuest_ActiveQuestIDs";
 
     public event Action OnQuestUpdated;
 
@@ -35,6 +43,7 @@ public class DailyQuestManager : MonoBehaviour
 
         // Load last reset date when game started
         LoadLastResetDate();
+        LoadActiveQuests();
     }
 
     private void Start()
@@ -55,7 +64,7 @@ public class DailyQuestManager : MonoBehaviour
         DateTime currentCycle = GetCurrentQuestCycleDate();
 
         // if today cycle date is different with saved cycle date
-        if (currentCycle > _lastQuestDate)
+        if (currentCycle > _lastQuestDate || _activeQuest.Count == 0)
         {
             ExecuteDailyReset(currentCycle);
         }
@@ -71,12 +80,15 @@ public class DailyQuestManager : MonoBehaviour
         _currentMilestonePoints = 0;
         _claimedMilestones.Clear();
 
+        // Randomize quest from database
+        GenerateRandomQuests();
+
         // save new cycle date to memory and playerprefs
         _lastQuestDate = newCycleDate;
         PlayerPrefs.SetString(LastQuestResetKey, _lastQuestDate.ToString("yyyy-MM-dd"));
         PlayerPrefs.Save();
 
-        Debug.Log($"[DailyQuest] Successfully reset cycle date: {{_lastQuestDate:yyyy-MM-dd}} (04:00 UTC+7)\")");
+        Debug.Log($"[DailyQuest] Successfully reset cycle date: {_lastQuestDate:yyyy-MM-dd} (04:00 UTC+7)\")");
     
         OnQuestUpdated?.Invoke();
     }
@@ -97,6 +109,66 @@ public class DailyQuestManager : MonoBehaviour
         _lastQuestDate = DateTime.MinValue;
     }
 
+    // Random Quest Selection
+    private void GenerateRandomQuests()
+    {
+        _activeQuest.Clear();
+
+        if (_questDatabase == null || _questDatabase.Quests.Count == 0)
+        {
+            Debug.LogWarning("[DailyQuestManager] DB quest empty");
+            return;
+        }
+
+        // Copy all quest from database to temporary list for randomize
+        List<DailyQuestData> pool = new List<DailyQuestData>(_questDatabase.Quests);
+
+        // Algoritma Fisher-Yates Shuffle untuk menjamin keacakan yang merata
+        for (int i = pool.Count - 1; i > 0; i--)
+        {
+            int randIndex = UnityEngine.Random.Range(0, i + 1);
+            var temp = pool[i];
+            pool[i] = pool[randIndex];
+            pool[randIndex] = temp;
+        }
+
+        int count = Mathf.Min(_questCountToPick, pool.Count);
+        List<string> pickedIDs = new List<string>();
+
+        for (int i = 0; i < count; i++)
+        {
+            _activeQuest.Add(pool[i]);
+            pickedIDs.Add(pool[i].questID);
+        }
+
+        // Save selected ID
+        PlayerPrefs.SetString(ActiveQuestsKey, string.Join(",", pickedIDs));
+        PlayerPrefs.Save();
+    }
+
+    private void LoadActiveQuests()
+    {
+        _activeQuest.Clear();
+
+        if (!PlayerPrefs.HasKey(ActiveQuestsKey) || _questDatabase == null) return;
+
+        string savedIDs = PlayerPrefs.GetString(ActiveQuestsKey);
+        if (string.IsNullOrEmpty(savedIDs)) return;
+
+        string[] idArray = savedIDs.Split(',');
+        HashSet<string> idSet = new HashSet<string>(idArray);
+
+        // Cocokkan ID yang tersimpan dengan definisi di db
+        foreach (var quest in _questDatabase.Quests)
+        {
+            if (idSet.Contains(quest.questID))
+            {
+                _activeQuest.Add(quest);
+            }
+        }
+    }
+
+    // Quest Logic
     public int GetProgress(string questID)
     {
         return _questProgress.TryGetValue(questID, out int progress) ? progress : 0;
@@ -126,7 +198,8 @@ public class DailyQuestManager : MonoBehaviour
 
         bool isAnyUpdated = false;
 
-        foreach (var quest in _questDatabase.Quests)
+        // Only add on active quest
+        foreach (var quest in _activeQuest)
         {
             if (quest.questType == type && !_claimedQuest.Contains(quest.questID))
             {
@@ -197,16 +270,27 @@ public class DailyQuestManager : MonoBehaviour
             if (milestone.gold > 0) EconomyManager.Instance.ModifyGem(milestone.gem);
         }
 
+        AlertManager.Instance?.Show($"Milestone chest {milestone.requiredPoints} Pts collected!");
         OnQuestUpdated?.Invoke();
     }
 
     // Debug
-    [ContextMenu("Debug: Complete All Quests")]
+    [ContextMenu("Debug: Re-Roll Quests Now")]
+    public void DebugRerollQuests()
+    {
+        _questProgress.Clear();
+        _claimedQuest.Clear();
+        GenerateRandomQuests();
+        OnQuestUpdated?.Invoke();
+        Debug.Log("[DailyQuest DEBUG] Re-roll quest...");
+    }
+
+    [ContextMenu("Debug: Complete All Active Quests")]
     public void DebugCompleteAllQuests()
     {
         if (_questDatabase == null) return;
 
-        foreach (var quest in _questDatabase.Quests)
+        foreach (var quest in _activeQuest)
         {
             if (!_claimedQuest.Contains(quest.questID))
             {
@@ -233,6 +317,19 @@ public class DailyQuestManager : MonoBehaviour
         _currentMilestonePoints = 0;
 
         OnQuestUpdated?.Invoke();
+    }
+
+    [ContextMenu("Debug: Reset All")]
+    public void DebugResetAll()
+    {
+        _questProgress.Clear();
+        _claimedQuest.Clear();
+        _claimedMilestones.Clear();
+        _currentMilestonePoints = 0;
+        PlayerPrefs.DeleteKey(LastQuestResetKey);
+        PlayerPrefs.DeleteKey(ActiveQuestsKey);
+        PlayerPrefs.Save();
+        CheckDailyReset();
     }
 
     [ContextMenu("Debug: Simulate Pass 04:00AM (Trigger Reset)")]
