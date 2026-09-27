@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 25a996a14ecd0ba4ca793e8ea808ce18
+guid: 89a7aa73a42df7b45b34ee57dc18a509
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2494363716452996216
-    second: WhatsApp Image 2026-09-22 at 18.20.15_0
+      213: 7187656821533958376
+    second: Garis_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -152,13 +152,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: WhatsApp Image 2026-09-22 at 18.20.15_0
+      name: Garis_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 757
-        height: 1600
+        width: 2340
+        height: 136
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -167,8 +167,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 874ddcb9592cd9220800000000000000
-      internalID: 2494363716452996216
+      spriteID: 8e0e1fe1ccfafb360800000000000000
+      internalID: 7187656821533958376
       vertices: []
       indices: 
       edges: []
@@ -187,7 +187,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      WhatsApp Image 2026-09-22 at 18.20.15_0: 2494363716452996216
+      Garis_0: 7187656821533958376
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
