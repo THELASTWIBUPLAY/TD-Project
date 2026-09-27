@@ -19,20 +19,40 @@ public class ShopUI : MonoBehaviour
 
     private void RefreshUI()
     {
+        if (_shopManager == null || _shopManager.Resources == null) return;
+
         var resources = _shopManager.Resources;
 
+        // 1. Render Slot Pembelian Gold
         for (int i = 0; i < _goldSlots.Length; i++)
         {
-            var slot = _goldSlots[i];
-            var data = resources.GoldItem[i];
-            slot.Setup(data);
+            if (_goldSlots[i] == null) continue;
+
+            if (i < resources.GoldItem.Count)
+            {
+                _goldSlots[i].gameObject.SetActive(true);
+                _goldSlots[i].Setup(resources.GoldItem[i]);
+            }
+            else
+            {
+                _goldSlots[i].gameObject.SetActive(false);
+            }
         }
 
+        // 2. Render Slot Pembelian Gem
         for (int i = 0; i < _gemSlot.Length; i++)
         {
-            var slot = _gemSlot[i];
-            var data = resources.GemItem[i];
-            slot.Setup(data);
+            if (_gemSlot[i] == null) continue;
+
+            if (i < resources.GemItem.Count)
+            {
+                _gemSlot[i].gameObject.SetActive(true);
+                _gemSlot[i].Setup(resources.GemItem[i]);
+            }
+            else
+            {
+                _gemSlot[i].gameObject.SetActive(false);
+            }
         }
     }
 }

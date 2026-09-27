@@ -490,6 +490,7 @@ MonoBehaviour:
   _itemAmount: {fileID: 8570694631142219257}
   _itemPrice: {fileID: 2655308490868853092}
   _itemIcon: {fileID: 3253516512199040169}
+  _buyButton: {fileID: 863457219839172127}
 --- !u!114 &1500621147017626329
 MonoBehaviour:
   m_ObjectHideFlags: 0
