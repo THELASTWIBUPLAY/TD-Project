@@ -22,6 +22,9 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private CanvasGroup _settingPanel;
     [SerializeField] private CanvasGroup _creditsPanel;
     [SerializeField] private CanvasGroup _shopPanel;
+    [SerializeField] private CanvasGroup _basePanel;
+    [SerializeField] private CanvasGroup _heroPanel;
+    [SerializeField] private CanvasGroup _dungeonPanel;
 
     public CanvasGroup MainPanel => _mainPanel;
     public CanvasGroup LevelSelectorPanel => _levelSelectorPanel;
@@ -29,6 +32,9 @@ public class MainMenuManager : MonoBehaviour
     public CanvasGroup SettingsPanel => _settingPanel;
     public CanvasGroup CreditsPanel => _creditsPanel;
     public CanvasGroup ShopPanel => _shopPanel;
+    public CanvasGroup BasePanel => _basePanel;
+    public CanvasGroup HeroPanel => _heroPanel;
+    public CanvasGroup DungeonPanel => _dungeonPanel;
 
     // UI Dependencies
     [Header("UI Dependencies")]
