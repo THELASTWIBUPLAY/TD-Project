@@ -1,0 +1,76 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2bb67bae86717941a749373d12b60e1, type: 3}
+  m_Name: ResourcesItems
+  m_EditorClassIdentifier: 
+  _goldItem:
+  - type: 0
+    name: Handful
+    amount: 5000
+    price: 99
+    sprite: {fileID: 0}
+  - type: 0
+    name: A pouch
+    amount: 25000
+    price: 449
+    sprite: {fileID: 0}
+  - type: 0
+    name: A bag
+    amount: 100000
+    price: 1799
+    sprite: {fileID: 0}
+  - type: 0
+    name: A safe
+    amount: 250000
+    price: 3499
+    sprite: {fileID: 0}
+  - type: 0
+    name: Multiple safe
+    amount: 500000
+    price: 6499
+    sprite: {fileID: 0}
+  - type: 0
+    name: An hill
+    amount: 1000000
+    price: 10999
+    sprite: {fileID: 0}
+  _gemItem:
+  - type: 1
+    name: A pocket
+    amount: 100
+    price: 0.99
+    sprite: {fileID: 0}
+  - type: 1
+    name: Pouchful
+    amount: 500
+    price: 3.99
+    sprite: {fileID: 0}
+  - type: 1
+    name: Bagful
+    amount: 2000
+    price: 12.99
+    sprite: {fileID: 0}
+  - type: 1
+    name: Caseful
+    amount: 5000
+    price: 19.99
+    sprite: {fileID: 0}
+  - type: 1
+    name: Chestful
+    amount: 10000
+    price: 29.99
+    sprite: {fileID: 0}
+  - type: 1
+    name: Caveful
+    amount: 25000
+    price: 39.99
+    sprite: {fileID: 0}
