@@ -3,8 +3,10 @@ using System;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class DailyRewardViewModel : MonoBehaviour
+public class DailyRewardViewModel : MonoBehaviour, ISaveable
 {
+    public static DailyRewardViewModel Instance { get; private set; }
+
     public enum SlotState
     {
         Claimed,
@@ -40,6 +42,13 @@ public class DailyRewardViewModel : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+
         _model = new DailyRewardModel();
     }
 
@@ -234,5 +243,17 @@ public class DailyRewardViewModel : MonoBehaviour
         _model.ResetDailyProgressDebug();
         _ = InitializeAsync();
         Debug.Log("[DailyReward] Progress PlayerPrefs reset");
+    }
+
+    public void PopulateSaveData(GameSaveData saveData)
+    {
+        _model?.PopulateSaveData(saveData);
+    }
+
+    public void LoadFromSaveData(GameSaveData saveData)
+    {
+        _model?.LoadFromSaveData(saveData);
+        EvaluateStreakProgress();
+        OnDataInitialized?.Invoke();
     }
 }

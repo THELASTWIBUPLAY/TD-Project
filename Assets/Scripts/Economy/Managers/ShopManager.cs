@@ -66,6 +66,8 @@ public class ShopManager : MonoBehaviour
         AchievementManager.Instance?.AddProgress(AchievementType.SpendGem, gemCost);
 
         AlertManager.Instance?.Show($"Successfully bought {item.amount:N0} Gold!");
+
+        SaveManager.Instance?.SaveLocal();
     }
 
     private void ProcessGemPurchase(ResourceItemData item)
@@ -75,6 +77,8 @@ public class ShopManager : MonoBehaviour
         EconomyManager.Instance.ModifyGem(item.amount);
 
         AlertManager.Instance?.Show($"[TEST IAP] Berhasil membeli {item.amount:N0} Gem!");
+
+        SaveManager.Instance?.SaveLocal();
     }
 
     // Navigation

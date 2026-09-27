@@ -90,6 +90,7 @@ public class MainPanelController : MonoBehaviour
     public void OnExitButtonClicked()
     {
         Application.Quit();
+        SaveManager.Instance?.SaveLocal();
 
         #if UNITY_EDITOR
                 UnityEditor.EditorApplication.isPlaying = false;

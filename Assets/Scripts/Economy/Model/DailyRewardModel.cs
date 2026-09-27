@@ -7,7 +7,7 @@ using Unity.Services.CloudCode; // To use server side script created
 using Unity.Services.Core; // To use services
 using UnityEngine;
 
-public class DailyRewardModel : MonoBehaviour
+public class DailyRewardModel
 {
     [Serializable]
     public class ServerTimeResponse
@@ -17,6 +17,9 @@ public class DailyRewardModel : MonoBehaviour
 
     private const string LastClaimDateKey = "DailyReward_LastDateUtc";
     private const string CurrentStreakKey = "DailyReward_CurrentStreak";
+
+    private DateTime? _cachedLastClaimTimeUtc;
+    private int _cachedStreak = 0;
 
     public async Task EnsureAuthenticatedAsync()
     {
@@ -44,30 +47,48 @@ public class DailyRewardModel : MonoBehaviour
 
     public DateTime? GetLastClaimTimeUtc()
     {
-        if (!PlayerPrefs.HasKey(LastClaimDateKey)) return null;
-
-        string savedString = PlayerPrefs.GetString(LastClaimDateKey);
-        if (DateTime.TryParse(savedString, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out DateTime result))
-        {
-            return result;
-        }
-        return null;
+        return _cachedLastClaimTimeUtc;
     }
 
     public int GetCurrentStreak()
     {
-        return PlayerPrefs.GetInt(CurrentStreakKey, 0);
+        return _cachedStreak;
     }
 
     public void SaveClaimProgress(DateTime claimTimeUtc, int newStreak)
     {
-        // Format "o" menyimpan tahun, bulan, tanggal, jam, menit, hingga detik secara standar ISO 8601
-        PlayerPrefs.SetString(LastClaimDateKey, claimTimeUtc.ToString("o", CultureInfo.InvariantCulture));
-        PlayerPrefs.SetInt(CurrentStreakKey, newStreak);
-        PlayerPrefs.Save();
+        _cachedLastClaimTimeUtc = claimTimeUtc;
+        _cachedStreak = newStreak;
+
+        // Panggil auto-save lokal setiap kali reward harian diklaim
+        SaveManager.Instance?.SaveLocal();
     }
 
-    // Helper method for testing
+    public void PopulateSaveData(GameSaveData saveData)
+    {
+        saveData.dailyReward.lastClaimTimeUtc = _cachedLastClaimTimeUtc.HasValue
+            ? _cachedLastClaimTimeUtc.Value.ToString("o")
+            : string.Empty;
+
+        saveData.dailyReward.currentStreak = _cachedStreak;
+    }
+
+    public void LoadFromSaveData(GameSaveData saveData)
+    {
+        if (!string.IsNullOrEmpty(saveData.dailyReward.lastClaimTimeUtc) &&
+            DateTime.TryParse(saveData.dailyReward.lastClaimTimeUtc, out DateTime parsedTime))
+        {
+            _cachedLastClaimTimeUtc = parsedTime;
+        }
+        else
+        {
+            _cachedLastClaimTimeUtc = null;
+        }
+
+        _cachedStreak = saveData.dailyReward.currentStreak;
+    }
+
+    [ContextMenu("Debug: Reset Daily Progress")]
     public void ResetDailyProgressDebug()
     {
         PlayerPrefs.DeleteKey(LastClaimDateKey);

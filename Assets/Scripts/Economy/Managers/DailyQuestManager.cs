@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DailyQuestManager : MonoBehaviour
+public class DailyQuestManager : MonoBehaviour, ISaveable
 {
     public static DailyQuestManager Instance { get; private set; }
 
@@ -89,8 +89,9 @@ public class DailyQuestManager : MonoBehaviour
         PlayerPrefs.Save();
 
         Debug.Log($"[DailyQuest] Successfully reset cycle date: {_lastQuestDate:yyyy-MM-dd} (04:00 UTC+7)\")");
-    
+
         OnQuestUpdated?.Invoke();
+        SaveManager.Instance?.SaveLocal();
     }
 
     private void LoadLastResetDate()
@@ -215,6 +216,7 @@ public class DailyQuestManager : MonoBehaviour
         if (isAnyUpdated)
         {
             OnQuestUpdated?.Invoke();
+            SaveManager.Instance?.SaveLocal(); // Simpan progres quest
         }
     }
 
@@ -238,6 +240,8 @@ public class DailyQuestManager : MonoBehaviour
 
         AlertManager.Instance?.Show($"Hadiah {quest.questName} berhasil diambil!");
         OnQuestUpdated?.Invoke();
+
+        SaveManager.Instance?.SaveLocal();
     }
 
     // Milestone point
@@ -272,6 +276,8 @@ public class DailyQuestManager : MonoBehaviour
 
         AlertManager.Instance?.Show($"Milestone chest {milestone.requiredPoints} Pts collected!");
         OnQuestUpdated?.Invoke();
+
+        SaveManager.Instance?.SaveLocal();
     }
 
     // Debug
@@ -349,5 +355,59 @@ public class DailyQuestManager : MonoBehaviour
         {
             CheckDailyReset();
         }
+    }
+
+    public void PopulateSaveData(GameSaveData saveData)
+    {
+        var d = saveData.dailyQuest;
+        d.cycleDateUtc = _lastQuestDate.ToString("yyyy-MM-dd");
+        d.milestonePoints = _currentMilestonePoints;
+
+        d.activeQuestIDs.Clear();
+        foreach (var q in _activeQuest) d.activeQuestIDs.Add(q.questID);
+
+        d.questProgress.Clear();
+        foreach (var pair in _questProgress)
+        {
+            d.questProgress.Add(new QuestProgressEntry { questID = pair.Key, progress = pair.Value });
+        }
+
+        d.claimedQuests.Clear();
+        d.claimedQuests.AddRange(_claimedQuest);
+
+        d.claimedMilestones.Clear();
+        d.claimedMilestones.AddRange(_claimedMilestones);
+    }
+
+    public void LoadFromSaveData(GameSaveData saveData)
+    {
+        var d = saveData.dailyQuest;
+
+        if (DateTime.TryParse(d.cycleDateUtc, out DateTime cycle))
+            _lastQuestDate = cycle.Date;
+
+        _currentMilestonePoints = d.milestonePoints;
+
+        _questProgress.Clear();
+        foreach (var entry in d.questProgress) _questProgress[entry.questID] = entry.progress;
+
+        _claimedQuest.Clear();
+        foreach (var id in d.claimedQuests) _claimedQuest.Add(id);
+
+        _claimedMilestones.Clear();
+        foreach (var id in d.claimedMilestones) _claimedMilestones.Add(id);
+
+        // Pulihkan quest aktif berdasarkan ID
+        _activeQuest.Clear();
+        if (_questDatabase != null)
+        {
+            var idSet = new HashSet<string>(d.activeQuestIDs);
+            foreach (var q in _questDatabase.Quests)
+            {
+                if (idSet.Contains(q.questID)) _activeQuest.Add(q);
+            }
+        }
+
+        OnQuestUpdated?.Invoke();
     }
 }

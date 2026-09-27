@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class EconomyManager : MonoBehaviour
+public class EconomyManager : MonoBehaviour, ISaveable
 {
     public static EconomyManager Instance { get; private set; }
 
@@ -90,10 +90,27 @@ public class EconomyManager : MonoBehaviour
     private void NotifyUpdate()
     {
         OnEconomyChanged?.Invoke(_currentData);
+        SaveManager.Instance?.SaveLocal()
     }
 
-    #if UNITY_EDITOR
-        public void SimulateMemoryHack(int fakeGemValue)
+    public void PopulateSaveData(GameSaveData saveData)
+    {
+        saveData.economy.gold = _currentData.gold;
+        saveData.economy.gem = _currentData.gem;
+        saveData.economy.currentEnergy = _currentData.currentEnergy;
+    }
+
+    public void LoadFromSaveData(GameSaveData saveData)
+    {
+        _currentData.gold = saveData.economy.gold;
+        SetEncryptedGem(saveData.economy.gem); // Set via enkripsi XOR
+        _currentData.currentEnergy = saveData.economy.currentEnergy;
+
+        NotifyUpdate(); // Pemicu agar EconomyBarUI langsung menampilkan angka hasil load
+    }
+
+#if UNITY_EDITOR
+    public void SimulateMemoryHack(int fakeGemValue)
         {
             // Simulate What GameGuardian on RAM:
             // Changing gem value without going through ModifyGem() Method

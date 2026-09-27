@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Economy.Managers
 {
-    public class AchievementManager : MonoBehaviour
+    public class AchievementManager : MonoBehaviour, ISaveable
     {
         public static AchievementManager Instance { get; private set; }
 
@@ -119,6 +119,47 @@ namespace Assets.Scripts.Economy.Managers
             AlertManager.Instance?.Show($"Achievement '{data.title}' finished!");
 
             OnAchievementUpdated?.Invoke();
+
+            SaveManager.Instance?.SaveLocal();
+        }
+
+        public void PopulateSaveData(GameSaveData saveData)
+        {
+            var a = saveData.achievement;
+
+            // 1. Ekspor progres dictionary ke List
+            a.progressList.Clear();
+            foreach (var pair in _progressMap)
+            {
+                a.progressList.Add(new AchievementProgressEntry
+                {
+                    achievementID = pair.Key,
+                    progress = pair.Value
+                });
+            }
+
+            // 2. Ekspor daftar klaim permanen
+            a.claimedList.Clear();
+            a.claimedList.AddRange(_claimedSet);
+        }
+
+        public void LoadFromSaveData(GameSaveData saveData)
+        {
+            var a = saveData.achievement;
+
+            _progressMap.Clear();
+            foreach (var item in a.progressList)
+            {
+                _progressMap[item.achievementID] = item.progress;
+            }
+
+            _claimedSet.Clear();
+            foreach (var id in a.claimedList)
+            {
+                _claimedSet.Add(id);
+            }
+
+            OnAchievementUpdated?.Invoke(); // Refresh UI Achievement
         }
 
         // DEBUG
