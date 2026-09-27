@@ -18,6 +18,10 @@ public class DailyQuestManager : MonoBehaviour
     public int CurrentMilestonePoints => _currentMilestonePoints;
     private readonly HashSet<int> _claimedMilestones = new HashSet<int>();
 
+    // Reset tracking
+    private DateTime _lastQuestDate;
+    private const string LastQuestResetKey = "DailyQuest_LastResetDateUtc";
+
     public event Action OnQuestUpdated;
 
     private void Awake()
@@ -28,9 +32,72 @@ public class DailyQuestManager : MonoBehaviour
             return;
         }
         Instance = this;
+
+        // Load last reset date when game started
+        LoadLastResetDate();
     }
 
-   public int GetProgress(string questID)
+    private void Start()
+    {
+        // Check if quest need reset when game first started
+        CheckDailyReset();
+    }
+
+    // Count cycle date of today quest
+    public DateTime GetCurrentQuestCycleDate()
+    {
+        // UTC + 7 jam (WIB) - 4 jam (Offset Reset) = UTC + 3 jam
+        return DateTime.UtcNow.AddHours(3).Date;
+    }
+
+    public void CheckDailyReset()
+    {
+        DateTime currentCycle = GetCurrentQuestCycleDate();
+
+        // if today cycle date is different with saved cycle date
+        if (currentCycle > _lastQuestDate)
+        {
+            ExecuteDailyReset(currentCycle);
+        }
+    }
+
+    private void ExecuteDailyReset(DateTime newCycleDate)
+    {
+        // Clear all quest progress
+        _questProgress.Clear();
+        _claimedQuest.Clear();
+
+        //clear all milestone progress
+        _currentMilestonePoints = 0;
+        _claimedMilestones.Clear();
+
+        // save new cycle date to memory and playerprefs
+        _lastQuestDate = newCycleDate;
+        PlayerPrefs.SetString(LastQuestResetKey, _lastQuestDate.ToString("yyyy-MM-dd"));
+        PlayerPrefs.Save();
+
+        Debug.Log($"[DailyQuest] Successfully reset cycle date: {{_lastQuestDate:yyyy-MM-dd}} (04:00 UTC+7)\")");
+    
+        OnQuestUpdated?.Invoke();
+    }
+
+    private void LoadLastResetDate()
+    {
+        if (PlayerPrefs.HasKey(LastQuestResetKey))
+        {
+            string savedDateStr = PlayerPrefs.GetString(LastQuestResetKey);
+            if (DateTime.TryParse(savedDateStr, out DateTime savedDate))
+            {
+                _lastQuestDate = savedDate.Date;
+                return;
+            }
+        }
+
+        // If new player, set the last quest date to yesterday
+        _lastQuestDate = DateTime.MinValue;
+    }
+
+    public int GetProgress(string questID)
     {
         return _questProgress.TryGetValue(questID, out int progress) ? progress : 0;
     }
@@ -166,5 +233,24 @@ public class DailyQuestManager : MonoBehaviour
         _currentMilestonePoints = 0;
 
         OnQuestUpdated?.Invoke();
+    }
+
+    [ContextMenu("Debug: Simulate Pass 04:00AM (Trigger Reset)")]
+    public void DebugSimulateNextDayReset()
+    {
+        // Mundurkan tanggal pencatatan ke 2 hari lalu seolah-olah sudah lewat hari
+        _lastQuestDate = DateTime.UtcNow.AddDays(-2);
+        PlayerPrefs.SetString(LastQuestResetKey, _lastQuestDate.ToString("yyyy-MM-dd"));
+        PlayerPrefs.Save();
+
+        CheckDailyReset();
+    }
+
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        if (hasFocus)
+        {
+            CheckDailyReset();
+        }
     }
 }
