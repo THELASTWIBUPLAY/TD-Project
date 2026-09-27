@@ -9,8 +9,14 @@ public class DailyQuestManager : MonoBehaviour
     [SerializeField] private DailyQuestSO _questDatabase;
     public DailyQuestSO QuestDatabase => _questDatabase;
 
+    // Quest Runtime
     private readonly Dictionary<string, int> _questProgress = new Dictionary<string, int>();
     private readonly HashSet<string> _claimedQuest = new HashSet<string>();
+
+    // Milestone Runtime
+    private int _currentMilestonePoints = 0;
+    public int CurrentMilestonePoints => _currentMilestonePoints;
+    private readonly HashSet<int> _claimedMilestones = new HashSet<int>();
 
     public event Action OnQuestUpdated;
 
@@ -88,7 +94,42 @@ public class DailyQuestManager : MonoBehaviour
             if (quest.gem > 0) EconomyManager.Instance.ModifyGem(quest.gem);
         }
 
+        _currentMilestonePoints += quest.questPoints;
+
         AlertManager.Instance?.Show($"Hadiah {quest.questName} berhasil diambil!");
+        OnQuestUpdated?.Invoke();
+    }
+
+    // Milestone point
+    public MilestoneState GetMilestoneState(QuestMilestoneTier milestone)
+    {
+        if (_claimedMilestones.Contains(milestone.milestoneID))
+        {
+            return MilestoneState.Claimed;
+        }
+
+        if (_currentMilestonePoints >= milestone.requiredPoints)
+            return MilestoneState.ReadyToClaim;
+
+        return MilestoneState.Locked;
+    }
+
+    public void ClaimMilestone(QuestMilestoneTier milestone)
+    {
+        if (GetMilestoneState(milestone) != MilestoneState.ReadyToClaim)
+        {
+            AlertManager.Instance?.Show("Milestone is not reached or already been claimed");
+            return;
+        }
+
+        _claimedMilestones.Add(milestone.milestoneID);
+
+        if (EconomyManager.Instance != null)
+        {
+            if (milestone.gold > 0) EconomyManager.Instance.ModifyGold(milestone.gold);
+            if (milestone.gold > 0) EconomyManager.Instance.ModifyGem(milestone.gem);
+        }
+
         OnQuestUpdated?.Invoke();
     }
 
@@ -109,11 +150,20 @@ public class DailyQuestManager : MonoBehaviour
         OnQuestUpdated?.Invoke();
     }
 
-    [ContextMenu("Debug: Reset All Quests")]
+    [ContextMenu("Debug: Add 20 Milestone Points")]
+    public void DebugAddPoints()
+    {
+        _currentMilestonePoints += 20;
+        OnQuestUpdated?.Invoke();
+    }
+
+    [ContextMenu("Debug: Reset All Quests & Milestones")]
     public void DebugResetAllQuests()
     {
         _questProgress.Clear();
         _claimedQuest.Clear();
+        _claimedMilestones.Clear();
+        _currentMilestonePoints = 0;
 
         OnQuestUpdated?.Invoke();
     }

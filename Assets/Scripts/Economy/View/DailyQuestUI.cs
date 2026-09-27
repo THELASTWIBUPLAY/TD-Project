@@ -1,8 +1,18 @@
+using Assets.Scripts.Economy.View;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class DailyQuestUI : MonoBehaviour
 {
+    [Header("Quest List Slots")]
     [SerializeField] private DailyQuestSlotUI[] _slots;
+
+    [Header("Milesone Progress Bar")]
+    [SerializeField] private Slider _milestoneSlider;
+    [SerializeField] private TextMeshProUGUI _milestonePointsText;
+    [SerializeField] private DailyQuestMilestoneSlotUI[] _milestoneSlots;
+
     private CanvasGroup _myCanvas;
 
     private void Awake()
@@ -38,8 +48,10 @@ public class DailyQuestUI : MonoBehaviour
         if (DailyQuestManager.Instance == null || DailyQuestManager.Instance.QuestDatabase == null)
             return;
 
-        var questList = DailyQuestManager.Instance.QuestDatabase.Quests;
+        var db = DailyQuestManager.Instance.QuestDatabase;
 
+        // Quest
+        var questList = db.Quests;
         for (int i = 0; i < _slots.Length; i++)
         {
             if (_slots[i] == null)
@@ -61,6 +73,40 @@ public class DailyQuestUI : MonoBehaviour
             else
             {
                 _slots[i].gameObject.SetActive(false);
+            }
+        }
+
+        // Milestone
+        int currentPoints = DailyQuestManager.Instance.CurrentMilestonePoints;
+        int maxPoints = db.GetMaxMilestonePoints();
+
+        if (_milestoneSlider != null)
+        {
+            _milestoneSlider.maxValue = maxPoints;
+            _milestoneSlider.value = currentPoints;
+        }
+
+        if (_milestonePointsText != null)
+        {
+            _milestonePointsText.text = $"{currentPoints} / {maxPoints}";
+        }
+
+        // refresh chest milestones
+        var milestoneList = db.Milestones;
+        for (int i = 0; i < _milestoneSlots.Length; i++)
+        {
+            if (_milestoneSlots[i] == null) continue;
+
+            if (i < milestoneList.Count)
+            {
+                _milestoneSlots[i].gameObject.SetActive(true);
+                var tier = milestoneList[i];
+                var state = DailyQuestManager.Instance.GetMilestoneState(tier);
+                _milestoneSlots[i].Setup(tier, state);
+            }
+            else
+            {
+                _milestoneSlots[i].gameObject.SetActive(false);
             }
         }
     }

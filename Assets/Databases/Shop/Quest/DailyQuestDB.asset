@@ -17,23 +17,53 @@ MonoBehaviour:
     questType: 0
     questName: Gather 5 Relics
     targetGoal: 5
+    questPoints: 40
     gold: 1000
     gem: 50
   - questID: 2
     questType: 1
     questName: Kill 30 Enemies
     targetGoal: 30
+    questPoints: 40
     gold: 1000
     gem: 50
   - questID: 3
     questType: 2
     questName: Clear a Dungeon
     targetGoal: 1
+    questPoints: 40
     gold: 1000
     gem: 50
   - questID: 3
     questType: 2
     questName: Clear Dungeon 5 times
     targetGoal: 5
+    questPoints: 40
     gold: 5000
     gem: 250
+  _milestones:
+  - milestoneID: 1
+    requiredPoints: 20
+    gold: 1000
+    gem: 10
+    icon: {fileID: 0}
+  - milestoneID: 2
+    requiredPoints: 40
+    gold: 2500
+    gem: 25
+    icon: {fileID: 0}
+  - milestoneID: 3
+    requiredPoints: 60
+    gold: 4000
+    gem: 40
+    icon: {fileID: 0}
+  - milestoneID: 4
+    requiredPoints: 80
+    gold: 6000
+    gem: 60
+    icon: {fileID: 0}
+  - milestoneID: 5
+    requiredPoints: 100
+    gold: 10000
+    gem: 100
+    icon: {fileID: 0}
