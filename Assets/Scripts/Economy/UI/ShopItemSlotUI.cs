@@ -37,17 +37,15 @@ public class ShopItemSlotUI : MonoBehaviour
         if (_itemAmount != null) _itemAmount.text = $"+{data.amount:N0}";
         if (_itemIcon != null && data.sprite != null) _itemIcon.sprite = data.sprite;
 
-        // Format label harga berdasarkan mata uang pembayaran
+        // Temp Solution without currency sprites
         if (_itemPrice != null)
         {
             if (data.type == ResourceItemType.Gold)
             {
-                // Pembelian Gold dibayar dengan Gem
                 _itemPrice.text = $"{data.price:N0} Gem";
             }
             else
             {
-                // Pembelian Gem dibayar dengan Uang Nyata
                 _itemPrice.text = $"${data.price:F2}";
             }
         }

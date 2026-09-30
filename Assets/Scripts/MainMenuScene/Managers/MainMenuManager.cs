@@ -22,8 +22,8 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private CanvasGroup _settingPanel;
     [SerializeField] private CanvasGroup _creditsPanel;
     [SerializeField] private CanvasGroup _shopPanel;
-    [SerializeField] private CanvasGroup _basePanel;
-    [SerializeField] private CanvasGroup _heroPanel;
+    [SerializeField] private CanvasGroup _talentPanel;
+    [SerializeField] private CanvasGroup _deckPanel;
     [SerializeField] private CanvasGroup _dungeonPanel;
 
     public CanvasGroup MainPanel => _mainPanel;
@@ -32,11 +32,22 @@ public class MainMenuManager : MonoBehaviour
     public CanvasGroup SettingsPanel => _settingPanel;
     public CanvasGroup CreditsPanel => _creditsPanel;
     public CanvasGroup ShopPanel => _shopPanel;
-    public CanvasGroup BasePanel => _basePanel;
-    public CanvasGroup HeroPanel => _heroPanel;
+    public CanvasGroup TalentPanel => _talentPanel;
+    public CanvasGroup DeckPanel => _deckPanel;
     public CanvasGroup DungeonPanel => _dungeonPanel;
 
-    // UI Dependencies
+
+    [Header("UI Groups")]
+    [SerializeField] private CanvasGroup _bottomMenu;
+    [SerializeField] private CanvasGroup _leftMenu;
+    [SerializeField] private CanvasGroup _economyBar;
+    [SerializeField] private CanvasGroup _profileMenu;
+
+    public CanvasGroup BottomMenu => _bottomMenu;
+    public CanvasGroup LeftMenu => _leftMenu;
+    public CanvasGroup EconomyBar => _economyBar;
+    public CanvasGroup ProfileMenu => _profileMenu;
+   
     [Header("UI Dependencies")]
     [SerializeField] private TextMeshProUGUI _gameTitleText;
     [SerializeField] private TextMeshProUGUI _gameVersionText;

@@ -14,16 +14,16 @@ public enum AchievementType
 
 public enum AchievementState
 {
-    InProgress,     // Belum mencapai target
-    ReadyToClaim,   // Target tercapai, tombol klaim menyala
-    Claimed         // Hadiah sudah diambil (Permanen)
+    InProgress,     
+    ReadyToClaim,   
+    Claimed,
 }
 
 [Serializable]
 public struct AchievementData
 {
     [Header("Identity")]
-    public string achievementID; // Contoh: "ACH_KILL_100", "ACH_WAVE_10"
+    public string achievementID;
     public string title;
     [TextArea(2, 3)] public string description;
     public AchievementType type;

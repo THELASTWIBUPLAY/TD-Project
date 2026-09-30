@@ -6,7 +6,7 @@ public class DailyRewardUI : MonoBehaviour
 {
     [Header("Dependencies")]
     [SerializeField] private DailyRewardViewModel _viewModel;
-    [SerializeField] private DailyRewardSlotUI[] _slots; // Array 7 slot di Canvas
+    [SerializeField] private DailyRewardSlotUI[] _slots;
 
     [Header("UI Elements")]
     [SerializeField] private CanvasGroup _myCanvas;

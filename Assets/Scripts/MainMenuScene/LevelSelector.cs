@@ -21,7 +21,7 @@ public class LevelSelector : MonoBehaviour
         string sceneName = "Level " + _level.ToString();
         Debug.Log("Attempting to load: " + sceneName);
 
-        // Cek jika scene sudah terdaftar dalam build
+        // Chec if scene already registered on build
         if (Application.CanStreamedLevelBeLoaded(sceneName))
         {
             SceneManager.LoadScene(sceneName);

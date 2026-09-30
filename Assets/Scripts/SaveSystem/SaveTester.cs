@@ -13,31 +13,31 @@ public class SaveTester : MonoBehaviour
 
     private void Update()
     {
-        // F5: Simpan Data Lokal Secara Paksa
+        // F5: Force Save
         if (Input.GetKeyDown(KeyCode.F5))
         {
             ForceSave();
         }
 
-        // F6: Muat Ulang Data dari File Save Lokal
+        // F6: Load Save
         if (Input.GetKeyDown(KeyCode.F6))
         {
             ForceLoad();
         }
 
-        // F7: Cetak Isi File JSON ke Console
+        // F7: Print Json on Log
         if (Input.GetKeyDown(KeyCode.F7))
         {
             PrintSaveFileContent();
         }
 
-        // F8: Buka Folder Direktori Save File di Windows Explorer / Mac Finder
+        // F8: Open Save Folder Directory
         if (Input.GetKeyDown(KeyCode.F8))
         {
             OpenSaveDirectory();
         }
 
-        // F9: Hapus File Save (Simulasi Pemain Baru / Fresh Install)
+        // F9: Delete save to simulate new account
         if (Input.GetKeyDown(KeyCode.F9))
         {
             DeleteSaveFile();
@@ -101,7 +101,7 @@ public class SaveTester : MonoBehaviour
         string dirPath = Application.persistentDataPath;
 
 #if UNITY_EDITOR
-        // Buka folder dan langsung sorot filenya di File Explorer OS
+        // Open folder and highlight the file
         if (File.Exists(SaveFilePath))
         {
             EditorUtility.RevealInFinder(SaveFilePath);

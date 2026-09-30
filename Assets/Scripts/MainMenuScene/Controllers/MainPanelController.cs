@@ -1,9 +1,9 @@
-using Unity.Microsoft.GDK;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MainPanelController : MonoBehaviour
 {
-    [SerializeField] private CreditsPanelController _creditsPanelController;
+    [SerializeField] private Button _battleBtn;
     private CanvasGroup _myPanel;
 
     private void Awake()
@@ -11,61 +11,14 @@ public class MainPanelController : MonoBehaviour
         _myPanel = GetComponent<CanvasGroup>();
     }
 
-    public void OnHomeButtonClicked()
+    private void OnEnable()
     {
-        if (MainMenuManager.Instance != null)
-        {
-            MainMenuManager.Instance.TogglePanel(_myPanel, true);
-            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.ShopPanel, false);
-            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.HeroPanel, false);
-            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.DungeonPanel, false);
-            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.BasePanel, false);
-        }
+        _battleBtn.onClick.AddListener(OpenLevelSelector);
     }
 
-    public void OnPlayButtonClicked()
+    private void OnDisable()
     {
-        if (MainMenuManager.Instance != null)
-        {
-            MainMenuManager.Instance.TogglePanel(_myPanel, false);
-            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.LevelSelectorPanel, true);
-        }
-    }
-
-    public void OnShopButtonClicked()
-    {
-        if (MainMenuManager.Instance != null)
-        {
-            MainMenuManager.Instance.TogglePanel(_myPanel, false);
-            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.ShopPanel, true);
-        }
-    }
-
-    public void OnBaseButtonClicked()
-    {
-        if (MainMenuManager.Instance != null)
-        {
-            MainMenuManager.Instance.TogglePanel(_myPanel, false);
-            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.BasePanel, true);
-        }
-    }
-
-    public void OnHeroButtonClicked()
-    {
-        if (MainMenuManager.Instance != null)
-        {
-            MainMenuManager.Instance.TogglePanel(_myPanel, false);
-            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.HeroPanel, true);
-        }
-    }
-
-    public void OnDungeonButtonClicked()
-    {
-        if (MainMenuManager.Instance != null)
-        {
-            MainMenuManager.Instance.TogglePanel(_myPanel, false);
-            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.DungeonPanel, true);
-        }
+        _battleBtn.onClick.RemoveListener(OpenLevelSelector);
     }
 
     public void OnSettingsButtonClicked()
@@ -77,23 +30,16 @@ public class MainPanelController : MonoBehaviour
         }
     }
 
-    public void OnCreditsButtonClicked()
+    private void OpenLevelSelector()
     {
         if (MainMenuManager.Instance != null)
         {
             MainMenuManager.Instance.TogglePanel(_myPanel, false);
-            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.CreditsPanel, true);
-            _creditsPanelController.StartScroll();
+            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.BottomMenu, false);
+            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.LeftMenu, false);
+            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.ProfileMenu, false);
+            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.EconomyBar, false);
+            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.LevelSelectorPanel, true);
         }
-    }
-
-    public void OnExitButtonClicked()
-    {
-        Application.Quit();
-        SaveManager.Instance?.SaveLocal();
-
-        #if UNITY_EDITOR
-                UnityEditor.EditorApplication.isPlaying = false;
-        #endif
     }
 }

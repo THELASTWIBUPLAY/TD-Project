@@ -216,7 +216,7 @@ public class DailyQuestManager : MonoBehaviour, ISaveable
         if (isAnyUpdated)
         {
             OnQuestUpdated?.Invoke();
-            SaveManager.Instance?.SaveLocal(); // Simpan progres quest
+            SaveManager.Instance?.SaveLocal();
         }
     }
 

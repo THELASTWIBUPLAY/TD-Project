@@ -145,6 +145,7 @@ public class SaveManager : MonoBehaviour
         if (DailyQuestManager.Instance is ISaveable quest) quest.PopulateSaveData(target);
         if (AchievementManager.Instance is ISaveable ach) ach.PopulateSaveData(target);
         if (DailyRewardViewModel.Instance is ISaveable reward) reward.PopulateSaveData(target);
+        if (TalentManager.Instance is ISaveable talent) talent.PopulateSaveData(target);
     }
 
     private void DistributeDataToManagers(GameSaveData source)
@@ -153,6 +154,7 @@ public class SaveManager : MonoBehaviour
         if (DailyQuestManager.Instance is ISaveable quest) quest.LoadFromSaveData(source);
         if (AchievementManager.Instance is ISaveable ach) ach.LoadFromSaveData(source);
         if (DailyRewardViewModel.Instance is ISaveable reward) reward.LoadFromSaveData(source);
+        if (TalentManager.Instance is ISaveable talent) talent.LoadFromSaveData(source);
     }
 
     // Auto-save saat pemain meminimalkan atau keluar dari game

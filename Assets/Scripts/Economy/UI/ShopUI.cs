@@ -23,7 +23,7 @@ public class ShopUI : MonoBehaviour
 
         var resources = _shopManager.Resources;
 
-        // 1. Render Slot Pembelian Gold
+        // Gold Slot
         for (int i = 0; i < _goldSlots.Length; i++)
         {
             if (_goldSlots[i] == null) continue;
@@ -39,7 +39,7 @@ public class ShopUI : MonoBehaviour
             }
         }
 
-        // 2. Render Slot Pembelian Gem
+        // Gem Slot
         for (int i = 0; i < _gemSlot.Length; i++)
         {
             if (_gemSlot[i] == null) continue;

@@ -65,6 +65,8 @@ public class CreditsPanelController : MonoBehaviour
          "Hendra Febri\n\n" +
          "<b>PRODUCER</b>\n" +
          "Ariiq Wicaksana\n\n" +
+         "<b>GAME DESIGNER</b>\n" +
+         "Ariiq Wicaksana\n\n" +
          "<b>PROGRAMMER 1</b>\n" +
          "Muhamad Masyhuri\n\n" +
          "<b>PROGRAMMER 2</b>\n" +

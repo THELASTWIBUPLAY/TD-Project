@@ -7,8 +7,8 @@ public class DailyRewardSlotUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _dayText;
     [SerializeField] private TextMeshProUGUI _rewardAmountText;
     [SerializeField] private Image _iconImage;
-    [SerializeField] private GameObject _claimedCheckmark; // Gambar centang
-    [SerializeField] private GameObject _highlightBorder;   // Efek border menyala jika ready
+    [SerializeField] private GameObject _claimedCheckmark; 
+    [SerializeField] private GameObject _highlightBorder;
 
     public void Setup(DailyRewardTier tier, DailyRewardViewModel.SlotState state)
     {

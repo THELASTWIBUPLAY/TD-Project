@@ -7,7 +7,7 @@ using Unity.Services.CloudCode; // To use server side script created
 using Unity.Services.Core; // To use services
 using UnityEngine;
 
-public class DailyRewardModel
+public class DailyRewardModel : MonoBehaviour
 {
     [Serializable]
     public class ServerTimeResponse

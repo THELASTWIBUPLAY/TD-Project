@@ -16,7 +16,7 @@ public class AchievementSlotUI : MonoBehaviour
 
     [Header("Claim Elements")]
     [SerializeField] private Button _claimButton;
-    [SerializeField] private GameObject _claimedBadge; // Badge/Teks bertuliskan "CLAIMED"
+    [SerializeField] private GameObject _claimedBadge;
 
     private AchievementData _currentData;
 
@@ -44,7 +44,7 @@ public class AchievementSlotUI : MonoBehaviour
         if (_descText != null) _descText.text = data.description;
         if (_iconImage != null && data.icon != null) _iconImage.sprite = data.icon;
 
-        // Teks Hadiah
+        // RewardTedt
         if (_rewardText != null)
         {
             if (data.rewardGold > 0 && data.rewardGem > 0)
@@ -55,14 +55,13 @@ public class AchievementSlotUI : MonoBehaviour
                 _rewardText.text = $"{data.rewardGem} Gem";
         }
 
-        // Teks dan Nilai Progress Bar
+        // progress text and bar
         if (_progressText != null)
             _progressText.text = $"{currentProgress} / {data.targetGoal}";
 
         if (_progressSlider != null)
             _progressSlider.value = Mathf.Clamp01((float)currentProgress / data.targetGoal);
 
-        // Aturan Visibilitas Tombol & Badge
         ApplyVisualState(state);
     }
     private void ApplyVisualState(AchievementState state)
@@ -70,13 +69,13 @@ public class AchievementSlotUI : MonoBehaviour
         switch (state)
         {
             case AchievementState.InProgress:
-                // Masih berprogres: Sembunyikan tombol klaim dan badge
+                // Hide claim and badge
                 if (_claimButton != null) _claimButton.gameObject.SetActive(false);
                 if (_claimedBadge != null) _claimedBadge.SetActive(false);
                 break;
 
             case AchievementState.ReadyToClaim:
-                // Target tercapai: Munculkan tombol klaim dan sembunyikan badge
+                // show claim button
                 if (_claimButton != null)
                 {
                     _claimButton.gameObject.SetActive(true);
@@ -86,7 +85,7 @@ public class AchievementSlotUI : MonoBehaviour
                 break;
 
             case AchievementState.Claimed:
-                // Sudah diklaim: Sembunyikan tombol klaim dan munculkan badge
+                // hide claim button and show claimed badge
                 if (_claimButton != null) _claimButton.gameObject.SetActive(false);
                 if (_claimedBadge != null) _claimedBadge.SetActive(true);
                 break;
@@ -97,16 +96,15 @@ public class AchievementSlotUI : MonoBehaviour
     {
         if (AchievementManager.Instance == null) return;
 
-        // 1. Kirim perintah klaim ke manager
+        // Kirim perintah klaim ke manager
         AchievementManager.Instance.ClaimAchievement(_currentData);
 
-        // 2. Lepas fokus EventSystem agar tidak tersangkut di UI
+        // Lepas fokus EventSystem agar tidak tersangkut di UI
         if (EventSystem.current != null)
         {
             EventSystem.current.SetSelectedGameObject(null);
         }
 
-        // 3. Langsung ubah visual kartu detik itu juga ke state Claimed
         ApplyVisualState(AchievementState.Claimed);
     }
 }

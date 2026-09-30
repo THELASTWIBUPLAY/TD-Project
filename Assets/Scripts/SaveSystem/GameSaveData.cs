@@ -49,6 +49,14 @@ public class AchievementSaveData
 }
 
 [Serializable]
+public class TalentSaveData
+{
+    public int attackLevel;
+    public int hpLevel;
+    public int coinLevel;
+}   
+
+[Serializable]
 public class GameSaveData
 {
     public int saveVersion = 1;
@@ -58,4 +66,5 @@ public class GameSaveData
     public DailyRewardSaveData dailyReward = new DailyRewardSaveData();
     public DailyQuestSaveData dailyQuest = new DailyQuestSaveData();
     public AchievementSaveData achievement = new AchievementSaveData();
+    public TalentSaveData talent = new TalentSaveData();
 }

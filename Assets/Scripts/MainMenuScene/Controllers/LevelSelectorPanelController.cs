@@ -17,6 +17,10 @@ public class LevelSelectorController : MonoBehaviour
         {
             MainMenuManager.Instance.TogglePanel(_myPanel, false);
             MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.MainPanel, true);
+            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.BottomMenu, true);
+            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.LeftMenu, true);
+            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.ProfileMenu, true);
+            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.EconomyBar, true);
         }
     }
 

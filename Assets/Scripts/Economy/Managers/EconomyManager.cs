@@ -37,7 +37,7 @@ public class EconomyManager : MonoBehaviour, ISaveable
         _secureGemKey = UnityEngine.Random.Range(1000, 9999);
         SetEncryptedGem(0);
 
-        _currentData.maxEnergy = 100;
+        _currentData.maxEnergy = 50;
     }
 
     // Helper method for encryption
@@ -90,7 +90,7 @@ public class EconomyManager : MonoBehaviour, ISaveable
     private void NotifyUpdate()
     {
         OnEconomyChanged?.Invoke(_currentData);
-        SaveManager.Instance?.SaveLocal()
+        SaveManager.Instance?.SaveLocal();
     }
 
     public void PopulateSaveData(GameSaveData saveData)
