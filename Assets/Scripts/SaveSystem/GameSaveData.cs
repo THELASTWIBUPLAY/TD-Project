@@ -54,14 +54,14 @@ public class TalentSaveData
     public int attackLevel;
     public int hpLevel;
     public int coinLevel;
-}   
+    public List<int> claimedRewardTiers = new List<int>();
+}
 
 [Serializable]
 public class GameSaveData
 {
     public int saveVersion = 1;
     public string lastSavedTimestampUtc;
-
     public EconomySaveData economy = new EconomySaveData();
     public DailyRewardSaveData dailyReward = new DailyRewardSaveData();
     public DailyQuestSaveData dailyQuest = new DailyQuestSaveData();

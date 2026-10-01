@@ -49,7 +49,6 @@ public class SettingsManager : MonoBehaviour
     private void ExitGame()
     {
         Application.Quit();
-        SaveManager.Instance.SaveLocal();
 
         #if UNITY_EDITOR
                 UnityEditor.EditorApplication.isPlaying = false;

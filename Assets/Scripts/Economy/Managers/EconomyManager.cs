@@ -90,7 +90,6 @@ public class EconomyManager : MonoBehaviour, ISaveable
     private void NotifyUpdate()
     {
         OnEconomyChanged?.Invoke(_currentData);
-        SaveManager.Instance?.SaveLocal();
     }
 
     public void PopulateSaveData(GameSaveData saveData)
