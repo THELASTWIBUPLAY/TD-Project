@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97e68e3b843746d4baa6d236bb0daac3, type: 3}
+  m_Name: DailyQuestDB
+  m_EditorClassIdentifier: 
+  _quests:
+  - questID: 1
+    questType: 0
+    questName: Gather 5 Relics
+    targetGoal: 5
+    questPoints: 40
+    gold: 1000
+    gem: 50
+  - questID: 2
+    questType: 1
+    questName: Kill 30 Enemies
+    targetGoal: 30
+    questPoints: 40
+    gold: 1000
+    gem: 50
+  - questID: 3
+    questType: 2
+    questName: Clear a Dungeon
+    targetGoal: 1
+    questPoints: 40
+    gold: 1000
+    gem: 50
+  - questID: 4
+    questType: 2
+    questName: Clear Dungeon 5 times
+    targetGoal: 5
+    questPoints: 40
+    gold: 5000
+    gem: 250
+  - questID: 5
+    questType: 1
+    questName: Kill 100 Enemies
+    targetGoal: 100
+    questPoints: 40
+    gold: 5000
+    gem: 250
+  - questID: 6
+    questType: 0
+    questName: Gather 15 Relics
+    targetGoal: 15
+    questPoints: 40
+    gold: 5000
+    gem: 250
+  _milestones:
+  - milestoneID: 1
+    requiredPoints: 20
+    gold: 1000
+    gem: 10
+    icon: {fileID: 0}
+  - milestoneID: 2
+    requiredPoints: 40
+    gold: 2500
+    gem: 25
+    icon: {fileID: 0}
+  - milestoneID: 3
+    requiredPoints: 60
+    gold: 4000
+    gem: 40
+    icon: {fileID: 0}
+  - milestoneID: 4
+    requiredPoints: 80
+    gold: 6000
+    gem: 60
+    icon: {fileID: 0}
+  - milestoneID: 5
+    requiredPoints: 100
+    gold: 10000
+    gem: 100
+    icon: {fileID: 0}
