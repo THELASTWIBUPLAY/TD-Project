@@ -123,28 +123,35 @@ public class AudioManager : MonoBehaviour
     }
 
     private IEnumerator ToNormalRoutine()
+{
+    float duration = 1.0f;
+    float elapsed = 0f;
+    float startBossVol = bgmBossSource.volume;
+
+    if (!bgmNormalSource.isPlaying)
     {
-        float duration = 1.0f;
-        float elapsed = 0f;
-        float startBossVol = bgmBossSource.volume;
-
         bgmNormalSource.UnPause();
-
-        while (elapsed < duration)
+        if (!bgmNormalSource.isPlaying)
         {
-            float t = elapsed / duration;
-            bgmBossSource.volume = Mathf.Lerp(startBossVol, 0f, t);
-            bgmNormalSource.volume = Mathf.Lerp(0f, defaultBgmVolume, t);
-
-            elapsed += Time.unscaledDeltaTime;
-            yield return null;
+            bgmNormalSource.Play();
         }
-
-        bgmNormalSource.volume = defaultBgmVolume;
-        bgmBossSource.volume = 0f;
-        bgmBossSource.Stop();
-        transitionCoroutine = null;
     }
+
+    while (elapsed < duration)
+    {
+        float t = elapsed / duration;
+        bgmBossSource.volume = Mathf.Lerp(startBossVol, 0f, t);
+        bgmNormalSource.volume = Mathf.Lerp(0f, defaultBgmVolume, t);
+
+        elapsed += Time.unscaledDeltaTime;
+        yield return null;
+    }
+
+    bgmNormalSource.volume = defaultBgmVolume;
+    bgmBossSource.volume = 0f;
+    bgmBossSource.Stop();
+    transitionCoroutine = null;
+}
 
     public void PlayClassShootSFX(CharacterClassType classType)
     {
@@ -155,11 +162,11 @@ public class AudioManager : MonoBehaviour
 
         AudioClip clip = classType switch
         {
-            CharacterClassType.Ranger => sfxRanger,
-            CharacterClassType.Sniper => sfxSniper,
-            CharacterClassType.Bombardier => sfxBombardier,
-            CharacterClassType.Cryo => sfxCryo,
-            CharacterClassType.Gunslinger => sfxGunslinger,
+            CharacterClassType.Fighter => sfxRanger,
+            CharacterClassType.Ranged => sfxSniper,
+            CharacterClassType.Mage => sfxBombardier,
+            CharacterClassType.Support => sfxCryo,
+            CharacterClassType.Tank => sfxGunslinger,
             _ => sfxRanger
         };
 
@@ -191,7 +198,7 @@ public class AudioManager : MonoBehaviour
     {
         if (muteButtonText != null)
         {
-            muteButtonText.text = isMuted ? "Mute: ON" : "Mute: OFF";
+            muteButtonText.text = isMuted ? "ON" : "OFF";
             muteButtonText.ForceMeshUpdate(); 
         }
         else

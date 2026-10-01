@@ -1,10 +1,17 @@
 using UnityEngine;
 
+public enum EvolutionPath
+{
+    None,
+    PathA,
+    PathB
+}
+
 public enum CharacterClassType
 {
-    Ranger,
-    Sniper,
-    Bombardier,
-    Cryo,
-    Gunslinger
+    Fighter,    
+    Mage,       
+    Support,    
+    Tank,       
+    Ranged      
 }
