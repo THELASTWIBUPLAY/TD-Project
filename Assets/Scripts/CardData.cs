@@ -10,7 +10,20 @@ public enum BuffType
     ExpGain,
     Ricochet,
     EmergencyRepair,
-    Overdrive
+    Overdrive,
+
+    FortifiedBastion,
+    TrickshotFighter,
+    GlassCannonCore,
+    DeepFreeze,
+    HeavyCaliber,
+    ThornsPlating,
+    ArcaneOvercharge,
+    BlackMarketDeal,
+    DesperateGambit,
+
+    EvolvePathA,
+    EvolvePathB
 }
 
 [System.Serializable]
@@ -28,7 +41,10 @@ public class UpgradeCard
     {
         get
         {
-            if (buffType == BuffType.AddRandomCharacter || buffType == BuffType.AddSpecificCharacter || buffType == BuffType.EmergencyRepair)
+            if (buffType == BuffType.AddRandomCharacter || 
+                buffType == BuffType.AddSpecificCharacter || 
+                buffType == BuffType.EmergencyRepair ||
+                buffType == BuffType.BlackMarketDeal)
             {
                 return false;
             }

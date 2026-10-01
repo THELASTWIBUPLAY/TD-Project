@@ -72,7 +72,21 @@ public class SlotGridManager : MonoBehaviour
             Character charComp = defaultChar.GetComponent<Character>();
             if (charComp != null)
             {
-                charComp.SetupClass(CharacterClassType.Ranger, 1);
+
+                CharacterClassType initialClass = CharacterClassType.Fighter;
+                if (UpgradeManager.Instance != null)
+                {
+                    foreach (CharacterClassType cls in System.Enum.GetValues(typeof(CharacterClassType)))
+                    {
+                        if (!UpgradeManager.Instance.IsClassBanned(cls))
+                        {
+                            initialClass = cls;
+                            break;
+                        }
+                    }
+                }
+
+                charComp.SetupClass(initialClass, 1);
             }
 
             centerSlot.AssignCharacter(defaultChar);
@@ -134,7 +148,6 @@ public class SlotGridManager : MonoBehaviour
 
     void ExecuteMerge(CharacterSlot targetSlot, CharacterSlot sacrificeA, CharacterSlot sacrificeB, int newStar, CharacterClassType cls)
     {
-
         sacrificeA.ClearSlot();
         sacrificeB.ClearSlot();
 
@@ -142,6 +155,68 @@ public class SlotGridManager : MonoBehaviour
         {
             targetSlot.currentCharacter.SetupClass(cls, newStar);
             targetSlot.currentCharacter.PlayMergeCelebration();
+
+            if (newStar >= 3 && UpgradeManager.Instance != null)
+            {
+                StartCoroutine(OpenEvolutionModalNextFrame(targetSlot.currentCharacter));
+            }
+        }
+    }
+
+    private System.Collections.IEnumerator OpenEvolutionModalNextFrame(Character charTarget)
+    {
+        yield return null; 
+        if (UpgradeManager.Instance != null)
+        {
+            UpgradeManager.Instance.TriggerInstantEvolutionChoice(charTarget);
+        }
+    }
+
+    void Update()
+    {
+
+    }
+
+    [ContextMenu("Debug: Set Center to Star 3 & Evolve")]
+    public void DebugPromoteCenterToStar3()
+    {
+        CharacterSlot targetSlot = null;
+
+        int centerIndex = allSlots.Count / 2;
+        if (allSlots.Count > centerIndex && allSlots[centerIndex].isOccupied && allSlots[centerIndex].currentCharacter != null)
+        {
+            targetSlot = allSlots[centerIndex];
+        }
+        else
+        {
+            foreach (var slot in allSlots)
+            {
+                if (slot != null && slot.isOccupied && slot.currentCharacter != null)
+                {
+                    targetSlot = slot;
+                    break;
+                }
+            }
+        }
+
+        if (targetSlot != null && targetSlot.currentCharacter != null)
+        {
+            Character targetChar = targetSlot.currentCharacter;
+
+            targetChar.SetStarLevel(3);
+            targetChar.ApplyClassStats();
+            targetChar.PlayMergeCelebration();
+
+            Debug.Log($"[DEBUG] Unit {targetChar.classType} berhasil dinaikkan ke Bintang 3 instan!");
+
+            if (UpgradeManager.Instance != null)
+            {
+                UpgradeManager.Instance.TriggerInstantEvolutionChoice(targetChar);
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[DEBUG] Tidak ada karakter yang ditemukan di grid untuk dinaikkan ke Bintang 3!");
         }
     }
 }
