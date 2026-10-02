@@ -13,7 +13,7 @@ public class EconomyManager : MonoBehaviour, ISaveable
         public int currentEnergy { get; internal set; }
         public int maxEnergy { get; internal set; }
     }
-
+        
     // Binding: UI will sub to this
     public event Action<EconomyData> OnEconomyChanged;
 
@@ -109,6 +109,14 @@ public class EconomyManager : MonoBehaviour, ISaveable
         _currentData.currentEnergy = saveData.economy.currentEnergy;
 
         NotifyUpdate(); // Pemicu agar EconomyBarUI langsung menampilkan angka hasil load
+    }
+
+
+    // Debug
+    [ContextMenu("Reset All Energy")]
+    public void ResetAllEnergy()
+    {
+        _currentData.currentEnergy = 0;
     }
 
 #if UNITY_EDITOR

@@ -7,6 +7,7 @@ public class EconomySaveData
     public int gold;
     public int gem;
     public int currentEnergy;
+    public string lastEnergyRegenUtc;
 }
 
 [Serializable]

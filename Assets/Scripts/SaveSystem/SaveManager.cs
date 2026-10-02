@@ -158,6 +158,7 @@ public class SaveManager : MonoBehaviour
         if (AchievementManager.Instance is ISaveable ach) ach.PopulateSaveData(target);
         if (DailyRewardViewModel.Instance is ISaveable reward) reward.PopulateSaveData(target);
         if (TalentManager.Instance is ISaveable talent) talent.PopulateSaveData(target);
+        if (EnergyRegenManager.Instance is ISaveable energy) energy.PopulateSaveData(target);
     }
 
     private void DistributeDataToManagers(GameSaveData source)
@@ -170,6 +171,7 @@ public class SaveManager : MonoBehaviour
             if (AchievementManager.Instance is ISaveable ach) ach.LoadFromSaveData(source);
             if (DailyRewardViewModel.Instance is ISaveable reward) reward.LoadFromSaveData(source);
             if (TalentManager.Instance is ISaveable talent) talent.LoadFromSaveData(source);
+            if (EnergyRegenManager.Instance is ISaveable energy) energy.LoadFromSaveData(source); 
         }
         finally
         {
