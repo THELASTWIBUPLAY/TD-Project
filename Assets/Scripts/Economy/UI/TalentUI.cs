@@ -1,6 +1,4 @@
-using System.Linq;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -61,9 +59,6 @@ public class TalentUI : MonoBehaviour
         if (TalentManager.Instance != null)
         {
             _progressBar.maxValue = TalentManager.Instance.MaxTalentLevel * 3;
-
-            TalentManager.Instance.OnTalentUpdated += HandleTalentUpdate;
-            TalentManager.Instance.OnTalentRewardUpdated += HandleRewardUpdate;
         }
 
         PositionRewardSlotOnSlider();

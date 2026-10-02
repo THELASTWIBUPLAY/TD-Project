@@ -72,6 +72,8 @@ public class SaveManager : MonoBehaviour
     /// </summary>
     public bool LoadLocal()
     {
+
+
         if (!File.Exists(LocalSaveFilePath))
         {
             Debug.Log("[SaveManager] File save lokal belum ditemukan (Pemain Baru).");

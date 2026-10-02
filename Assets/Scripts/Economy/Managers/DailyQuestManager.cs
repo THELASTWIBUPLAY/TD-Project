@@ -271,7 +271,7 @@ public class DailyQuestManager : MonoBehaviour, ISaveable
         if (EconomyManager.Instance != null)
         {
             if (milestone.gold > 0) EconomyManager.Instance.ModifyGold(milestone.gold);
-            if (milestone.gold > 0) EconomyManager.Instance.ModifyGem(milestone.gem);
+            if (milestone.gem > 0) EconomyManager.Instance.ModifyGem(milestone.gem);
         }
 
         AlertManager.Instance?.Show($"Milestone chest {milestone.requiredPoints} Pts collected!");

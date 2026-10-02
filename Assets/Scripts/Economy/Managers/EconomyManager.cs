@@ -57,6 +57,7 @@ public class EconomyManager : MonoBehaviour, ISaveable
     {
         _currentData.gold += gold;
         NotifyUpdate();
+        Debug.Log($"[Economy Manager] Modify gold by {gold}. Current gold is {_currentData.gold}");
     }
 
     public void ModifyGem(int gem)
@@ -79,12 +80,14 @@ public class EconomyManager : MonoBehaviour, ISaveable
 
         SetEncryptedGem(newGemTotal);
         NotifyUpdate();
+        Debug.Log($"[Economy Manager] Modify gem by {gem}. Current gem is {_currentData.gem}");
     }
 
     public void ModifyEnergy(int energy)
     {
         _currentData.currentEnergy += energy;
         NotifyUpdate();
+        Debug.Log($"[Economy Manager] Modify energy by {energy}. Current energy is {_currentData.currentEnergy}");
     }
 
     private void NotifyUpdate()
