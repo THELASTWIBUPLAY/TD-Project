@@ -10,12 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 26ed33e1f9a85da4a8aba5b12ca08528, type: 3}
-  m_Name: Stage_Endless
+  m_Name: Level 2
   m_EditorClassIdentifier: 
-  stageName: Endless Run
-  isEndless: 1
-  maxWave: 10
-  energyCost: 10
+  stageName: Magica Forest
+  stageLevel: 2
+  isEndless: 0
+  maxWave: 5
+  energyCost: 5
   baseEnemyCount: 5
   enemyCountWaveMultiplier: 2
   baseSpawnInterval: 2.2
@@ -30,5 +31,5 @@ MonoBehaviour:
   scoreMiniBoss: 120
   scoreFinalBoss: 350
   scoreWaveClearBonus: 50
-  gold: 0
-  gem: 0
+  gold: 500
+  gem: 5

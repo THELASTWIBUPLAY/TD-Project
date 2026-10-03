@@ -45,7 +45,7 @@ public class DungeonUI : MonoBehaviour
     {
         if (_confirmPanel == null) return;
 
-        _confirmPanel.Setup(data);
+        _confirmPanel.SetupDungeon(data);
         _confirmPanel.gameObject.SetActive(true);
     }
 }

@@ -10,11 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 26ed33e1f9a85da4a8aba5b12ca08528, type: 3}
-  m_Name: Stage_Campaign
+  m_Name: Level 1
   m_EditorClassIdentifier: 
-  stageName: Stage 1
+  stageName: Magica Forest
+  stageLevel: 1
   isEndless: 0
-  maxWave: 10
+  maxWave: 3
+  energyCost: 5
   baseEnemyCount: 5
   enemyCountWaveMultiplier: 2
   baseSpawnInterval: 2.2
@@ -29,3 +31,5 @@ MonoBehaviour:
   scoreMiniBoss: 120
   scoreFinalBoss: 350
   scoreWaveClearBonus: 50
+  gold: 500
+  gem: 5

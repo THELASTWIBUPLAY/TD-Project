@@ -281,11 +281,23 @@ public class GameManager : MonoBehaviour
         if (gameWinPanel != null)
         {
             gameWinPanel.SetActive(true);
+            GameWinReward();
         }
 
         UpdateSummaryUI(gameWinScoreText, gameWinKillsText, gameWinHighscoreText);
     }
 
+    // Add rewards to economy
+    private void GameWinReward()
+    {
+        var wm = WaveManager.Instance.stageConfig;
+
+        if (EconomyManager.Instance != null)
+        {
+            EconomyManager.Instance.ModifyGold(wm.gold);
+            EconomyManager.Instance.ModifyGem(wm.gem);
+        }
+    }
 
     private void UpdateSummaryUI(TextMeshProUGUI txtScore, TextMeshProUGUI txtKills, TextMeshProUGUI txtHighscore)
     {

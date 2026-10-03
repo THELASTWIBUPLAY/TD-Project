@@ -217,7 +217,7 @@ public class WaveManager : MonoBehaviour
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.TriggerGameWin();
-            }
+            }   
             yield break;
         }
 

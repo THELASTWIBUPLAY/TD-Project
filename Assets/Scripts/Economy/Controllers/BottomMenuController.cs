@@ -42,6 +42,7 @@ public class BottomMenuController : MonoBehaviour
     {
         if (MainMenuManager.Instance != null)
         {
+            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.LevelSelectorPanel, false);
             MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.MainPanel, false);
             MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.ShopPanel, true);
             MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.DeckPanel, false);
@@ -54,6 +55,7 @@ public class BottomMenuController : MonoBehaviour
     {
         if (MainMenuManager.Instance != null)
         {
+            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.LevelSelectorPanel, false);
             MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.MainPanel, false);
             MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.DeckPanel, true);
             MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.ShopPanel, false);
@@ -66,6 +68,7 @@ public class BottomMenuController : MonoBehaviour
     {
         if (MainMenuManager.Instance != null)
         {
+            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.LevelSelectorPanel, false);
             MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.MainPanel, true);
             MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.ShopPanel, false);
             MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.DeckPanel, false);
@@ -78,6 +81,7 @@ public class BottomMenuController : MonoBehaviour
     {
         if (MainMenuManager.Instance != null)
         {
+            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.LevelSelectorPanel, false);
             MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.MainPanel, false);
             MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.TalentPanel, true);
             MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.ShopPanel, false);
@@ -92,6 +96,7 @@ public class BottomMenuController : MonoBehaviour
     {
         if (MainMenuManager.Instance != null)
         {
+            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.LevelSelectorPanel, false);
             MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.MainPanel, false);
             MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.DungeonPanel, true);
             MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.ShopPanel, false);

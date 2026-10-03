@@ -4,9 +4,11 @@ using UnityEngine;
 public class StageConfig : ScriptableObject
 {
     [Header("Mode Configuration")]
-    public string stageName = "Stage 1";
+    public string stageName = "Level 1";
+    public int stageLevel = 1;
     public bool isEndless = false;
     public int maxWave = 10;
+    public int energyCost = 5;
 
     [Header("Wave Enemies Progression")]
     public int baseEnemyCount = 5;
@@ -29,4 +31,8 @@ public class StageConfig : ScriptableObject
     public int scoreMiniBoss = 120;
     public int scoreFinalBoss = 350;
     public int scoreWaveClearBonus = 50;
+
+    [Header("Rewards")]
+    public int gold;
+    public int gem;
 }

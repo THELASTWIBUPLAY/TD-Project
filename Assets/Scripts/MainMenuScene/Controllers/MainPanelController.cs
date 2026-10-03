@@ -35,10 +35,10 @@ public class MainPanelController : MonoBehaviour
         if (MainMenuManager.Instance != null)
         {
             MainMenuManager.Instance.TogglePanel(_myPanel, false);
-            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.BottomMenu, false);
-            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.LeftMenu, false);
-            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.ProfileMenu, false);
-            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.EconomyBar, false);
+            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.BottomMenu, true);
+            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.LeftMenu, true);
+            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.ProfileMenu, true);
+            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.EconomyBar, true);
             MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.LevelSelectorPanel, true);
         }
     }
