@@ -259,7 +259,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 199.91325}
+  m_AnchoredPosition: {x: 0, y: 199.91318}
   m_SizeDelta: {x: 0, y: 599.9131}
   m_Pivot: {x: 0, y: 1}
 --- !u!224 &23236804 stripped
@@ -2246,7 +2246,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: 401.87012}
+  m_AnchoredPosition: {x: 0, y: 401.87003}
   m_SizeDelta: {x: 0, y: 837.79}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &175609696
@@ -3911,8 +3911,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2025541668}
   m_HandleRect: {fileID: 2025541667}
   m_Direction: 2
-  m_Value: -0.00000037969468
-  m_Size: 0.51997674
+  m_Value: -0.000000075938935
+  m_Size: 0.5203168
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -14213,8 +14213,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1130468505}
   m_HandleRect: {fileID: 1130468504}
   m_Direction: 2
-  m_Value: -0.0000009159254
-  m_Size: 0.6663216
+  m_Value: -0.0000006106169
+  m_Size: 0.66675746
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -22424,9 +22424,8 @@ MonoBehaviour:
   _scrollRect: {fileID: 1892143311}
   _contentPanel: {fileID: 551654895}
   _viewPages:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 437438963}
+  - {fileID: 634680755}
   _nextBtn: {fileID: 496053472}
   _previousBtn: {fileID: 1069615025}
   _snapSpeed: 10
