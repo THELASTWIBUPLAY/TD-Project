@@ -2,6 +2,15 @@ using System;
 using System.Collections.Generic;
 
 [Serializable]
+public class ProfileSaveData
+{
+    public string playerName = "The Hero";
+    public string playerBio = "I am ready!";
+    public int accountLevel = 1;
+    public int accountExp = 0;
+}
+
+[Serializable]
 public class EconomySaveData
 {
     public int gold;
@@ -63,6 +72,7 @@ public class GameSaveData
 {
     public int saveVersion = 1;
     public string lastSavedTimestampUtc;
+    public ProfileSaveData profile = new ProfileSaveData();
     public EconomySaveData economy = new EconomySaveData();
     public DailyRewardSaveData dailyReward = new DailyRewardSaveData();
     public DailyQuestSaveData dailyQuest = new DailyQuestSaveData();

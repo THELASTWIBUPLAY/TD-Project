@@ -126,8 +126,12 @@ public class EnergyRegenManager : MonoBehaviour, ISaveable
 
     private DateTime GetCurrentServerTime()
     {
-        double elapsed = Time.unscaledTimeAsDouble - _realtimeAtSync;
-        return _serverTimeAtSync.AddSeconds(elapsed);
+        if (AuthManager.Instance != null && AuthManager.Instance.IsServerTimeSynced)
+        {
+            return AuthManager.Instance.CurrentServerTimeUtc;
+        }
+
+        return DateTime.UtcNow;
     }
 
     // Regen Logic
