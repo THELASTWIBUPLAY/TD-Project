@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -72,6 +73,39 @@ namespace Assets.Scripts.Economy.Managers
             {
                 OnAchievementUpdated?.Invoke();
             }
+        }
+
+        public List<AchievementData> GetActiveAchievements()
+        {
+            if (_database == null || _database.Achievements == null)
+                return new List<AchievementData>();
+
+            var result = new List<AchievementData>();
+
+            //Grouping achievement by type
+            var groupedByType = _database.Achievements.GroupBy(a => a.type);
+
+            foreach (var group in groupedByType)
+            {
+                // sort from lower goal to higher
+                var sortedTiers = group.OrderBy(a => a.targetGoal).ToList();
+
+                // search for first unclaimed achievement 
+                var activeTier = sortedTiers.FirstOrDefault(a => GetAchievementState(a) != AchievementState.Claimed);
+
+                // If found, show
+                if (!string.IsNullOrEmpty(activeTier.achievementID))
+                {
+                    result.Add(activeTier);
+                }
+                else
+                {
+                    // Jika semua tier pada tipe ini sudah diklaim, tampilkan tier terakhir dengan status "Claimed"
+                    result.Add(sortedTiers.Last());
+                }
+            }
+
+            return result;
         }
 
         // Record

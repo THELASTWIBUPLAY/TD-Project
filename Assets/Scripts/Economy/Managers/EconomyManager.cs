@@ -117,6 +117,7 @@ public class EconomyManager : MonoBehaviour, ISaveable
     public void ResetAllEnergy()
     {
         _currentData.currentEnergy = 0;
+        
     }
 
 #if UNITY_EDITOR
