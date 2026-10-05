@@ -2,9 +2,9 @@ using UnityEngine;
 
 public enum CharacterClassType
 {
+    Melee,
     Ranger,
-    Sniper,
-    Bombardier,
-    Cryo,
-    Gunslinger
+    Mage,
+    Support,
+    Tank
 }

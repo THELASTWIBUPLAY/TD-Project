@@ -5,7 +5,7 @@ using TMPro;
 public class Character : MonoBehaviour
 {
     [Header("Class & Star Config")]
-    public CharacterClassType classType = CharacterClassType.Ranger;
+    public CharacterClassType classType = CharacterClassType.Melee;
     [Range(1, 3)]
     public int starLevel = 1;
     public TextMeshPro starText3D;
@@ -23,11 +23,12 @@ public class Character : MonoBehaviour
     public GameObject projectilePrefab;
     private SpriteRenderer spriteRenderer;
 
-    [Header("Bouncy Animation")]
-    public float bounceDuration = 0.15f;
     private Vector3 basePresetScale = new Vector3(0.6f, 0.6f, 1f);
-    private Coroutine bounceCoroutine;
     private float fireCountdown = 0f;
+
+    private CharacterAnimator charAnim;
+
+    public bool isAttacking = false;
 
     void Awake()
     {
@@ -36,6 +37,7 @@ public class Character : MonoBehaviour
         {
             basePresetScale = transform.localScale;
         }
+        charAnim = GetComponentInChildren<CharacterAnimator>();
     }
 
     void Start()
@@ -50,6 +52,11 @@ public class Character : MonoBehaviour
         starLevel = star;
         ApplyClassStats();
         UpdateStarDisplay();
+
+        if (charAnim != null)
+        {
+            charAnim.InitializeAnimator();
+        }
     }
 
     public void ApplyClassStats()
@@ -58,39 +65,34 @@ public class Character : MonoBehaviour
 
         switch (classType)
         {
-            case CharacterClassType.Ranger:
+            case CharacterClassType.Melee: //Ranger
                 baseAttackDamage = 12f;
                 baseAttackCooldown = 0.65f;
                 attackRange = 7.5f;
-                if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0.4f, 0.8f); 
                 break;
 
-            case CharacterClassType.Sniper:
+            case CharacterClassType.Ranger: //Sniper
                 baseAttackDamage = 45f;
                 baseAttackCooldown = 1.6f;
-                attackRange = 10f;
-                if (spriteRenderer != null) spriteRenderer.color = new Color(0.2f, 0.85f, 0.3f); 
+                attackRange = 10f; 
                 break;
 
-            case CharacterClassType.Bombardier:
+            case CharacterClassType.Mage: //Bombardier
                 baseAttackDamage = 25f;
                 baseAttackCooldown = 1.1f;
-                attackRange = 6.5f;
-                if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0.45f, 0.1f); 
+                attackRange = 6.5f; 
                 break;
 
-            case CharacterClassType.Cryo:
+            case CharacterClassType.Support: //Cryo
                 baseAttackDamage = 8f;
                 baseAttackCooldown = 0.8f;
-                attackRange = 7f;
-                if (spriteRenderer != null) spriteRenderer.color = new Color(0.4f, 0.8f, 1f); 
+                attackRange = 7f; 
                 break;
 
-            case CharacterClassType.Gunslinger:
+            case CharacterClassType.Tank: //Gunslinger
                 baseAttackDamage = 6f;
                 baseAttackCooldown = 0.25f; 
                 attackRange = 5.2f;
-                if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0.85f, 0.15f); 
                 break;
         }
     }
@@ -108,6 +110,7 @@ public class Character : MonoBehaviour
             if (target != null)
             {
                 Shoot(target);
+                charAnim.PlayAnim();
                 fireCountdown = Mathf.Max(0.08f, currentCooldown);
             }
         }
@@ -117,6 +120,11 @@ public class Character : MonoBehaviour
     {
         starLevel = Mathf.Clamp(newLevel, 1, 3);
         UpdateStarDisplay();
+
+        if (charAnim != null)
+        {
+            charAnim.InitializeAnimator();
+        }
     }
 
     public void UpdateStarDisplay()
@@ -135,7 +143,7 @@ public class Character : MonoBehaviour
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, attackRange);
         Transform bestEnemy = null;
 
-        if (classType == CharacterClassType.Sniper)
+        if (classType == CharacterClassType.Ranger)
         {
             float maxFoundHp = -1f;
             foreach (Collider2D col in colliders)
@@ -172,7 +180,7 @@ public class Character : MonoBehaviour
     {
         if (target == null || projectilePrefab == null) return;
 
-        if (classType != CharacterClassType.Bombardier && AudioManager.Instance != null)
+        if (classType != CharacterClassType.Mage && AudioManager.Instance != null)
         {
             AudioManager.Instance.PlayClassShootSFX(classType);
         }
@@ -180,7 +188,7 @@ public class Character : MonoBehaviour
         float starDamageMult = starLevel == 1 ? 1f : (starLevel == 2 ? 2.2f : 4.5f);
         float finalDamage = baseAttackDamage * starDamageMult * (1f + (GlobalDamageBonusPercent / 100f));
 
-        if (starLevel >= 3 && classType == CharacterClassType.Sniper)
+        if (starLevel >= 3 && classType == CharacterClassType.Ranger)
         {
             Enemy targetEnemyComp = target.GetComponent<Enemy>();
             if (targetEnemyComp != null && (targetEnemyComp.archetype == EnemyArchetype.Tank || targetEnemyComp.archetype == EnemyArchetype.Boss))
@@ -189,7 +197,7 @@ public class Character : MonoBehaviour
             }
         }
 
-        if (starLevel >= 3 && classType == CharacterClassType.Ranger)
+        if (starLevel >= 3 && classType == CharacterClassType.Melee)
         {
             StartCoroutine(DoubleTapRoutine(target, finalDamage));
         }
@@ -197,9 +205,6 @@ public class Character : MonoBehaviour
         {
             SpawnProjectile(target, finalDamage);
         }
-
-        if (bounceCoroutine != null) StopCoroutine(bounceCoroutine);
-        bounceCoroutine = StartCoroutine(BounceEffect());
     }
 
     void SpawnProjectile(Transform target, float dmg)
@@ -210,7 +215,7 @@ public class Character : MonoBehaviour
         {
             projectile.damage = dmg;
 
-            bool isAoE = (classType == CharacterClassType.Bombardier);
+            bool isAoE = (classType == CharacterClassType.Mage);
             float splashRadius = (starLevel >= 3) ? 2.2f : 1.5f;
 
             projectile.Setup(target, isAoE, splashRadius);
@@ -224,37 +229,10 @@ public class Character : MonoBehaviour
         if (target != null) SpawnProjectile(target, dmg);
     }
 
-    IEnumerator BounceEffect()
-    {
-        Vector3 targetScale = basePresetScale * (1f + ((starLevel - 1) * 0.2f));
-        Vector3 squashScale = new Vector3(targetScale.x * 1.2f, targetScale.y * 0.8f, targetScale.z);
-        Vector3 stretchScale = new Vector3(targetScale.x * 0.85f, targetScale.y * 1.15f, targetScale.z);
-
-        float halfDuration = bounceDuration / 2f;
-        float elapsed = 0f;
-
-        while (elapsed < halfDuration)
-        {
-            transform.localScale = Vector3.Lerp(squashScale, stretchScale, elapsed / halfDuration);
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-
-        elapsed = 0f;
-        while (elapsed < halfDuration)
-        {
-            transform.localScale = Vector3.Lerp(stretchScale, targetScale, elapsed / halfDuration);
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-
-        transform.localScale = targetScale;
-    }
-
     public void PlayMergeCelebration()
     {
         MergeSparkleEffect.Create(transform.position, starLevel);
-        
+
         StartCoroutine(MergePopRoutine());
     }
 

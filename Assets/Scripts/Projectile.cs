@@ -96,7 +96,7 @@ public class Projectile : MonoBehaviour
 
                 if (AudioManager.Instance != null)
                 {
-                    AudioManager.Instance.PlayClassShootSFX(CharacterClassType.Bombardier);
+                    AudioManager.Instance.PlayClassShootSFX(CharacterClassType.Mage);
                 }
 
                 ExplosionEffect.Create(transform.position, aoeRadius);
