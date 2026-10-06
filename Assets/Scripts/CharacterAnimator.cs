@@ -9,8 +9,8 @@ public class CharacterAnimator : MonoBehaviour
     private Animator animator;
     private float animLength = -1;
 
-    // Stores the resolved active animation state name after checking fallbacks
-    public string currentAtkAnimName;
+    public string atkAnimName;
+    public string idleAnimName;
 
     private void Awake()
     {
@@ -44,19 +44,23 @@ public class CharacterAnimator : MonoBehaviour
             case CharacterClassType.Support:
                 charClass = "Support";
                 break;
+            default:
+                charClass = "Ranger";
+                break;
         }
 
         charStar = character.starLevel;
 
-        currentAtkAnimName = ResolveAttackAnimationName();
+        atkAnimName = GetAtkAnimName();
+        idleAnimName = GetIdleAnimName();
 
-        animator.CrossFadeInFixedTime(currentAtkAnimName, 0);
+        animator.CrossFadeInFixedTime(atkAnimName, 0);
         CancelInvoke(nameof(UnconditionalPlayIdle));
         Invoke(nameof(UnconditionalPlayIdle), 0.1f);
 
         animLength = -1f;
 
-        AnimationClip clip = GetClipByName(currentAtkAnimName);
+        AnimationClip clip = GetClipByName(atkAnimName);
 
         if (clip != null)
         {
@@ -64,23 +68,34 @@ public class CharacterAnimator : MonoBehaviour
         }
     }
 
-    private string ResolveAttackAnimationName()
+    // Finds earliest star level that has an animation for a given class
+    private string GetAtkAnimName()
     {
-        string primaryName = $"atk{charClass}{charStar}";
-        if (HasAnimationClip(primaryName))
+        string atkName = "";
+
+        for (int i = charStar; i >= 1; i--)
         {
-            return primaryName;
+            atkName = $"atk{charClass}{i}";
+            if (HasAnimationClip(atkName))
+            {
+                return atkName;
+            }
+
+            Debug.LogWarning($"Animation '{atkName}' not found");
         }
 
-        string classFallbackName = $"atk{charClass}1";
-        if (HasAnimationClip(classFallbackName))
+        return "atk";
+    }
+
+    private string GetIdleAnimName()
+    {
+        string idleName = $"idle{charClass}{charStar}";
+        if (HasAnimationClip(idleName))
         {
-            Debug.LogWarning($"Animation '{primaryName}' not found. Falling back to '{classFallbackName}'.");
-            return classFallbackName;
+            return idleName;
         }
 
-        Debug.LogWarning($"Animation '{classFallbackName}' not found. Falling back to 'atkRanger1'.");
-        return "atkRanger1";
+        return "idle";
     }
 
     private bool HasAnimationClip(string clipName)
@@ -98,12 +113,12 @@ public class CharacterAnimator : MonoBehaviour
 
     private void UnconditionalPlayIdle()
     {
-        animator.CrossFadeInFixedTime("Idle", 0);
+        animator.CrossFadeInFixedTime(idleAnimName, 0);
     }
 
     public void PlayAnim()
     {
-        animator.CrossFadeInFixedTime(currentAtkAnimName, 0);
+        animator.CrossFadeInFixedTime(atkAnimName, 0);
 
         CancelInvoke(nameof(PlayIdle));
         Invoke(nameof(PlayIdle), animLength > 0 ? animLength : 0.5f);
@@ -111,11 +126,11 @@ public class CharacterAnimator : MonoBehaviour
 
     private void PlayIdle()
     {
-        if (!animator.GetCurrentAnimatorStateInfo(0).IsName(currentAtkAnimName))
+        if (!animator.GetCurrentAnimatorStateInfo(0).IsName(atkAnimName))
         {
             return;
         }
 
-        animator.CrossFadeInFixedTime("Idle", 0);
+        animator.CrossFadeInFixedTime(idleAnimName, 0);
     }
 }

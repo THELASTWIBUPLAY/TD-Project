@@ -30,6 +30,8 @@ public class Character : MonoBehaviour
 
     public bool isAttacking = false;
 
+    private GameObject projVisuals;
+
     void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -136,6 +138,8 @@ public class Character : MonoBehaviour
 
         float scaleMult = 1f + ((starLevel - 1) * 0.2f);
         transform.localScale = basePresetScale * scaleMult;
+
+        UpdateProjectilePrefab();
     }
 
     Transform PickTargetForClass()
@@ -174,6 +178,14 @@ public class Character : MonoBehaviour
             }
         }
         return bestEnemy;
+    }
+
+    public void UpdateProjectilePrefab()
+    {
+        if (ProjectileVisualManager.Instance != null)
+        {
+            projVisuals = ProjectileVisualManager.Instance.GetProjectilePrefab(classType, starLevel);
+        }
     }
 
     void Shoot(Transform target)
@@ -218,7 +230,7 @@ public class Character : MonoBehaviour
             bool isAoE = (classType == CharacterClassType.Mage);
             float splashRadius = (starLevel >= 3) ? 2.2f : 1.5f;
 
-            projectile.Setup(target, isAoE, splashRadius);
+            projectile.Setup(target, isAoE, splashRadius, this, projVisuals);
         }
     }
 

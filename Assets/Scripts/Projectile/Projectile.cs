@@ -23,13 +23,15 @@ public class Projectile : MonoBehaviour
     private Transform targetEnemy;
     private Rigidbody2D targetRb;
     private Vector2 currentDirection = Vector2.up;
+    private Character owner;
+    private ProjectileOnImpact onImpact;
 
     public void Setup(Transform target)
     {
         Setup(target, false, 1.5f);
     }
 
-    public void Setup(Transform target, bool isAreaDamage, float splashRadius = 1.5f)
+    public void Setup(Transform target, bool isAreaDamage, float splashRadius = 1.5f, Character character = null, GameObject projPrefab = null)
     {
         targetEnemy = target;
         isAoE = isAreaDamage;
@@ -47,6 +49,20 @@ public class Projectile : MonoBehaviour
             targetRb = targetEnemy.GetComponent<Rigidbody2D>();
             currentDirection = (targetEnemy.position - transform.position).normalized;
             UpdateRotation(currentDirection);
+        }
+
+        owner = character;
+
+        if (projPrefab != null)
+        {
+            GameObject visualInstance = Instantiate(projPrefab, transform.position, transform.rotation, transform);
+            visualInstance.transform.localPosition = Vector3.zero;
+            visualInstance.transform.localRotation = Quaternion.identity;
+            GetComponent<SpriteRenderer>().enabled = false;
+            if (visualInstance.TryGetComponent<ProjectileOnImpact>(out ProjectileOnImpact hi))
+            {
+                onImpact = hi;
+            }
         }
     }
 
@@ -114,7 +130,7 @@ public class Projectile : MonoBehaviour
                     }
                 }
 
-                Destroy(gameObject);
+                DestroyProjectile();
                 return;
             }
 
@@ -140,8 +156,19 @@ public class Projectile : MonoBehaviour
                 }
             }
 
-            Destroy(gameObject);
+            DestroyProjectile();
         }
+    }
+
+    private void DestroyProjectile()
+    {
+        if (onImpact != null)
+        {
+            onImpact.Impact();
+            onImpact.gameObject.transform.SetParent(null);
+        }
+
+        Destroy(gameObject);
     }
 
     Transform FindNextBounceTarget()
@@ -167,7 +194,7 @@ public class Projectile : MonoBehaviour
 
     private void OnBecameInvisible()
     {
-        Destroy(gameObject);
+        DestroyProjectile();
     }
 
     private void OnDrawGizmosSelected()
