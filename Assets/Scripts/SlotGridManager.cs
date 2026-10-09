@@ -177,6 +177,30 @@ public class SlotGridManager : MonoBehaviour
 
     }
 
+    public void SpawnCharacterFromWheel(CharacterClassType classType)
+    {
+        CharacterSlot emptySlot = GetRandomEmptySlot();
+
+        if (emptySlot != null)
+        {
+            GameObject newCharGO = Instantiate(characterPrefab, emptySlot.transform.position, Quaternion.identity);
+            Character newChar = newCharGO.GetComponent<Character>();
+
+            if (newChar != null)
+            {
+                newChar.SetupClass(classType, 1);
+            }
+
+            emptySlot.AssignCharacter(newCharGO);
+
+            CheckAndExecuteMerge();
+        }
+        else
+        {
+            Debug.LogWarning("[SlotGridManager] Grid Penuh! Tidak dapat men-deploy karakter dari Spin Wheel.");
+        }
+    }
+
     [ContextMenu("Debug: Set Center to Star 3 & Evolve")]
     public void DebugPromoteCenterToStar3()
     {

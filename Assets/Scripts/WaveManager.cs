@@ -31,6 +31,8 @@ public class WaveManager : MonoBehaviour
     private bool isSpawning = false;
     private bool isWaveClearing = false;
 
+    public GameObject preWaveSpinPanel;
+
     private List<GameObject> activeEnemies = new List<GameObject>();
 
     void Awake()
@@ -231,6 +233,14 @@ public class WaveManager : MonoBehaviour
         if (waveClearPanel != null)
         {
             waveClearPanel.SetActive(false);
+        }
+
+        if (preWaveSpinPanel != null)
+        {
+            preWaveSpinPanel.SetActive(true); 
+            Time.timeScale = 0f;             
+
+            yield return new WaitUntil(() => !preWaveSpinPanel.activeSelf);
         }
 
         currentWave++;
