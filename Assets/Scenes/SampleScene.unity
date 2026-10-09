@@ -2860,8 +2860,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df74826ffa357d7408227b87c21299f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  columns: 0
-  rows: 0
+  columns: 5
+  rows: 3
   spacingX: 0.85
   spacingY: 0.85
   gridCenterPosition: {x: 0, y: -3.4}
@@ -8338,6 +8338,21 @@ MonoBehaviour:
   - name: mage3
     prefab: {fileID: 8015012828080601276, guid: 4a74bbb1c9c38824c91a8c12f8de7cad, type: 3}
     classType: 2
+    starLevel: 3
+    useForAllStars: 0
+  - name: tank1
+    prefab: {fileID: 8015012828080601276, guid: c718811c5f2c99f49abad051f8f061fc, type: 3}
+    classType: 4
+    starLevel: 1
+    useForAllStars: 0
+  - name: tank2
+    prefab: {fileID: 8015012828080601276, guid: c7736c1dd2b18504ba27fbee14c86ce4, type: 3}
+    classType: 4
+    starLevel: 2
+    useForAllStars: 0
+  - name: tank3
+    prefab: {fileID: 8015012828080601276, guid: 54230bf2c9cb5714db79c3520ce63c2d, type: 3}
+    classType: 4
     starLevel: 3
     useForAllStars: 0
   auraLinks:
