@@ -58,6 +58,7 @@ public class Projectile : MonoBehaviour
             GameObject visualInstance = Instantiate(projPrefab, transform.position, transform.rotation, transform);
             visualInstance.transform.localPosition = Vector3.zero;
             visualInstance.transform.localRotation = Quaternion.identity;
+            visualInstance.transform.localScale = Vector3.one;
             GetComponent<SpriteRenderer>().enabled = false;
             if (visualInstance.TryGetComponent<ProjectileOnImpact>(out ProjectileOnImpact hi))
             {

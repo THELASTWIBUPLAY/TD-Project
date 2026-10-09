@@ -56,7 +56,7 @@ public class CharacterAnimator : MonoBehaviour
 
         animator.CrossFadeInFixedTime(atkAnimName, 0);
         CancelInvoke(nameof(UnconditionalPlayIdle));
-        Invoke(nameof(UnconditionalPlayIdle), 0.1f);
+        Invoke(nameof(UnconditionalPlayIdle), 0.05f);
 
         animLength = -1f;
 

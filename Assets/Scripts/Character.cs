@@ -30,7 +30,8 @@ public class Character : MonoBehaviour
 
     public bool isAttacking = false;
 
-    private GameObject projVisuals;
+    private GameObject projectileVfx;
+    private GameObject auraVfx;
 
     void Awake()
     {
@@ -139,7 +140,7 @@ public class Character : MonoBehaviour
         float scaleMult = 1f + ((starLevel - 1) * 0.2f);
         transform.localScale = basePresetScale * scaleMult;
 
-        UpdateProjectilePrefab();
+        UpdateVfx();
     }
 
     Transform PickTargetForClass()
@@ -180,11 +181,26 @@ public class Character : MonoBehaviour
         return bestEnemy;
     }
 
-    public void UpdateProjectilePrefab()
+    public void UpdateVfx()
     {
-        if (ProjectileVisualManager.Instance != null)
+        projectileVfx = VfxManager.Instance.GetProjectilePrefab(classType, starLevel);
+
+        UpdateAuraVfx();
+    }
+
+    private void UpdateAuraVfx()
+    {
+        if (auraVfx != null)
         {
-            projVisuals = ProjectileVisualManager.Instance.GetProjectilePrefab(classType, starLevel);
+            Destroy(auraVfx);
+        }
+
+        GameObject auraPrefab = VfxManager.Instance.GetAuraPrefab(classType, starLevel);
+        if (auraPrefab != null)
+        {
+            auraVfx = Instantiate(auraPrefab, transform.position, Quaternion.identity, transform);
+            auraVfx.transform.localPosition = Vector3.zero;
+            auraVfx.transform.localRotation = Quaternion.identity;
         }
     }
 
@@ -230,7 +246,7 @@ public class Character : MonoBehaviour
             bool isAoE = (classType == CharacterClassType.Mage);
             float splashRadius = (starLevel >= 3) ? 2.2f : 1.5f;
 
-            projectile.Setup(target, isAoE, splashRadius, this, projVisuals);
+            projectile.Setup(target, isAoE, splashRadius, this, projectileVfx);
         }
     }
 

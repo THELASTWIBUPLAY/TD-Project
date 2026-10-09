@@ -2860,8 +2860,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df74826ffa357d7408227b87c21299f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  columns: 5
-  rows: 3
+  columns: 0
+  rows: 0
   spacingX: 0.85
   spacingY: 0.85
   gridCenterPosition: {x: 0, y: -3.4}
@@ -8276,7 +8276,7 @@ GameObject:
   - component: {fileID: 1917876408}
   - component: {fileID: 1917876407}
   m_Layer: 0
-  m_Name: ProjectileVisualManager
+  m_Name: VfxManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8295,10 +8295,67 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileVisualManager
   projectileLinks:
-  - projectile: {fileID: 8015012828080601276, guid: 586e40724303a144b911228bbdb26c0d, type: 3}
+  - name: ranger1
+    prefab: {fileID: 8015012828080601276, guid: 586e40724303a144b911228bbdb26c0d, type: 3}
     classType: 1
-    starLevel: 0
-    useForAllStars: 1
+    starLevel: 1
+    useForAllStars: 0
+  - name: ranger2
+    prefab: {fileID: 8015012828080601276, guid: d6f61227144d1274e81e487dce3ea82e, type: 3}
+    classType: 1
+    starLevel: 2
+    useForAllStars: 0
+  - name: ranger3
+    prefab: {fileID: 8015012828080601276, guid: 645473a3b3d3c414eb9cd9fcb94d1628, type: 3}
+    classType: 1
+    starLevel: 3
+    useForAllStars: 0
+  - name: melee1
+    prefab: {fileID: 8015012828080601276, guid: c718811c5f2c99f49abad051f8f061fc, type: 3}
+    classType: 0
+    starLevel: 1
+    useForAllStars: 0
+  - name: melee2
+    prefab: {fileID: 8015012828080601276, guid: c7736c1dd2b18504ba27fbee14c86ce4, type: 3}
+    classType: 0
+    starLevel: 2
+    useForAllStars: 0
+  - name: melee3
+    prefab: {fileID: 8015012828080601276, guid: 54230bf2c9cb5714db79c3520ce63c2d, type: 3}
+    classType: 0
+    starLevel: 3
+    useForAllStars: 0
+  - name: mage1
+    prefab: {fileID: 8015012828080601276, guid: 6977cbc877bfaad4983d2d36b11f6cd3, type: 3}
+    classType: 2
+    starLevel: 1
+    useForAllStars: 0
+  - name: mage2
+    prefab: {fileID: 8015012828080601276, guid: cba0e04e1e01ec94f9f02e5a673e4942, type: 3}
+    classType: 2
+    starLevel: 2
+    useForAllStars: 0
+  - name: mage3
+    prefab: {fileID: 8015012828080601276, guid: 4a74bbb1c9c38824c91a8c12f8de7cad, type: 3}
+    classType: 2
+    starLevel: 3
+    useForAllStars: 0
+  auraLinks:
+  - name: support 1
+    prefab: {fileID: 395897915748806596, guid: 07621e4cce0d4d949a9f19f7f9988ac2, type: 3}
+    classType: 3
+    starLevel: 1
+    useForAllStars: 0
+  - name: support 2
+    prefab: {fileID: 395897915748806596, guid: f74f537cc1a41554f8fb54e5f99e9c24, type: 3}
+    classType: 3
+    starLevel: 2
+    useForAllStars: 0
+  - name: support 3
+    prefab: {fileID: 395897915748806596, guid: 3bf6058b35a1c844781d853801a16026, type: 3}
+    classType: 3
+    starLevel: 3
+    useForAllStars: 0
 --- !u!4 &1917876408
 Transform:
   m_ObjectHideFlags: 0

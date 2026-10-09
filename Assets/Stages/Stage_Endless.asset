@@ -17,8 +17,8 @@ MonoBehaviour:
   maxWave: 10
   baseEnemyCount: 5
   enemyCountWaveMultiplier: 2
-  baseSpawnInterval: 2.2
-  minSpawnInterval: 0.6
+  baseSpawnInterval: 0
+  minSpawnInterval: 0
   miniBossInterval: 5
   finalBossInterval: 10
   miniBossCount: 1

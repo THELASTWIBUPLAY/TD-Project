@@ -9,19 +9,13 @@ public class ProjectileOnImpact : MonoBehaviour
 
     [Header("Settings")]
     public float impactWait = 0.5f;
+    public bool impactInheritRotation = false;
 
     private GameObject impactInstance;
-    private Vector3 ogScale;
-
-    private void Awake()
-    {
-        ogScale = transform.localScale;
-    }
 
     public void Impact()
     {
         transform.SetParent(null);
-        transform.localScale = ogScale;
 
         if (visual != null)
         {
@@ -30,7 +24,7 @@ public class ProjectileOnImpact : MonoBehaviour
 
         if (impact != null)
         {
-            impactInstance = Instantiate(impact, transform.position, transform.rotation);
+            impactInstance = Instantiate(impact, transform.position, impactInheritRotation ? transform.rotation : Quaternion.identity);
         }
 
         StartCoroutine(CleanupRoutine());

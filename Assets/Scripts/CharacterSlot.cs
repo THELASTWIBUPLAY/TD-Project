@@ -5,6 +5,7 @@ public class CharacterSlot : MonoBehaviour
     [Header("Status")]
     public bool isOccupied = false;
     public Character currentCharacter;
+    public GameObject characterPrefab;
 
     public void AssignCharacter(GameObject characterGO)
     {
@@ -34,6 +35,29 @@ public class CharacterSlot : MonoBehaviour
 
         currentCharacter = null;
     }
+
+    public Character CreateCharacter(CharacterClassType classType = CharacterClassType.Ranger, int starLevel = 1)
+    {
+        if (isOccupied)
+        {
+            ClearSlot();
+        }
+
+        GameObject newCharGO = Instantiate(characterPrefab, transform.position, Quaternion.identity);
+        currentCharacter = newCharGO.GetComponent<Character>();
+
+        if (currentCharacter != null)
+        {
+            currentCharacter.SetupClass(classType, starLevel);
+        }
+
+        newCharGO.transform.position = transform.position;
+        newCharGO.transform.SetParent(transform);
+        isOccupied = true;
+
+        return currentCharacter;
+    }
+
     private void OnDrawGizmos()
     {
         Gizmos.color = isOccupied ? Color.red : Color.green;
