@@ -8,14 +8,15 @@ using Unity.Services.RemoteConfig;
 public class MailConnectionTest : MonoBehaviour
 {
     [SerializeField] private MailInboxUI mailInbox;
-
     private struct UserAttributes { }
     private struct AppAttributes { }
+    
 
     private async void Start()
     {
         try
         {
+            // This test should start directly from the empty MailTest scene.
             if (UnityServices.State != ServicesInitializationState.Uninitialized)
             {
                 Debug.LogWarning(
@@ -25,12 +26,16 @@ public class MailConnectionTest : MonoBehaviour
                 return;
             }
 
+            // Use the same production environment as the main menu.
             var options = new InitializationOptions();
-            options.SetEnvironmentName("development");
+            options.SetEnvironmentName("production");
 
             await UnityServices.InitializeAsync(options);
+
+            // Give this test player an identity.
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
 
+            // Download the published configuration.
             var config = await RemoteConfigService.Instance.FetchConfigsAsync(
                 new UserAttributes(),
                 new AppAttributes()
@@ -38,6 +43,7 @@ public class MailConnectionTest : MonoBehaviour
 
             Debug.Log($"[MailTest] Config source: {config.origin}");
 
+            // Cached data wouldn't prove the cloud connection worked.
             if (config.origin != ConfigOrigin.Remote)
             {
                 Debug.LogWarning(
@@ -58,40 +64,40 @@ public class MailConnectionTest : MonoBehaviour
             }
 
             string json = config.GetJson("mail_catalog");
-            MailCatalog catalog = JsonUtility.FromJson<MailCatalog>(json);
 
-            if (catalog == null || catalog.messages == null)
-            {
-                Debug.LogError("[MailTest] Expected a messages array in mail_catalog.");
-                return;
-            }
+MailCatalog catalog = JsonUtility.FromJson<MailCatalog>(json);
 
-            if (mailInbox != null)
-            {
-                mailInbox.ShowInbox(catalog);
-            }
-            else
-            {
-                Debug.LogWarning("[MailTest] Assign the Mail Inbox reference.");
-            }
+if (catalog == null || catalog.messages == null)
+{
+    Debug.LogError("[MailTest] Expected a messages array in mail_catalog.");
+    return;
+}
+if (mailInbox != null)
+{
+    mailInbox.ShowInbox(catalog);
+}
+else
+{
+    Debug.LogWarning("[MailTest] Assign the Mail Inbox reference.");
+}
 
-            Debug.Log($"[MailTest] Loaded {catalog.messages.Length} message(s).");
+Debug.Log($"[MailTest] Loaded {catalog.messages.Length} message(s).");
 
-            foreach (MailMessage mail in catalog.messages)
-            {
-                if (mail == null)
-                    continue;
+foreach (MailMessage mail in catalog.messages)
+{
+    if (mail == null)
+        continue;
 
-                int rewardCount = mail.rewards != null ? mail.rewards.Length : 0;
+    int rewardCount = mail.rewards != null ? mail.rewards.Length : 0;
 
-                Debug.Log(
-                    $"[MailTest]\n" +
-                    $"ID: {mail.id}\n" +
-                    $"Title: {mail.title}\n" +
-                    $"Body: {mail.body}\n" +
-                    $"Attached rewards: {rewardCount}"
-                );
-            }
+    Debug.Log(
+        $"[MailTest]\n" +
+        $"ID: {mail.id}\n" +
+        $"Title: {mail.title}\n" +
+        $"Body: {mail.body}\n" +
+        $"Attached rewards: {rewardCount}"
+    );
+}
         }
         catch (Exception exception)
         {
