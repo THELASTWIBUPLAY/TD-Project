@@ -68,6 +68,38 @@ public class TalentSaveData
 }
 
 [Serializable]
+public class HeroProgressEntry
+{
+    public string heroId;
+    public int currentFragments;
+    public bool isUnlocked;
+}
+
+[Serializable]
+public class HeroSaveData
+{
+    public List<string> equippedHeroIds = new List<string>();
+    public List<HeroProgressEntry> heroProgressList = new List<HeroProgressEntry>();
+}
+
+[Serializable]
+public class RelicProgressEntry
+{
+    public string relicId;
+    public int currentFragments;
+    public bool isUnlocked;
+}
+
+[Serializable]
+public class RelicSaveData
+{
+    // ID relik yang sedang dipasang pemain di deck tempur (misal max 2 slot)
+    public List<string> equippedRelicIds = new List<string>();
+    // Progres fragmen masing-masing relik
+    public List<RelicProgressEntry> relicProgressList = new List<RelicProgressEntry>();
+}
+
+[Serializable]
 public class GameSaveData
 {
     public int saveVersion = 1;
@@ -78,4 +110,6 @@ public class GameSaveData
     public DailyQuestSaveData dailyQuest = new DailyQuestSaveData();
     public AchievementSaveData achievement = new AchievementSaveData();
     public TalentSaveData talent = new TalentSaveData();
+    public RelicSaveData relicData = new RelicSaveData();
+    public HeroSaveData heroData = new HeroSaveData();
 }

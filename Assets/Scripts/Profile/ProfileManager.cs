@@ -105,6 +105,20 @@ public class ProfileManager : MonoBehaviour, ISaveable
         SaveManager.Instance?.SaveLocal();
     }
 
+    [ContextMenu("Add 1000 exp")]
+    public void DebugAddExp()
+    {
+        AddAccountExp(1000);
+        OnProfileChanged?.Invoke();
+    }
+
+    [ContextMenu("Reset EXP")]
+    public void DebugResetExp()
+    {
+        _accountExp = 0;
+        OnProfileChanged?.Invoke();
+    }
+
     // ISaveable
     public void PopulateSaveData(GameSaveData saveData)
     {
