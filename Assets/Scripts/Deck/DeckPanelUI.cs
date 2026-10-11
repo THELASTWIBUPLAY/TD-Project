@@ -11,6 +11,9 @@ public class DeckPanelUI : MonoBehaviour
     private enum InventoryTab { Hero, Relic }
     private InventoryTab _currentTab = InventoryTab.Hero;
 
+    [Header("Modal Panels")]
+    [SerializeField] private HeroUpgradeModalUI _heroUpgradeModal;
+
     [Header("Top Box: Equipped Slots")]
     [SerializeField] private DeckDropSlot[] _heroDropSlots;   // Ukuran: 5
     [SerializeField] private DeckDropSlot[] _relicDropSlots;  // Ukuran: 3
@@ -84,6 +87,14 @@ public class DeckPanelUI : MonoBehaviour
             HeroManager.Instance.OnHeroDataUpdated -= RefreshInventoryRows;
         if (RelicManager.Instance != null)
             RelicManager.Instance.OnRelicDataUpdated -= RefreshInventoryRows;
+    }
+
+    public void OpenHeroUpgradeModal(string heroId)
+    {
+        if (_heroUpgradeModal != null)
+        {
+            _heroUpgradeModal.SetupModal(heroId);
+        }
     }
 
     private void SwitchTab(InventoryTab targetTab)
@@ -250,13 +261,5 @@ public class DeckPanelUI : MonoBehaviour
             var relic = !string.IsNullOrEmpty(id) ? _relicDatabase?.GetRelicById(id) : null;
             _relicDropSlots[i].SetupSlot(relic != null ? relic.relicIcon : null, id);
         }
-    }
-
-    public void OpenHeroUpgradeModal(string heroId)
-    {
-        var hero = _heroDatabase?.GetHeroById(heroId);
-        if (hero == null) return;
-
-        Debug.Log($"[Upgrade Modal] Membuka panel detail untuk Hero: {hero.heroName}");
     }
 }

@@ -1,6 +1,6 @@
-using UnityEngine;
-
-public class HeroRarity : MonoBehaviour
+public enum HeroRarity
 {
-
+    One,
+    Two,
+    Three
 }

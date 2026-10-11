@@ -73,6 +73,10 @@ public class HeroProgressEntry
     public string heroId;
     public int currentFragments;
     public bool isUnlocked;
+
+    // Progres Upgrade & Ascend
+    public int level = 1; // Mulai dari level 1
+    public int star = 1;  // Mulai dari bintang 1
 }
 
 [Serializable]

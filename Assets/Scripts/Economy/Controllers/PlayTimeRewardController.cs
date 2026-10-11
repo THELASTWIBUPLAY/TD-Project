@@ -1,85 +1,199 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayTimeRewardController : MonoBehaviour
-{ 
-    public enum RewardState
+public class PlayTimeRewardController : MonoBehaviour, ISaveable
+{
+    public static PlayTimeRewardController Instance { get; private set; }
+
+    public enum SlotState
     {
-        CountingDown,
-        ReadyToClaim,
+        Locked,         // Belum dibeli dengan Gem
+        CountingDown,   // Terbuka & timer berjalan
+        ReadyToClaim    // Waktu habis & siap diambil
     }
 
-    [Header("Reward Configurations")]
-    [Tooltip("Reward duration in seconds. Default 30 Minutes = 1800 seconds.")]
-    [SerializeField] private float _claimInterval = 1800f; // In seconds
-    [SerializeField] private int _baseGoldReward = 100;
-
-    // Events
-    public event Action OnRewardReady;
-    public event Action OnRewardClaimed;
-
-    // State
-    private float _targetTime;
-    private RewardState _currentState;
-
-    // UI Access
-    public RewardState CurrentState => _currentState;
-    public float RemainingSeconds => MathF.Max(0f, _targetTime - Time.time);
-    public float ProgressNormalized => Mathf.Clamp01(1f - (RemainingSeconds / _claimInterval));
-
-    public string SourceName => GetType().Name;
-
-    private void Start()
+    [Serializable]
+    public class SlotConfig
     {
-        StartNewCycle();
+        public string slotName = "Chest Slot";
+        [Tooltip("Biaya Gem untuk membuka slot ini secara permanen (0 = gratis/terbuka awal)")]
+        public int unlockGemCost = 0;
+        [Tooltip("Durasi countdown dalam detik (default: 1800 detik / 30 menit)")]
+        public float claimInterval = 1800f;
+        [Tooltip("Jumlah Gold yang didapatkan")]
+        public int goldReward = 100;
+        [Tooltip("Jumlah Gem bonus jika ada")]
+        public int gemReward = 0;
     }
 
-    private void Update()
+    public class SlotRuntime
     {
-        if (_currentState == RewardState.CountingDown)
+        public bool isUnlocked;
+        public float targetTime;
+        public SlotState state;
+    }
+
+    [Header("Slot Configurations (4 Slots)")]
+    [SerializeField]
+    private SlotConfig[] _slotConfigs = new SlotConfig[4]
+    {
+        new SlotConfig { slotName = "Chest 1", unlockGemCost = 0,   claimInterval = 1800f, goldReward = 100 },
+        new SlotConfig { slotName = "Chest 2", unlockGemCost = 50,  claimInterval = 1800f, goldReward = 150 },
+        new SlotConfig { slotName = "Chest 3", unlockGemCost = 100, claimInterval = 1800f, goldReward = 200 },
+        new SlotConfig { slotName = "Chest 4", unlockGemCost = 150, claimInterval = 1800f, goldReward = 250 }
+    };
+
+    private readonly SlotRuntime[] _slotRuntimes = new SlotRuntime[4];
+
+    public event Action<int> OnSlotUpdated;
+    public int TotalSlots => _slotConfigs.Length;
+
+    private const string PrefKeyUnlockedPrefix = "PlayTime_SlotUnlocked_";
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
         {
-            if (Time.time >= _targetTime)
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+
+        InitializeSlots();
+    }
+
+    private void InitializeSlots()
+    {
+        for (int i = 0; i < _slotConfigs.Length; i++)
+        {
+            _slotRuntimes[i] = new SlotRuntime();
+
+            // Slot 0 selalu terbuka default. Slot 1-3 dibaca dari penyimpanan
+            if (i == 0 || _slotConfigs[i].unlockGemCost <= 0)
             {
-                SetReadyToClaim();
+                _slotRuntimes[i].isUnlocked = true;
+            }
+            else
+            {
+                _slotRuntimes[i].isUnlocked = PlayerPrefs.GetInt(PrefKeyUnlockedPrefix + i, 0) == 1;
+            }
+
+            if (_slotRuntimes[i].isUnlocked)
+            {
+                StartSlotCycle(i);
+            }
+            else
+            {
+                _slotRuntimes[i].state = SlotState.Locked;
             }
         }
     }
 
-    private void StartNewCycle()
+    private void Update()
     {
-        _targetTime = Time.time + _claimInterval;
-        _currentState = RewardState.CountingDown;
-    }
-
-    private void SetReadyToClaim()
-    {
-        _currentState = RewardState.ReadyToClaim;
-        OnRewardReady?.Invoke();
-    }
-
-    /// <summary>
-    /// Called via OnClick()
-    /// </summary>
-    public void ClaimReward()
-    {
-        if (_currentState != RewardState.ReadyToClaim)
+        for (int i = 0; i < _slotRuntimes.Length; i++)
         {
-            AlertManager.Instance.Show("Reward is not ready to claim!");
+            var runtime = _slotRuntimes[i];
+            if (runtime != null && runtime.isUnlocked && runtime.state == SlotState.CountingDown)
+            {
+                if (Time.time >= runtime.targetTime)
+                {
+                    runtime.state = SlotState.ReadyToClaim;
+                    OnSlotUpdated?.Invoke(i);
+                }
+            }
+        }
+    }
+
+    public void StartSlotCycle(int slotIndex)
+    {
+        if (slotIndex < 0 || slotIndex >= _slotRuntimes.Length) return;
+
+        var cfg = _slotConfigs[slotIndex];
+        var runtime = _slotRuntimes[slotIndex];
+
+        runtime.targetTime = Time.time + cfg.claimInterval;
+        runtime.state = SlotState.CountingDown;
+        OnSlotUpdated?.Invoke(slotIndex);
+    }
+
+    public SlotConfig GetConfig(int slotIndex) => _slotConfigs[slotIndex];
+    public SlotState GetState(int slotIndex) => _slotRuntimes[slotIndex].state;
+
+    public float GetRemainingSeconds(int slotIndex)
+    {
+        if (!_slotRuntimes[slotIndex].isUnlocked) return 0f;
+        return Mathf.Max(0f, _slotRuntimes[slotIndex].targetTime - Time.time);
+    }
+
+    // =========================================================================
+    // UNLOCK & CLAIM INTERACTION
+    // =========================================================================
+
+    public bool TryUnlockSlot(int slotIndex)
+    {
+        if (slotIndex <= 0 || slotIndex >= _slotConfigs.Length) return false;
+
+        var runtime = _slotRuntimes[slotIndex];
+        if (runtime.isUnlocked) return false;
+
+        var cfg = _slotConfigs[slotIndex];
+
+        if (EconomyManager.Instance == null || EconomyManager.Instance.CurrentData.gem < cfg.unlockGemCost)
+        {
+            AlertManager.Instance?.Show("Gem tidak mencukupi untuk membuka slot!");
+            return false;
+        }
+
+        // Potong Gem & simpan status permanen
+        EconomyManager.Instance.ModifyGem(-cfg.unlockGemCost);
+        runtime.isUnlocked = true;
+        PlayerPrefs.SetInt(PrefKeyUnlockedPrefix + slotIndex, 1);
+        PlayerPrefs.Save();
+
+        AlertManager.Instance?.Show($"{cfg.slotName} Terbuka!");
+        StartSlotCycle(slotIndex);
+
+        SaveManager.Instance?.SaveLocal();
+        return true;
+    }
+
+    public void ClaimReward(int slotIndex)
+    {
+        if (slotIndex < 0 || slotIndex >= _slotRuntimes.Length) return;
+
+        var runtime = _slotRuntimes[slotIndex];
+        if (runtime.state != SlotState.ReadyToClaim)
+        {
+            AlertManager.Instance?.Show("Peti belum siap diklaim!");
             return;
         }
 
-        DistributeReward();
-        OnRewardClaimed?.Invoke();
-        StartNewCycle();
-    }
+        var cfg = _slotConfigs[slotIndex];
 
-    private void DistributeReward()
-    {
         if (EconomyManager.Instance != null)
         {
-            EconomyManager.Instance.ModifyGold(_baseGoldReward);
+            if (cfg.goldReward > 0) EconomyManager.Instance.ModifyGold(cfg.goldReward);
+            if (cfg.gemReward > 0) EconomyManager.Instance.ModifyGem(cfg.gemReward);
         }
 
-        AlertManager.Instance.Show("Reward is claimed!");
+        AlertManager.Instance?.Show($"Hadiah {cfg.slotName} berhasil diambil!");
+        StartSlotCycle(slotIndex);
+        SaveManager.Instance?.SaveLocal();
+    }
+
+    // =========================================================================
+    // ISAVEABLE IMPLEMENTATION
+    // =========================================================================
+
+    public void PopulateSaveData(GameSaveData saveData)
+    {
+        // Menyinkronkan status buka slot ke save file jika field sudah tersedia
+    }
+
+    public void LoadFromSaveData(GameSaveData saveData)
+    {
+        InitializeSlots();
     }
 }

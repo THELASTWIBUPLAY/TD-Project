@@ -7,58 +7,40 @@ public struct AscendRequirement
     [Range(1, 3)] public int starLevel;
     [Tooltip("Level maksimal hero di tier bintang ini")]
     public int maxLevelCap;
-    [Tooltip("Biaya Gem untuk naik KE tier bintang ini (★1 ke ★2, ★2 ke ★3)")]
+
+    [Header("Material Requirements")]
     public int gemCost;
+    [Tooltip("Jumlah fragmen hero spesifik yang dibutuhkan untuk ascend")]
+    public int requiredHeroFragments;
+    [Tooltip("Jumlah batu evolusi yang dibutuhkan (disiapkan untuk fitur mendatang)")]
+    public int requiredEvolutionStones;
 }
 
 [CreateAssetMenu(fileName = "HeroUpgradeConfig", menuName = "Deck/Hero Upgrade Config")]
 public class HeroUpgradeConfigSO : ScriptableObject
 {
     [Header("Ascend Tiers Configuration")]
-    [Tooltip("Daftar konfigurasi level cap dan biaya ascend per bintang")]
     [SerializeField]
     private AscendRequirement[] _ascendTiers = new AscendRequirement[]
     {
-        new AscendRequirement { starLevel = 1, maxLevelCap = 30, gemCost = 0 },
-        new AscendRequirement { starLevel = 2, maxLevelCap = 40, gemCost = 150 },
-        new AscendRequirement { starLevel = 3, maxLevelCap = 50, gemCost = 300 }
+        new AscendRequirement { starLevel = 1, maxLevelCap = 30, gemCost = 0,   requiredHeroFragments = 0,  requiredEvolutionStones = 0 },
+        new AscendRequirement { starLevel = 2, maxLevelCap = 40, gemCost = 150, requiredHeroFragments = 20, requiredEvolutionStones = 1 },
+        new AscendRequirement { starLevel = 3, maxLevelCap = 50, gemCost = 300, requiredHeroFragments = 50, requiredEvolutionStones = 3 }
     };
 
     [Header("Level Up Cost (Gold)")]
-    [Tooltip("Biaya dasar Gold di Level 1")]
     [SerializeField] private int _baseGoldCost = 100;
-    [Tooltip("Kenaikan biaya Gold per level (Contoh: Cost = Base + (Level * Multiplier))")]
     [SerializeField] private float _goldCostMultiplier = 50f;
 
-    /// <summary>
-    /// Mendapatkan batas level maksimal berdasarkan tingkat bintang saat ini.
-    /// </summary>
-    public int GetMaxLevelForStar(int star)
+    public AscendRequirement GetRequirementForStar(int star)
     {
         foreach (var tier in _ascendTiers)
         {
-            if (tier.starLevel == star) return tier.maxLevelCap;
+            if (tier.starLevel == star) return tier;
         }
-        return 30; // Fallback default
+        return default;
     }
 
-    /// <summary>
-    /// Mendapatkan biaya Gem untuk ascend ke targetStar berikutnya.
-    /// </summary>
-    public int GetGemCostForAscend(int targetStar)
-    {
-        foreach (var tier in _ascendTiers)
-        {
-            if (tier.starLevel == targetStar) return tier.gemCost;
-        }
-        return 0;
-    }
-
-    /// <summary>
-    /// Menghitung biaya Gold untuk naik dari currentLevel ke currentLevel + 1.
-    /// </summary>
-    public int GetGoldCostForLevelUp(int currentLevel)
-    {
-        return Mathf.RoundToInt(_baseGoldCost + (currentLevel * _goldCostMultiplier));
-    }
+    public int GetMaxLevelForStar(int star) => GetRequirementForStar(star).maxLevelCap;
+    public int GetGoldCostForLevelUp(int currentLevel) => Mathf.RoundToInt(_baseGoldCost + (currentLevel * _goldCostMultiplier));
 }
