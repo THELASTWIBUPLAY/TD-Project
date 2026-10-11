@@ -16,7 +16,7 @@ public class CharacterSlotEditor : Editor
 public class CreateCharacterWindow : EditorWindow
 {
     private CharacterSlot targetSlot;
-    private CharacterClassType selectedClass = CharacterClassType.Melee;
+    private CharacterClassType selectedClass = CharacterClassType.Fighter;
     private int starLevel = 1;
 
     public static void ShowWindow(CharacterSlot slot)

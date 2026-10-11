@@ -1305,8 +1305,8 @@ MonoBehaviour:
   currentHealth: 0
   healthBar: {fileID: 2110843643}
   healthText: {fileID: 34309551}
-  baselineSprite916: {fileID: -1366652369652354391, guid: 1210de2263a9fad4a9064fb0f3d0c4df, type: 3}
-  baselineSprite919: {fileID: -1366652369652354391, guid: 1210de2263a9fad4a9064fb0f3d0c4df, type: 3}
+  baselineSprite916: {fileID: 0}
+  baselineSprite919: {fileID: 0}
   repairEffectivenessMultiplier: 1
   fixedColliderHeight: 0.5
   widthPercentage: 0.88
@@ -1404,6 +1404,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -1413,7 +1414,6 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 0
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!4 &464291163
 Transform:
@@ -5438,6 +5438,7 @@ GameObject:
   m_IsActive: 1
 --- !u!212 &1210254393
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -5456,6 +5457,8 @@ SpriteRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -5477,9 +5480,11 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: -10
+  m_MaskInteraction: 0
   m_Sprite: {fileID: -6411699102014456103, guid: c87653c77d0e78149b74ddd482356acf, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -5489,7 +5494,6 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 0
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!4 &1210254394
 Transform:
@@ -6232,6 +6236,26 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1328087371}
   m_CullTransparentMesh: 1
+--- !u!114 &1328087375
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1328087371}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 1
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1 &1331010102
 GameObject:
   m_ObjectHideFlags: 0
@@ -6369,26 +6393,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1331010102}
   m_CullTransparentMesh: 1
---- !u!114 &1328087375
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1328087371}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_IgnoreLayout: 1
-  m_MinWidth: -1
-  m_MinHeight: -1
-  m_PreferredWidth: -1
-  m_PreferredHeight: -1
-  m_FlexibleWidth: -1
-  m_FlexibleHeight: -1
-  m_LayoutPriority: 1
 --- !u!1 &1400772116
 GameObject:
   m_ObjectHideFlags: 0
@@ -7130,7 +7134,7 @@ MonoBehaviour:
   buffListPanel: {fileID: 744525727}
   buffListText: {fileID: 868719518}
   autoBattleText: {fileID: 1422280225}
-  buffListContainer: {fileID: 633433441}
+  buffListContainer: {fileID: 744525728}
   buffItemPrefab: {fileID: 5185963325879838027, guid: 44239a14eef944e4b9a633548ad0059f, type: 3}
   cardPrefab: {fileID: 435667288698384381, guid: bb8fc7960185ee54e8e36c86670d0fad, type: 3}
   cardSpawnParent: {fileID: 1061813640}
@@ -7145,8 +7149,8 @@ MonoBehaviour:
   characterPrefab: {fileID: 8036335337543512908, guid: 21a684fb35ac8d14497f25c0228b64a1, type: 3}
   isAutoBattle: 0
   bannedClasses: 
-  rerollButton: {fileID: 1431697346}
-  rerollText: {fileID: 1066896494}
+  rerollButton: {fileID: 0}
+  rerollText: {fileID: 0}
   maxRerollCount: 3
   debugTargetClass: 0
   debugBlackMarketTickets: 2
@@ -9071,17 +9075,17 @@ MonoBehaviour:
   projectileLinks:
   - name: ranger1
     prefab: {fileID: 8015012828080601276, guid: 586e40724303a144b911228bbdb26c0d, type: 3}
-    classType: 1
+    classType: 4
     starLevel: 1
     useForAllStars: 0
   - name: ranger2
     prefab: {fileID: 8015012828080601276, guid: d6f61227144d1274e81e487dce3ea82e, type: 3}
-    classType: 1
+    classType: 4
     starLevel: 2
     useForAllStars: 0
   - name: ranger3
     prefab: {fileID: 8015012828080601276, guid: 645473a3b3d3c414eb9cd9fcb94d1628, type: 3}
-    classType: 1
+    classType: 4
     starLevel: 3
     useForAllStars: 0
   - name: melee1
@@ -9101,48 +9105,48 @@ MonoBehaviour:
     useForAllStars: 0
   - name: mage1
     prefab: {fileID: 8015012828080601276, guid: 6977cbc877bfaad4983d2d36b11f6cd3, type: 3}
-    classType: 2
+    classType: 1
     starLevel: 1
     useForAllStars: 0
   - name: mage2
     prefab: {fileID: 8015012828080601276, guid: cba0e04e1e01ec94f9f02e5a673e4942, type: 3}
-    classType: 2
+    classType: 1
     starLevel: 2
     useForAllStars: 0
   - name: mage3
     prefab: {fileID: 8015012828080601276, guid: 4a74bbb1c9c38824c91a8c12f8de7cad, type: 3}
-    classType: 2
+    classType: 1
     starLevel: 3
     useForAllStars: 0
   - name: tank1
     prefab: {fileID: 8015012828080601276, guid: c718811c5f2c99f49abad051f8f061fc, type: 3}
-    classType: 4
+    classType: 3
     starLevel: 1
     useForAllStars: 0
   - name: tank2
     prefab: {fileID: 8015012828080601276, guid: c7736c1dd2b18504ba27fbee14c86ce4, type: 3}
-    classType: 4
+    classType: 3
     starLevel: 2
     useForAllStars: 0
   - name: tank3
     prefab: {fileID: 8015012828080601276, guid: 54230bf2c9cb5714db79c3520ce63c2d, type: 3}
-    classType: 4
+    classType: 3
     starLevel: 3
     useForAllStars: 0
   auraLinks:
   - name: support 1
     prefab: {fileID: 395897915748806596, guid: 07621e4cce0d4d949a9f19f7f9988ac2, type: 3}
-    classType: 3
+    classType: 2
     starLevel: 1
     useForAllStars: 0
   - name: support 2
     prefab: {fileID: 395897915748806596, guid: f74f537cc1a41554f8fb54e5f99e9c24, type: 3}
-    classType: 3
+    classType: 2
     starLevel: 2
     useForAllStars: 0
   - name: support 3
     prefab: {fileID: 395897915748806596, guid: 3bf6058b35a1c844781d853801a16026, type: 3}
-    classType: 3
+    classType: 2
     starLevel: 3
     useForAllStars: 0
 --- !u!4 &1917876408
@@ -10041,3 +10045,4 @@ SceneRoots:
   - {fileID: 956637804}
   - {fileID: 718425699}
   - {fileID: 1210254394}
+  - {fileID: 1917876408}

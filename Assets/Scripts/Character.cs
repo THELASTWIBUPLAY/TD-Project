@@ -16,8 +16,8 @@ public class Character : MonoBehaviour
     public float attackRange = 7f;
 
     [Header("Critical Stats")]
-    public float critRate = 0.05f;     
-    public float critDamage = 1.5f;    
+    public float critRate = 0.05f;
+    public float critDamage = 1.5f;
 
     [Header("Buff Multipliers (Global)")]
     public static float GlobalDamageBonusPercent = 0f;
@@ -51,10 +51,14 @@ public class Character : MonoBehaviour
 
     private Animator anim;
 
+    private CharacterAnimator charAnim;
+    private GameObject projectileVfx;
+    private GameObject auraVfx;
+
     void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        anim = GetComponent<Animator>(); // <-- Tambahkan baris ini
+        anim = GetComponent<Animator>();
         if (transform.localScale != Vector3.zero)
         {
             basePresetScale = transform.localScale;
@@ -84,37 +88,37 @@ public class Character : MonoBehaviour
     public void ApplyClassStats()
     {
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
-        if (anim == null) anim = GetComponent<Animator>(); // Ambil komponen Animator
+        if (anim == null) anim = GetComponent<Animator>();
 
         switch (classType)
         {
-            case CharacterClassType.Fighter: 
+            case CharacterClassType.Fighter:
                 baseAttackDamage = 14f;
                 baseAttackCooldown = 0.6f;
                 attackRange = 5.2f;
                 critRate = 0.10f;
                 critDamage = 1.5f;
-                if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0.4f, 0.8f); 
-                if (anim != null && fighterController != null) anim.runtimeAnimatorController = fighterController; // Ganti Controller
+                if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0.4f, 0.8f);
+                if (anim != null && fighterController != null) anim.runtimeAnimatorController = fighterController;
                 break;
 
-            case CharacterClassType.Ranged: 
+            case CharacterClassType.Ranged:
                 baseAttackDamage = 50f;
                 baseAttackCooldown = 1.8f;
                 attackRange = 10f;
                 critRate = 0.20f;
                 critDamage = 2.0f;
-                if (spriteRenderer != null) spriteRenderer.color = new Color(0.2f, 0.85f, 0.3f); 
+                if (spriteRenderer != null) spriteRenderer.color = new Color(0.2f, 0.85f, 0.3f);
                 if (anim != null && rangedController != null) anim.runtimeAnimatorController = rangedController;
                 break;
 
-            case CharacterClassType.Mage: 
+            case CharacterClassType.Mage:
                 baseAttackDamage = 30f;
                 baseAttackCooldown = 1.25f;
                 attackRange = 7.5f;
                 critRate = 0.05f;
                 critDamage = 1.5f;
-                if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0.45f, 0.1f); 
+                if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0.45f, 0.1f);
                 if (anim != null && mageController != null) anim.runtimeAnimatorController = mageController;
                 break;
 
@@ -124,17 +128,17 @@ public class Character : MonoBehaviour
                 attackRange = 7.5f;
                 critRate = 0.05f;
                 critDamage = 1.3f;
-                if (spriteRenderer != null) spriteRenderer.color = new Color(0.4f, 0.8f, 1f); 
+                if (spriteRenderer != null) spriteRenderer.color = new Color(0.4f, 0.8f, 1f);
                 if (anim != null && supportController != null) anim.runtimeAnimatorController = supportController;
                 break;
 
-            case CharacterClassType.Tank: 
+            case CharacterClassType.Tank:
                 baseAttackDamage = 20f;
-                baseAttackCooldown = 0.95f; 
+                baseAttackCooldown = 0.95f;
                 attackRange = 4.0f;
                 critRate = 0.05f;
                 critDamage = 1.4f;
-                if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0.85f, 0.15f); 
+                if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0.85f, 0.15f);
                 if (anim != null && tankController != null) anim.runtimeAnimatorController = tankController;
                 break;
         }
@@ -152,7 +156,7 @@ public class Character : MonoBehaviour
 
         if (classType == CharacterClassType.Fighter && currentEvolution == EvolutionPath.PathA)
         {
-            effectiveCooldown = 1f; 
+            effectiveCooldown = 1f;
         }
         else if (classType == CharacterClassType.Mage && currentEvolution == EvolutionPath.PathB)
         {
@@ -160,7 +164,7 @@ public class Character : MonoBehaviour
         }
         else if (classType == CharacterClassType.Tank && currentEvolution == EvolutionPath.PathB)
         {
-            effectiveCooldown = 3.0f; 
+            effectiveCooldown = 3.0f;
         }
 
         float currentCooldown = effectiveCooldown / (GlobalAtkSpeedMultiplier * starSpeedMult);
@@ -171,7 +175,7 @@ public class Character : MonoBehaviour
             if (target != null)
             {
                 Shoot(target);
-                charAnim.PlayAnim();
+                if (charAnim != null) charAnim.PlayAnim(); // [VFX RESTORED] null-guarded
                 fireCountdown = Mathf.Max(0.08f, currentCooldown);
             }
         }
@@ -199,6 +203,34 @@ public class Character : MonoBehaviour
         transform.localScale = basePresetScale * scaleMult;
 
         UpdateVfx();
+    }
+
+    public void UpdateVfx()
+    {
+        if (VfxManager.Instance == null) return;
+
+        projectileVfx = VfxManager.Instance.GetProjectilePrefab(classType, starLevel);
+
+        UpdateAuraVfx();
+    }
+
+    private void UpdateAuraVfx()
+    {
+        if (auraVfx != null)
+        {
+            Destroy(auraVfx);
+            auraVfx = null;
+        }
+
+        if (VfxManager.Instance == null) return;
+
+        GameObject auraPrefab = VfxManager.Instance.GetAuraPrefab(classType, starLevel);
+        if (auraPrefab != null)
+        {
+            auraVfx = Instantiate(auraPrefab, transform.position, Quaternion.identity, transform);
+            auraVfx.transform.localPosition = Vector3.zero;
+            auraVfx.transform.localRotation = Quaternion.identity;
+        }
     }
 
     Transform PickTargetForClass()
@@ -248,7 +280,7 @@ public class Character : MonoBehaviour
     {
         if (classType == CharacterClassType.Tank && currentEvolution == EvolutionPath.PathA)
         {
-            return; 
+            return;
         }
 
         if (target == null || projectilePrefab == null) return;
@@ -355,11 +387,11 @@ public class Character : MonoBehaviour
             {
                 if (currentEvolution == EvolutionPath.PathB)
                 {
-                    splashRadius = 4.0f; 
+                    splashRadius = 4.0f;
                 }
                 else
                 {
-                    splashRadius = 2.4f; 
+                    splashRadius = 2.4f;
                 }
             }
 
@@ -409,7 +441,7 @@ public class Character : MonoBehaviour
                 Quaternion rot = Quaternion.Euler(0, 0, ang);
                 Vector2 spreadDir = rot * baseDir;
 
-                p.SetupDirection(spreadDir);
+                p.SetupDirection(spreadDir, this, projectileVfx);
             }
         }
     }
@@ -482,7 +514,7 @@ public class Character : MonoBehaviour
                 gameObject.AddComponent<SupportRouletteBuff>();
             }
         }
-        
+
         if (evolutionBadgeText != null)
         {
             evolutionBadgeText.text = (path == EvolutionPath.PathA) ? "[A]" : "[B]";

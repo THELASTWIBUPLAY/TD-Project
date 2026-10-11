@@ -36,7 +36,7 @@ public class CharacterSlot : MonoBehaviour
         currentCharacter = null;
     }
 
-    public Character CreateCharacter(CharacterClassType classType = CharacterClassType.Ranger, int starLevel = 1)
+    public Character CreateCharacter(CharacterClassType classType = CharacterClassType.Ranged, int starLevel = 1)
     {
         if (isOccupied)
         {

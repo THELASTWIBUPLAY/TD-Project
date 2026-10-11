@@ -21,7 +21,7 @@ public class Projectile : MonoBehaviour
     public float aoeRadius = 1.5f;
 
     [Header("Soft Homing Config")]
-    public float turnSpeed = 280f; 
+    public float turnSpeed = 280f;
     public float leadPredictionTime = 0.15f;
 
     [Header("Ricochet Mechanic")]
@@ -51,6 +51,7 @@ public class Projectile : MonoBehaviour
 
     private Vector3 lastPosition;
     private bool hasHitProcessed = false;
+    private bool isDestroyed = false;
 
     void Awake()
     {
@@ -58,7 +59,7 @@ public class Projectile : MonoBehaviour
         if (trailRenderer == null) trailRenderer = GetComponentInChildren<TrailRenderer>();
     }
 
-    public void Setup(Transform target, bool isAreaDamage = false, float splashRadius = 1.5f)
+    public void Setup(Transform target, bool isAreaDamage = false, float splashRadius = 1.5f, Character character = null, GameObject projPrefab = null)
     {
         targetEnemy = target;
         isAoE = isAreaDamage;
@@ -86,7 +87,43 @@ public class Projectile : MonoBehaviour
             UpdateRotation(currentDirection);
         }
 
+        owner = character;
+        AttachVisual(projPrefab);
+
         lastPosition = transform.position;
+    }
+
+    private void AttachVisual(GameObject projPrefab)
+    {
+        if (projPrefab == null) return;
+
+        GameObject visualInstance = Instantiate(projPrefab, transform.position, transform.rotation, transform);
+        visualInstance.transform.localPosition = Vector3.zero;
+        visualInstance.transform.localRotation = Quaternion.identity;
+        visualInstance.transform.localScale = Vector3.one;
+
+        if (spriteRenderer != null) spriteRenderer.enabled = false;
+        if (trailRenderer != null) trailRenderer.enabled = false;
+
+        if (visualInstance.TryGetComponent<ProjectileOnImpact>(out ProjectileOnImpact hi))
+        {
+            onImpact = hi;
+        }
+    }
+
+    private void DestroyProjectile()
+    {
+        if (isDestroyed) return;
+        isDestroyed = true;
+        hasHitProcessed = true;
+
+        if (onImpact != null)
+        {
+            onImpact.Impact();
+            onImpact.gameObject.transform.SetParent(null);
+        }
+
+        Destroy(gameObject);
     }
 
     public void SetColor(Color targetColor)
@@ -100,13 +137,13 @@ public class Projectile : MonoBehaviour
         {
             Gradient gradient = new Gradient();
             gradient.SetKeys(
-                new GradientColorKey[] { 
-                    new GradientColorKey(targetColor, 0.0f), 
-                    new GradientColorKey(targetColor, 1.0f) 
+                new GradientColorKey[] {
+                    new GradientColorKey(targetColor, 0.0f),
+                    new GradientColorKey(targetColor, 1.0f)
                 },
-                new GradientAlphaKey[] { 
-                    new GradientAlphaKey(1.0f, 0.0f), 
-                    new GradientAlphaKey(0.0f, 1.0f) 
+                new GradientAlphaKey[] {
+                    new GradientAlphaKey(1.0f, 0.0f),
+                    new GradientAlphaKey(0.0f, 1.0f)
                 }
             );
 
@@ -145,7 +182,7 @@ public class Projectile : MonoBehaviour
 
             if (targetRb != null)
             {
-                Vector2 vel = targetRb.linearVelocity; 
+                Vector2 vel = targetRb.linearVelocity;
                 predictedTargetPos += (Vector3)(vel * leadPredictionTime);
             }
             else
@@ -221,8 +258,8 @@ public class Projectile : MonoBehaviour
 
                 BurnPuddle bp = puddleObj.AddComponent<BurnPuddle>();
                 bp.radius = aoeRadius;
-                bp.dpsDamage = damage * 0.35f; 
-                bp.duration = 4.0f;            
+                bp.dpsDamage = damage * 0.35f;
+                bp.duration = 4.0f;
             }
 
             Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(transform.position, aoeRadius);
@@ -238,7 +275,7 @@ public class Projectile : MonoBehaviour
                 }
             }
 
-            Destroy(gameObject);
+            DestroyProjectile();
             return;
         }
 
@@ -249,8 +286,8 @@ public class Projectile : MonoBehaviour
                 ApplyHitEffects(enemy, damage);
                 damage *= 0.90f;
                 pierceCount++;
-                lastPosition = transform.position; 
-                if (pierceCount >= 4) Destroy(gameObject);
+                lastPosition = transform.position;
+                if (pierceCount >= 4) DestroyProjectile();
             }
             return;
         }
@@ -272,76 +309,75 @@ public class Projectile : MonoBehaviour
                 targetRb = targetEnemy.GetComponent<Rigidbody2D>();
                 currentDirection = (targetEnemy.position - transform.position).normalized;
                 damage *= 0.60f;
-                ResetTrail(); 
-                lastPosition = transform.position; 
+                ResetTrail();
+                lastPosition = transform.position;
                 return;
             }
         }
 
-        hasHitProcessed = true;
-        Destroy(gameObject);
+        DestroyProjectile();
     }
 
     void ApplyHitEffects(Enemy enemy, float dmg)
-{
-    if (enemy == null) return;
-
-    if (GameManager.Instance != null)
     {
-        GameManager.Instance.RecordDamage(shooterClass, dmg);
-    }
+        if (enemy == null) return;
 
-    if (isCrit && CameraShake.Instance != null)
-    {
-        CameraShake.Instance.Shake(0.08f, 0.06f);
-    }
-
-    if (shooterClass == CharacterClassType.Tank && evolution == EvolutionPath.PathB)
-    {
-        enemy.ApplyKnockback(2.5f, 0.08f); 
-    }
-
-    if (shooterClass == CharacterClassType.Mage && evolution == EvolutionPath.PathB)
-    {
-        enemy.ApplyKnockback(3.5f, 0.1f);
-    }
-
-    if (shooterClass == CharacterClassType.Ranged && evolution == EvolutionPath.PathB)
-    {
-        if (enemy.archetype != EnemyArchetype.Boss)
+        if (GameManager.Instance != null)
         {
-            if (enemy.currentHp <= (enemy.maxHp * 0.10f))
-            {
-                dmg = enemy.currentHp + 999f;
-            }
+            GameManager.Instance.RecordDamage(shooterClass, dmg);
         }
-    }
 
-    if (shooterClass == CharacterClassType.Support && evolution == EvolutionPath.PathA)
-    {
-        float splashRadius = 1.3f;
-
-        GameObject fx = new GameObject("FrostNovaFX");
-        fx.transform.position = transform.position;
-        FrostNovaVisual nova = fx.AddComponent<FrostNovaVisual>();
-        nova.Play(splashRadius, 0.25f); 
-
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, splashRadius);
-        foreach (var col in hits)
+        if (isCrit && CameraShake.Instance != null)
         {
-            if (col.CompareTag("Enemy"))
+            CameraShake.Instance.Shake(0.08f, 0.06f);
+        }
+
+        if (shooterClass == CharacterClassType.Tank && evolution == EvolutionPath.PathB)
+        {
+            enemy.ApplyKnockback(2.5f, 0.08f);
+        }
+
+        if (shooterClass == CharacterClassType.Mage && evolution == EvolutionPath.PathB)
+        {
+            enemy.ApplyKnockback(3.5f, 0.1f);
+        }
+
+        if (shooterClass == CharacterClassType.Ranged && evolution == EvolutionPath.PathB)
+        {
+            if (enemy.archetype != EnemyArchetype.Boss)
             {
-                Enemy nearbyEnemy = col.GetComponent<Enemy>();
-                if (nearbyEnemy != null)
+                if (enemy.currentHp <= (enemy.maxHp * 0.10f))
                 {
-                    nearbyEnemy.ApplyChilledSlow(0.45f, 2.5f);
+                    dmg = enemy.currentHp + 999f;
                 }
             }
         }
-    }
 
-    enemy.TakeDamage(dmg, isCrit);
-}
+        if (shooterClass == CharacterClassType.Support && evolution == EvolutionPath.PathA)
+        {
+            float splashRadius = 1.3f;
+
+            GameObject fx = new GameObject("FrostNovaFX");
+            fx.transform.position = transform.position;
+            FrostNovaVisual nova = fx.AddComponent<FrostNovaVisual>();
+            nova.Play(splashRadius, 0.25f);
+
+            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, splashRadius);
+            foreach (var col in hits)
+            {
+                if (col.CompareTag("Enemy"))
+                {
+                    Enemy nearbyEnemy = col.GetComponent<Enemy>();
+                    if (nearbyEnemy != null)
+                    {
+                        nearbyEnemy.ApplyChilledSlow(0.45f, 2.5f);
+                    }
+                }
+            }
+        }
+
+        enemy.TakeDamage(dmg, isCrit);
+    }
 
     Transform FindNextBounceTarget()
     {
@@ -369,12 +405,25 @@ public class Projectile : MonoBehaviour
         DestroyProjectile();
     }
 
-    public void SetupDirection(Vector2 direction)
+    public void SetupDirection(Vector2 direction, Character character = null, GameObject projPrefab = null)
     {
-        targetEnemy = null; 
+        targetEnemy = null;
         currentDirection = direction.normalized;
         UpdateRotation(currentDirection);
         ResetTrail();
+
+        owner = character;
+        AttachVisual(projPrefab);
+
         lastPosition = transform.position;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (isAoE)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position, aoeRadius);
+        }
     }
 }

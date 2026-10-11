@@ -308,7 +308,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79ce1043e75b2474192dbee86a39075a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterAnimator
-  currentAtkAnimName: 
+  atkAnimName: 
+  idleAnimName: 
 --- !u!1 &8036335337543512908
 GameObject:
   m_ObjectHideFlags: 0
@@ -353,7 +354,7 @@ SpriteRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8036335337543512908}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -425,7 +426,6 @@ MonoBehaviour:
   critRate: 0.05
   critDamage: 1.5
   projectilePrefab: {fileID: 7934798365187595461, guid: 3440ba879d174b340b9a30f2ba3b896f, type: 3}
-  bounceDuration: 0.15
   currentEvolution: 0
   evolutionBadgeText: {fileID: 0}
   fighterController: {fileID: 9100000, guid: 9f3f6344f066e9644890bef822ed65e6, type: 2}
@@ -441,7 +441,7 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8036335337543512908}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: 9f3f6344f066e9644890bef822ed65e6, type: 2}
   m_CullingMode: 0

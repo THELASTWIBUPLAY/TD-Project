@@ -29,10 +29,10 @@ public class CharacterAnimator : MonoBehaviour
 
         switch (character.classType)
         {
-            case CharacterClassType.Ranger:
+            case CharacterClassType.Ranged:
                 charClass = "Ranger";
                 break;
-            case CharacterClassType.Melee:
+            case CharacterClassType.Fighter:
                 charClass = "Melee";
                 break;
             case CharacterClassType.Mage:
