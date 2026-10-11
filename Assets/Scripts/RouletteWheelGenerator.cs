@@ -87,10 +87,11 @@ public class RouletteWheelGenerator : MonoBehaviour
         if (wheelContainer == null || slotPrefab == null) return;
 
         float angleStep = 360f / totalSlots;
+        float offsetAngle = 22.5f;
 
         for (int i = 0; i < totalSlots; i++)
         {
-            float angleDeg = i * angleStep;
+            float angleDeg = (i * angleStep) + offsetAngle;
             float angleRad = angleDeg * Mathf.Deg2Rad;
 
             Vector3 pos = new Vector3(Mathf.Sin(angleRad) * radius, Mathf.Cos(angleRad) * radius, 0f);
@@ -122,16 +123,19 @@ public class RouletteWheelGenerator : MonoBehaviour
         isSpinning = false;
 
         int winningIndex = Random.Range(0, slotRewards.Count);
-
+        
         float angleStep = 360f / totalSlots;
-        float targetAngle = winningIndex * angleStep;
+        float offsetAngle = 22.5f;
+        float targetAngle = (fullRounds * 360f) + (winningIndex * angleStep) + offsetAngle;
+        
+        currentAngle = targetAngle;
         if (wheelContainer != null)
         {
             wheelContainer.eulerAngles = new Vector3(0, 0, targetAngle);
         }
 
         OnSpinCompleted(winningIndex);
-}
+    }
 
     private IEnumerator SpinRoutine(int targetIndex)
     {
@@ -140,8 +144,9 @@ public class RouletteWheelGenerator : MonoBehaviour
 
         float elapsed = 0f;
         float angleStep = 360f / totalSlots;
+        float offsetAngle = 22.5f;
 
-        float targetAngle = (fullRounds * 360f) + (targetIndex * angleStep);
+        float targetAngle = (fullRounds * 360f) + (targetIndex * angleStep) + offsetAngle;
         float startAngle = currentAngle % 360f;
         float totalToRotate = targetAngle - startAngle;
 

@@ -139,7 +139,7 @@ public class UpgradeManager : MonoBehaviour
 
     private void InitRerollSystem()
     {
-        currentRerollCount = maxRerollCount;
+        currentRerollCount = 1; 
         UpdateRerollUI();
 
         if (rerollButton != null)
@@ -186,6 +186,9 @@ public class UpgradeManager : MonoBehaviour
             Debug.Log("[UpgradeManager] Semua skill sudah MAX dan arena penuh!");
             return;
         }
+
+        currentRerollCount = 1;
+        UpdateRerollUI();
 
         PopulateOptionsFromAvailable(available);
 
