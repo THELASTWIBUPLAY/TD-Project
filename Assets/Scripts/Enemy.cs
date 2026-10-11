@@ -5,7 +5,7 @@ public class Enemy : MonoBehaviour
 {
     [Header("Attributes")]
     public float maxHp = 15f;
-    private float currentHp;
+    public float currentHp;
     public float moveSpeed = 1.3f;
     public float damageToBase = 5f;
     public int expReward = 8;
@@ -31,6 +31,10 @@ public class Enemy : MonoBehaviour
 
     [Header("Base Safety Boundary")]
     public float baseLineY = -2f;
+
+    [Header("Support Debuff")]
+    public bool isChilled = false;
+    private Coroutine chilledCoroutine;
 
 
     public static System.Action<float, float> OnBossHpChanged;
@@ -102,9 +106,14 @@ public class Enemy : MonoBehaviour
     }
 
 
-    public void TakeDamage(float damageAmount)
+    public void TakeDamage(float damageAmount, bool isCrit = false)
     {
         if (isDead) return;
+
+        if (isChilled)
+        {
+            damageAmount *= 1.15f;
+        }
 
         currentHp -= damageAmount;
 
@@ -116,7 +125,7 @@ public class Enemy : MonoBehaviour
 
         if (DamageTextManager.Instance != null)
         {
-            DamageTextManager.Instance.SpawnDamageText(transform.position, damageAmount);
+            DamageTextManager.Instance.SpawnDamageText(transform.position, damageAmount, isCrit);
         }
 
         if (archetype == EnemyArchetype.Boss)
@@ -287,5 +296,60 @@ public class Enemy : MonoBehaviour
         {
             spriteRenderer.color = originalColor;
         }
+    }
+
+    public void ApplyKnockback(float force, float duration = 0.15f)
+    {
+        if (isDead) return;
+
+        if (archetype == EnemyArchetype.Boss)
+        {
+            force *= 0.15f; 
+        }
+
+        StartCoroutine(KnockbackRoutine(force, duration));
+    }
+
+    private IEnumerator KnockbackRoutine(float force, float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            transform.position += Vector3.up * force * Time.deltaTime;
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+    }
+
+    public void ApplyChilledSlow(float slowPercent, float duration)
+    {
+        if (isDead) return;
+
+        if (chilledCoroutine != null)
+        {
+            StopCoroutine(chilledCoroutine);
+        }
+
+        chilledCoroutine = StartCoroutine(ChilledRoutine(slowPercent, duration));
+    }
+
+    private IEnumerator ChilledRoutine(float slowPercent, float duration)
+    {
+        isChilled = true;
+
+        float originalSpeed = moveSpeed;
+
+        moveSpeed = Mathf.Max(0.35f, originalSpeed * (1f - slowPercent));
+
+        SpriteRenderer sr = GetComponent<SpriteRenderer>();
+        Color originalColor = sr != null ? sr.color : Color.white;
+        if (sr != null) sr.color = new Color(0.4f, 0.75f, 1f, originalColor.a);
+
+        yield return new WaitForSeconds(duration);
+
+        moveSpeed = originalSpeed;
+        if (sr != null) sr.color = originalColor;
+        isChilled = false;
+        chilledCoroutine = null;
     }
 }

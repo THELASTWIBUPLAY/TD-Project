@@ -83,6 +83,8 @@ public class BottomMenuController : MonoBehaviour
             MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.ShopPanel, false);
             MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.DeckPanel, false);
             MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.DungeonPanel, false);
+
+            FindFirstObjectByType<TalentUI>()?.RefreshAllUI();
         }
     }
 

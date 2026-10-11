@@ -16,12 +16,26 @@ public class DamageText : MonoBehaviour
         if (textMesh != null) startColor = textMesh.color;
     }
 
-    public void Setup(float damageAmount)
+    public void Setup(float damageAmount, bool isCrit = false)
     {
+        if (textMesh == null) textMesh = GetComponent<TextMeshPro>();
+
         if (textMesh != null)
         {
-            textMesh.text = Mathf.RoundToInt(damageAmount).ToString();
-            textMesh.color = startColor;
+            int roundedDamage = Mathf.RoundToInt(damageAmount);
+
+            if (isCrit)
+            {
+                textMesh.text = $"{roundedDamage}!";
+                textMesh.fontSize = 6.5f; 
+                textMesh.color = new Color(1f, 0.8f, 0.1f); 
+            }
+            else
+            {
+                textMesh.text = roundedDamage.ToString();
+                textMesh.fontSize = 4.5f; 
+                textMesh.color = startColor;
+            }
         }
         elapsed = 0f;
     }

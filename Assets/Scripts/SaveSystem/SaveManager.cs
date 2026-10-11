@@ -16,6 +16,9 @@ public class SaveManager : MonoBehaviour
     private GameSaveData _currentData = new GameSaveData();
     public GameSaveData CurrentData => _currentData;
 
+    public bool IsLoaded { get; private set; }
+    private bool _isDistributing;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -30,6 +33,7 @@ public class SaveManager : MonoBehaviour
     private void Start()
     {
         LoadLocal();
+        IsLoaded = true;
     }
 
     /// <summary>
@@ -37,6 +41,12 @@ public class SaveManager : MonoBehaviour
     /// </summary>
     public void SaveLocal()
     {
+        if (!IsLoaded || _isDistributing)
+        {
+            Debug.LogWarning($"[SaveManager] SaveLocal diblokir sebelum load selesai!\n{StackTraceUtility.ExtractStackTrace()}");
+            return;
+        }
+
         _currentData.lastSavedTimestampUtc = DateTime.UtcNow.ToString("o");
 
         // 1. Minta masing-masing manager mengisi datanya
@@ -150,21 +160,33 @@ public class SaveManager : MonoBehaviour
 
     private void DistributeDataToManagers(GameSaveData source)
     {
-        if (EconomyManager.Instance is ISaveable eco) eco.LoadFromSaveData(source);
-        if (DailyQuestManager.Instance is ISaveable quest) quest.LoadFromSaveData(source);
-        if (AchievementManager.Instance is ISaveable ach) ach.LoadFromSaveData(source);
-        if (DailyRewardViewModel.Instance is ISaveable reward) reward.LoadFromSaveData(source);
-        if (TalentManager.Instance is ISaveable talent) talent.LoadFromSaveData(source);
+        _isDistributing = true;
+        try
+        {
+            if (EconomyManager.Instance is ISaveable eco) eco.LoadFromSaveData(source);
+            if (DailyQuestManager.Instance is ISaveable quest) quest.LoadFromSaveData(source);
+            if (AchievementManager.Instance is ISaveable ach) ach.LoadFromSaveData(source);
+            if (DailyRewardViewModel.Instance is ISaveable reward) reward.LoadFromSaveData(source);
+            if (TalentManager.Instance is ISaveable talent) talent.LoadFromSaveData(source);
+        }
+        finally
+        {
+            _isDistributing = false;
+        }
     }
 
     // Auto-save saat pemain meminimalkan atau keluar dari game
     private void OnApplicationPause(bool pauseStatus)
     {
-        if (pauseStatus) SaveLocal();
+        #if !UNITY_EDITOR
+            if (pauseStatus) SaveLocal();
+        #endif
     }
 
     private void OnApplicationQuit()
     {
-        SaveLocal();
+        #if !UNITY_EDITOR
+            SaveLocal();
+        #endif
     }
 }
