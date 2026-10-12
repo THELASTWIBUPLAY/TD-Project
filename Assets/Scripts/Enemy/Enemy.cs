@@ -36,6 +36,18 @@ public class Enemy : MonoBehaviour
     public bool isChilled = false;
     private Coroutine chilledCoroutine;
 
+    [Header("Animation Setup")]
+    [SerializeField] private RuntimeAnimatorController normalController;
+    [SerializeField] private RuntimeAnimatorController scoutController;
+    [SerializeField] private RuntimeAnimatorController tankMobController;
+    [SerializeField] private RuntimeAnimatorController bossController;
+
+    private Animator anim;
+
+    [Header("Sway Movement (Kiri-Kanan)")]
+    public float swayFrequency = 0.5f; 
+    public float swayAmplitude = 0.05f;  
+    private float swayOffset = 0f;
 
     public static System.Action<float, float> OnBossHpChanged;
     public static System.Action OnBossDefeatedEvent;
@@ -54,6 +66,8 @@ public class Enemy : MonoBehaviour
     void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        anim = GetComponent<Animator>();
+
         if (spriteRenderer != null)
         {
             originalColor = spriteRenderer.color;
@@ -67,12 +81,20 @@ public class Enemy : MonoBehaviour
         moveSpeed *= GlobalSpeedMultiplier;
         damageToBase *= GlobalDamageMultiplier;
         currentHp = maxHp;
+
+        swayOffset = Random.Range(0f, 10f);
     }
 
 
     void Update()
     {
         transform.Translate(Vector3.down * moveSpeed * Time.deltaTime);
+
+        float verticalMove = -moveSpeed * Time.deltaTime;
+
+        float horizontalMove = Mathf.Sin((Time.time + swayOffset) * swayFrequency) * swayAmplitude * Time.deltaTime;
+
+        transform.Translate(new Vector3(horizontalMove, verticalMove, 0f));
 
         if (!isDead && transform.position.y <= baseLineY)
         {
@@ -239,9 +261,11 @@ public class Enemy : MonoBehaviour
     {
         archetype = type;
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+        if (anim == null) anim = GetComponent<Animator>();
 
         float waveHpFactor = 1f + ((wave - 1) * 0.12f);
 
+        float baseScaleSize = 0.12f; 
 
         switch (archetype)
         {
@@ -250,8 +274,8 @@ public class Enemy : MonoBehaviour
                 moveSpeed = 1.3f;
                 damageToBase = 5f;
                 expReward = 8;
-                transform.localScale = new Vector3(0.5f, 0.5f, 1f);
-                originalColor = Color.red;
+                transform.localScale = new Vector3(baseScaleSize, baseScaleSize, 1f);
+                if (anim != null && normalController != null) anim.runtimeAnimatorController = normalController;
                 break;
 
             case EnemyArchetype.Scout:
@@ -259,8 +283,9 @@ public class Enemy : MonoBehaviour
                 moveSpeed = 2.3f;
                 damageToBase = 4f;
                 expReward = 10;
-                transform.localScale = new Vector3(0.35f, 0.35f, 1f);
-                originalColor = new Color(1f, 0.8f, 0.1f); 
+                // Scout bisa dibuat sedikit lebih kecil
+                transform.localScale = new Vector3(baseScaleSize * 0.8f, baseScaleSize * 0.8f, 1f);
+                if (anim != null && scoutController != null) anim.runtimeAnimatorController = scoutController;
                 break;
 
             case EnemyArchetype.Tank:
@@ -268,22 +293,23 @@ public class Enemy : MonoBehaviour
                 moveSpeed = 0.75f;
                 damageToBase = 15f;
                 expReward = 22;
-                transform.localScale = new Vector3(0.85f, 0.85f, 1f);
-                originalColor = new Color(0.5f, 0.1f, 0.7f); 
+                // Tank mob sedikit lebih besar
+                transform.localScale = new Vector3(baseScaleSize * 1.3f, baseScaleSize * 1.3f, 1f);
+                if (anim != null && tankMobController != null) anim.runtimeAnimatorController = tankMobController;
                 break;
 
             case EnemyArchetype.Boss:
-
                 bool isFinalBoss = (wave >= 10);
-
                 moveSpeed = 0.5f;
                 damageToBase = isFinalBoss ? 50f : 30f;
                 expReward = isFinalBoss ? 100 : 50;
-
                 maxHp = (isFinalBoss ? 450f : 200f) + (wave * 30f);
-
-                transform.localScale = isFinalBoss ? new Vector3(2.2f, 2.2f, 1f) : new Vector3(1.7f, 1.7f, 1f);
-                originalColor = isFinalBoss ? new Color(0.8f, 0f, 0.2f) : new Color(0.9f, 0.3f, 0f);
+                
+                // Boss jauh lebih besar dari mob biasa
+                float bossScale = isFinalBoss ? baseScaleSize * 2.5f : baseScaleSize * 1.8f;
+                transform.localScale = new Vector3(bossScale, bossScale, 1f);
+                
+                if (anim != null && bossController != null) anim.runtimeAnimatorController = bossController;
                 break;
         }
 
@@ -292,10 +318,6 @@ public class Enemy : MonoBehaviour
         damageToBase *= GlobalDamageMultiplier;
         currentHp = maxHp;
 
-        if (spriteRenderer != null)
-        {
-            spriteRenderer.color = originalColor;
-        }
     }
 
     public void ApplyKnockback(float force, float duration = 0.15f)

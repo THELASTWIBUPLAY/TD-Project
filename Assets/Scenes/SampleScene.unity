@@ -2222,7 +2222,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   statsContainer: {fileID: 1807742733}
   statItemPrefab: {fileID: 3284936050915601594, guid: 339b7836682050d4baecb7583005f7fe, type: 3}
-  classIcons: []
+  classIcons:
+  - classType: 0
+    icon: {fileID: -2951802150405364340, guid: ef4d73ad4ea63dc41bb241508e2ff5fd, type: 3}
+  - classType: 1
+    icon: {fileID: -2951802150405364340, guid: a222e6e7a28002e40b52dce65895337a, type: 3}
+  - classType: 2
+    icon: {fileID: -2951802150405364340, guid: 21ffb7b9a43e7b2469bc168a9f23f376, type: 3}
+  - classType: 3
+    icon: {fileID: -2951802150405364340, guid: 61a5fa3bb0b0c7044989228d1b1aa89f, type: 3}
+  - classType: 4
+    icon: {fileID: -2951802150405364340, guid: 3328a6a778e062a46a2d95bbf5bfecb3, type: 3}
 --- !u!1 &616026263
 GameObject:
   m_ObjectHideFlags: 0
@@ -3447,7 +3457,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 0
+  m_Transition: 2
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
@@ -3458,7 +3468,7 @@ MonoBehaviour:
     m_FadeDuration: 0.1
   m_SpriteState:
     m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: -6470460504253458178, guid: 9d3e8c8c11e865f439c3a69087462af5, type: 3}
     m_SelectedSprite: {fileID: 0}
     m_DisabledSprite: {fileID: 0}
   m_AnimationTriggers:
@@ -3475,18 +3485,6 @@ MonoBehaviour:
       - m_Target: {fileID: 1509474896}
         m_TargetAssemblyTypeName: UpgradeManager, Assembly-CSharp
         m_MethodName: ToggleBuffList
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 822958238}
-        m_TargetAssemblyTypeName: ToggleStateButton, Assembly-CSharp
-        m_MethodName: OnToggleClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3516,7 +3514,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -4178046375966092550, guid: 2e9b0ff90606d864fb2c957982ce5884, type: 3}
+  m_Sprite: {fileID: -6470460504253458178, guid: da722ffee3ef9dd46bf3876daeeac617, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -3541,7 +3539,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 822958233}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d3814ac54b829784ca32eb649ec47563, type: 3}
   m_Name: 
@@ -5317,7 +5315,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -6470460504253458178, guid: da722ffee3ef9dd46bf3876daeeac617, type: 3}
+  m_Sprite: {fileID: -4178046375966092550, guid: 2e9b0ff90606d864fb2c957982ce5884, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -5349,12 +5347,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetImage: {fileID: 1127257615}
   buttonStates:
-  - stateName: 
-    normalSprite: {fileID: -6470460504253458178, guid: da722ffee3ef9dd46bf3876daeeac617, type: 3}
-    pressedSprite: {fileID: -6470460504253458178, guid: 9d3e8c8c11e865f439c3a69087462af5, type: 3}
-  - stateName: 
-    normalSprite: {fileID: -6470460504253458178, guid: 9d3e8c8c11e865f439c3a69087462af5, type: 3}
-    pressedSprite: {fileID: -6470460504253458178, guid: da722ffee3ef9dd46bf3876daeeac617, type: 3}
+  - stateName: Off
+    normalSprite: {fileID: -4178046375966092550, guid: 2e9b0ff90606d864fb2c957982ce5884, type: 3}
+    pressedSprite: {fileID: -4178046375966092550, guid: 18d28b1d77a57fe4abc86a49df29c665, type: 3}
+  - stateName: On
+    normalSprite: {fileID: 4130640169021434097, guid: 43dbea2156fd13542bb2e3680b86b01f, type: 3}
+    pressedSprite: {fileID: 4130640169021434097, guid: 6a04107cbd26e1648a1cf992788fc0d0, type: 3}
 --- !u!1 &1131646055
 GameObject:
   m_ObjectHideFlags: 0
@@ -6879,7 +6877,7 @@ MonoBehaviour:
   - slotName: Zonk
     rewardType: 1
     characterClass: 0
-    slotIcon: {fileID: 0}
+    slotIcon: {fileID: -1423569524638106717, guid: d5cb9c0c617c5f54881805f623c3b9b5, type: 3}
     idleAnimator: {fileID: 0}
   - slotName: Mage
     rewardType: 0
@@ -6889,7 +6887,7 @@ MonoBehaviour:
   - slotName: Zonk
     rewardType: 1
     characterClass: 0
-    slotIcon: {fileID: 0}
+    slotIcon: {fileID: -1423569524638106717, guid: d5cb9c0c617c5f54881805f623c3b9b5, type: 3}
     idleAnimator: {fileID: 0}
   - slotName: Support
     rewardType: 0
@@ -6904,7 +6902,7 @@ MonoBehaviour:
   - slotName: Zonk
     rewardType: 1
     characterClass: 0
-    slotIcon: {fileID: 0}
+    slotIcon: {fileID: -1423569524638106717, guid: d5cb9c0c617c5f54881805f623c3b9b5, type: 3}
     idleAnimator: {fileID: 0}
   - slotName: Ranged
     rewardType: 0
@@ -7589,6 +7587,22 @@ MonoBehaviour:
   rerollButton: {fileID: 1431697346}
   rerollText: {fileID: 0}
   maxRerollCount: 3
+  defaultCardIcon: {fileID: -7420496953532923731, guid: 446c83b0cc147fe4abeb899474b1bc23, type: 3}
+  recruitIcon: {fileID: 6249120374701171476, guid: 26550bf6a8843c1489c268a774555384, type: 3}
+  deployFighterIcon: {fileID: -2951802150405364340, guid: ef4d73ad4ea63dc41bb241508e2ff5fd, type: 3}
+  deployRangedIcon: {fileID: -2951802150405364340, guid: 3328a6a778e062a46a2d95bbf5bfecb3, type: 3}
+  deployMageIcon: {fileID: -2951802150405364340, guid: a222e6e7a28002e40b52dce65895337a, type: 3}
+  deploySupportIcon: {fileID: -2951802150405364340, guid: 21ffb7b9a43e7b2469bc168a9f23f376, type: 3}
+  deployTankIcon: {fileID: -2951802150405364340, guid: 61a5fa3bb0b0c7044989228d1b1aa89f, type: 3}
+  boostAttackIcon: {fileID: 774488917508658072, guid: 62b370e57fec57849a06da168afae5df, type: 3}
+  boostAttackSpeedIcon: {fileID: -1217496680462476774, guid: ade986afae72e2a4fa370ed511075204, type: 3}
+  frostAuraIcon: {fileID: 7160368459085403760, guid: 026414bd8d244e54ababa6c835af22c9, type: 3}
+  bountyHunterIcon: {fileID: -2376730594034363180, guid: 12a0a1f480112ed41b96bd8300ba08e8, type: 3}
+  emergencyRepairIcon: {fileID: -4354013236536830747, guid: 8449871ff2ee1fc4dad6afb76aa7fe68, type: 3}
+  fortifiedBastionIcon: {fileID: 160330610898347039, guid: 75b38374714c69f4686b7f5c4d0c203a, type: 3}
+  trickshotIcon: {fileID: -9167279979181079187, guid: 9b8105c7080c45144945d8e25300e821, type: 3}
+  blackMarketIcon: {fileID: 5702230276603442807, guid: 24febf9a6c2edca4ea1381f6ae86ccfc, type: 3}
+  desperateGambitIcon: {fileID: 3221721578438364599, guid: dd67cbf7255b97b41b3c218fac0eea9d, type: 3}
   debugTargetClass: 3
   debugBlackMarketTickets: 2
 --- !u!4 &1509474897
@@ -10367,7 +10381,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 550}
+  m_AnchoredPosition: {x: 0, y: 570}
   m_SizeDelta: {x: 1000, y: 270}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2146675514

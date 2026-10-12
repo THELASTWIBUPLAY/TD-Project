@@ -203,4 +203,18 @@ public class RouletteWheelGenerator : MonoBehaviour
             GameManager.Instance.RestoreSpeedAfterModal();
         }
     }
+
+    void OnEnable()
+    {
+        if (UpgradeManager.Instance != null && UpgradeManager.Instance.isAutoBattle)
+        {
+            StartCoroutine(AutoSkipRoutine());
+        }
+    }
+
+    private IEnumerator AutoSkipRoutine()
+    { 
+        yield return null; 
+        SkipSpin();
+    }
 }
