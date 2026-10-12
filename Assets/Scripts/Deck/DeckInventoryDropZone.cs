@@ -1,8 +1,27 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class DeckInventoryDropZone : MonoBehaviour, IDropHandler
 {
+    private void Awake()
+    {
+        // OTOMATISASI SENSOR HITBOX:
+        // Memastikan GameObject ini selalu memiliki penangkap raycast transparan
+        // sehingga OnDrop tetap aktif meski container di dalamnya kosong melompong.
+        var graphic = GetComponent<Graphic>();
+        if (graphic == null)
+        {
+            var img = gameObject.AddComponent<Image>();
+            img.color = Color.clear; // Transparan 100%
+            img.raycastTarget = true;
+        }
+        else
+        {
+            graphic.raycastTarget = true;
+        }
+    }
+
     public void OnDrop(PointerEventData eventData)
     {
         if (eventData.pointerDrag == null) return;

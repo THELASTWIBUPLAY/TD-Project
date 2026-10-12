@@ -185,5 +185,10 @@ public class DeckDropSlot : MonoBehaviour, IDropHandler, IBeginDragHandler, IDra
         {
             DeckPanelUI.Instance?.OpenHeroUpgradeModal(_currentEquippedId);
         }
+        else if (_allowedType == DeckDraggableItem.ItemType.Relic)
+        {
+            // Panggil modal detail relik saat slot equipped diklik
+            DeckPanelUI.Instance?.OpenRelicDetailModal(_currentEquippedId);
+        }
     }
 }

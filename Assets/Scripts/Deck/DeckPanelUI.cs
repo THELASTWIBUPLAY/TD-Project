@@ -13,6 +13,7 @@ public class DeckPanelUI : MonoBehaviour
 
     [Header("Modal Panels")]
     [SerializeField] private HeroUpgradeModalUI _heroUpgradeModal;
+    [SerializeField] private RelicDetailModalUI _relicDetailModal;
 
     [Header("Top Box: Equipped Slots")]
     [SerializeField] private DeckDropSlot[] _heroDropSlots;   // Ukuran: 5
@@ -94,6 +95,14 @@ public class DeckPanelUI : MonoBehaviour
         if (_heroUpgradeModal != null)
         {
             _heroUpgradeModal.SetupModal(heroId);
+        }
+    }
+
+    public void OpenRelicDetailModal(string relicId)
+    {
+        if (_relicDetailModal != null)
+        {
+            _relicDetailModal.SetupModal(relicId);
         }
     }
 

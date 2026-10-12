@@ -172,12 +172,18 @@ public class DeckDraggableItem : MonoBehaviour,
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        // Abaikan klik jika pointer baru saja menyelesaikan aksi dragging atau scrolling
         if (eventData.dragging || _isScrollingParent || _isDraggingItem) return;
 
-        if (type == ItemType.Hero && !string.IsNullOrEmpty(itemId))
+        if (string.IsNullOrEmpty(itemId)) return;
+
+        if (type == ItemType.Hero)
         {
             DeckPanelUI.Instance?.OpenHeroUpgradeModal(itemId);
+        }
+        else if (type == ItemType.Relic)
+        {
+            // Panggil modal detail relik saat kartu di inventory diklik
+            DeckPanelUI.Instance?.OpenRelicDetailModal(itemId);
         }
     }
 }

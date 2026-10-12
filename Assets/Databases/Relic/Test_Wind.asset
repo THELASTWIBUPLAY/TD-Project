@@ -17,7 +17,7 @@ MonoBehaviour:
   relicDescription: 
   relicIcon: {fileID: -7126909181331577088, guid: ce4e6db66902e604f950e816a61def86, type: 3}
   element: 3
-  activationType: 1
+  activationType: 0
   requiredFragments: 50
   fireAttackBonusPercent: 0
   earthBaseHpBonus: 0

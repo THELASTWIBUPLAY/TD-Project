@@ -44,7 +44,7 @@ public class PlayTimeRewardController : MonoBehaviour, ISaveable
         new SlotConfig { slotName = "Chest 4", unlockGemCost = 150, claimInterval = 1800f, goldReward = 250 }
     };
 
-    private readonly SlotRuntime[] _slotRuntimes = new SlotRuntime[4];
+    private SlotRuntime[] _slotRuntimes;
 
     public event Action<int> OnSlotUpdated;
     public int TotalSlots => _slotConfigs.Length;
@@ -65,11 +65,16 @@ public class PlayTimeRewardController : MonoBehaviour, ISaveable
 
     private void InitializeSlots()
     {
+        if (_slotConfigs == null || _slotConfigs.Length == 0) return;
+
+        // Alokasikan memori runtime persis sebesar jumlah slot di Inspector (misal 5)
+        _slotRuntimes = new SlotRuntime[_slotConfigs.Length];
+
         for (int i = 0; i < _slotConfigs.Length; i++)
         {
             _slotRuntimes[i] = new SlotRuntime();
 
-            // Slot 0 selalu terbuka default. Slot 1-3 dibaca dari penyimpanan
+            // Slot 0 selalu terbuka default. Slot sisanya dibaca dari PlayerPrefs
             if (i == 0 || _slotConfigs[i].unlockGemCost <= 0)
             {
                 _slotRuntimes[i].isUnlocked = true;
