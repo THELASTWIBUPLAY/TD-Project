@@ -58,7 +58,7 @@ public class AuthManager : MonoBehaviour
         // If not init yet wait until initialized
         if (UnityServices.State != ServicesInitializationState.Initialized)
         {
-            await UnityServices.InitializeAsync();
+            await GameServicesBootstrap.InitializeAsync();
         }
     }
 
@@ -74,7 +74,7 @@ public class AuthManager : MonoBehaviour
             // Do login if not logged in yet
             if (!AuthenticationService.Instance.IsSignedIn)
             {
-                await AuthenticationService.Instance.SignInAnonymouslyAsync();
+                await GameServicesBootstrap.SignInAnonymouslyAsync();
             }
             Debug.Log($"[AuthManager] Login Success! PlayerID: {AuthenticationService.Instance.PlayerId}");
             Debug.Log($"[AuthManager] PlayerName: {AuthenticationService.Instance.PlayerName}");

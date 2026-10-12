@@ -1,0 +1,10 @@
+{
+  "enabled": true,
+  "pool": [
+    { "heroId": "hero_fighter_001", "weight": 1 },
+    { "heroId": "hero_ranger_001", "weight": 1 },
+    { "heroId": "hero_mage_001", "weight": 1 },
+    { "heroId": "hero_support_001", "weight": 1 },
+    { "heroId": "hero_tank_001", "weight": 1 }
+  ]
+}

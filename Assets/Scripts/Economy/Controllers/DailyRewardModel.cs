@@ -25,12 +25,12 @@ public class DailyRewardModel : MonoBehaviour
     {
         if (UnityServices.State != ServicesInitializationState.Initialized)
         {
-            await UnityServices.InitializeAsync();
+            await GameServicesBootstrap.InitializeAsync();
         }
 
         if (!AuthenticationService.Instance.IsSignedIn)
         {
-            await AuthenticationService.Instance.SignInAnonymouslyAsync();
+            await GameServicesBootstrap.SignInAnonymouslyAsync();
         }
     }
 
