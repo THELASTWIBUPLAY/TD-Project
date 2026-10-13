@@ -29,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -0.70687, z: 0}
-  m_LocalScale: {x: 0.353454, y: 0.353454, z: 0.706908}
+  m_LocalScale: {x: 0.706908, y: 0.706908, z: 1.413816}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 408539720733993204}
@@ -2752,7 +2752,7 @@ ParticleSystem:
     drag:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 30
+      scalar: 50
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -4983,7 +4983,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -1, w: -0.00000035762784}
   m_LocalPosition: {x: 0, y: 0.70687, z: 0}
-  m_LocalScale: {x: 0.353454, y: 0.353454, z: 0.706908}
+  m_LocalScale: {x: 0.706908, y: 0.706908, z: 1.413816}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 408539720733993204}
@@ -7706,7 +7706,7 @@ ParticleSystem:
     drag:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 30
+      scalar: 50
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -9936,7 +9936,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 408539720733993204}
@@ -10134,8 +10134,8 @@ ParticleSystem:
       maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 1, g: 0.67876756, b: 0, a: 0.7254902}
-        key1: {r: 1, g: 0, b: 0, a: 0.7254902}
+        key0: {r: 1, g: 1, b: 1, a: 0.7254902}
+        key1: {r: 0.6226415, g: 0.6226415, b: 0.6226415, a: 0.7254902}
         key2: {r: 1, g: 0, b: 0, a: 0}
         key3: {r: 0, g: 0, b: 0, a: 0}
         key4: {r: 0, g: 0, b: 0, a: 0}

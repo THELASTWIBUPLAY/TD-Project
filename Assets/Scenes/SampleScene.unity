@@ -1349,6 +1349,7 @@ BoxCollider2D:
   m_EdgeRadius: 0
 --- !u!212 &464291162
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1367,6 +1368,8 @@ SpriteRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1388,9 +1391,11 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -1400,7 +1405,6 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 0
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!4 &464291163
 Transform:
@@ -1834,7 +1838,6 @@ MonoBehaviour:
   m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
-  m_Version: 2
   m_TaaSettings:
     m_Quality: 3
     m_FrameInfluence: 0.1
@@ -1842,6 +1845,7 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+  m_Version: 2
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0
@@ -5643,6 +5647,7 @@ GameObject:
   m_IsActive: 1
 --- !u!212 &1210254393
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -5661,6 +5666,8 @@ SpriteRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -5682,9 +5689,11 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: -10
+  m_MaskInteraction: 0
   m_Sprite: {fileID: -6411699102014456103, guid: c87653c77d0e78149b74ddd482356acf, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -5694,7 +5703,6 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 0
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!4 &1210254394
 Transform:
@@ -6324,6 +6332,127 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -125}
   m_SizeDelta: {x: 400, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1285596481
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1285596483}
+  - component: {fileID: 1285596482}
+  m_Layer: 0
+  m_Name: VfxManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1285596482
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1285596481}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ce872996078abd4cbe88c2d7b8cd81e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectileVisualManager
+  projectileLinks:
+  - name: ranger1
+    prefab: {fileID: 8015012828080601276, guid: 586e40724303a144b911228bbdb26c0d, type: 3}
+    classType: 4
+    starLevel: 1
+    useForAllStars: 0
+  - name: ranger2
+    prefab: {fileID: 8015012828080601276, guid: d6f61227144d1274e81e487dce3ea82e, type: 3}
+    classType: 4
+    starLevel: 2
+    useForAllStars: 0
+  - name: ranger3
+    prefab: {fileID: 8015012828080601276, guid: 645473a3b3d3c414eb9cd9fcb94d1628, type: 3}
+    classType: 4
+    starLevel: 3
+    useForAllStars: 0
+  - name: melee1
+    prefab: {fileID: 8015012828080601276, guid: c718811c5f2c99f49abad051f8f061fc, type: 3}
+    classType: 0
+    starLevel: 1
+    useForAllStars: 0
+  - name: melee2
+    prefab: {fileID: 8015012828080601276, guid: c7736c1dd2b18504ba27fbee14c86ce4, type: 3}
+    classType: 0
+    starLevel: 2
+    useForAllStars: 0
+  - name: melee3
+    prefab: {fileID: 8015012828080601276, guid: 54230bf2c9cb5714db79c3520ce63c2d, type: 3}
+    classType: 0
+    starLevel: 3
+    useForAllStars: 0
+  - name: mage1
+    prefab: {fileID: 8015012828080601276, guid: 6977cbc877bfaad4983d2d36b11f6cd3, type: 3}
+    classType: 1
+    starLevel: 1
+    useForAllStars: 0
+  - name: mage2
+    prefab: {fileID: 8015012828080601276, guid: c51eb1d6c76d8ec448fd4e8184fd545e, type: 3}
+    classType: 1
+    starLevel: 2
+    useForAllStars: 0
+  - name: mage3
+    prefab: {fileID: 8015012828080601276, guid: fd85701fa1dac3846860b48d47f76f37, type: 3}
+    classType: 1
+    starLevel: 3
+    useForAllStars: 0
+  - name: tank1
+    prefab: {fileID: 8015012828080601276, guid: c718811c5f2c99f49abad051f8f061fc, type: 3}
+    classType: 3
+    starLevel: 1
+    useForAllStars: 0
+  - name: tank2
+    prefab: {fileID: 8015012828080601276, guid: c7736c1dd2b18504ba27fbee14c86ce4, type: 3}
+    classType: 3
+    starLevel: 2
+    useForAllStars: 0
+  - name: tank3
+    prefab: {fileID: 8015012828080601276, guid: 54230bf2c9cb5714db79c3520ce63c2d, type: 3}
+    classType: 3
+    starLevel: 3
+    useForAllStars: 0
+  auraLinks:
+  - name: support 1
+    prefab: {fileID: 395897915748806596, guid: 07621e4cce0d4d949a9f19f7f9988ac2, type: 3}
+    classType: 2
+    starLevel: 1
+    useForAllStars: 0
+  - name: support 2
+    prefab: {fileID: 395897915748806596, guid: f74f537cc1a41554f8fb54e5f99e9c24, type: 3}
+    classType: 2
+    starLevel: 2
+    useForAllStars: 0
+  - name: support 3
+    prefab: {fileID: 395897915748806596, guid: 3bf6058b35a1c844781d853801a16026, type: 3}
+    classType: 2
+    starLevel: 3
+    useForAllStars: 0
+--- !u!4 &1285596483
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1285596481}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1321900350
 GameObject:
   m_ObjectHideFlags: 0
@@ -8675,6 +8804,7 @@ MonoBehaviour:
   gameWinScoreText: {fileID: 0}
   gameWinKillsText: {fileID: 0}
   gameWinHighscoreText: {fileID: 0}
+  _confirmPanel: {fileID: 0}
   totalEnemiesKilled: 0
 --- !u!4 &1705226283
 Transform:
@@ -10458,3 +10588,4 @@ SceneRoots:
   - {fileID: 956637804}
   - {fileID: 718425699}
   - {fileID: 1210254394}
+  - {fileID: 1285596483}
