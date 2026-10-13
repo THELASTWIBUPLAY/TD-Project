@@ -112,12 +112,14 @@ public class ProfileUI : MonoBehaviour
             _expProgress.value = Mathf.Clamp01(profile.AccountExp / profile.ExpToNextLevel);
 
             _playerNameBtnText.text = profile.PlayerName;
-            _playerLevelBtnText.text = profile.AccountLevel.ToString();
+            _playerLevelBtnText.text = "Lv. " + profile.AccountLevel.ToString();
         }
     }
 
     public void OpenEditModal()
     {
+        transform.SetAsLastSibling();
+
         if (ProfileManager.Instance == null || _editPanel == null) return;
 
         if (_nameInput != null) _nameInput.text = ProfileManager.Instance.PlayerName;

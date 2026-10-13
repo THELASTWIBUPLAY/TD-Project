@@ -122,8 +122,9 @@ public class DailyQuestUI : MonoBehaviour
 
     public void OpenDailyPanel()
     {
-        DailyQuestManager.Instance?.CheckDailyReset();
+        transform.SetAsLastSibling();
 
+        DailyQuestManager.Instance?.CheckDailyReset();
         RefreshUI();
         if (MainMenuManager.Instance != null)
         {

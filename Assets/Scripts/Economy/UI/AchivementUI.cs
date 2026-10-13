@@ -70,7 +70,9 @@ public class AchievementUI : MonoBehaviour
 
 	public void OpenPanel()
 	{
-		RefreshUI();
+        transform.SetAsLastSibling();
+
+        RefreshUI();
 		if (MainMenuManager.Instance != null)
 		{
 			MainMenuManager.Instance.TogglePanel(_myCanvas, true);

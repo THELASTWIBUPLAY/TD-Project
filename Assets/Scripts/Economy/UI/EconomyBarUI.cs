@@ -1,6 +1,6 @@
 using UnityEngine;
 using TMPro;
-
+using System.Globalization;
 public class EconomyBarUI : MonoBehaviour
 {
     [Header("UI References")]
@@ -40,11 +40,29 @@ public class EconomyBarUI : MonoBehaviour
 
     private void UpdateDisplay(EconomyManager.EconomyData data)
     {
-        _goldText.text = data.gold.ToString("N0");
-        _gemText.text = data.gem.ToString("N0");
+        _goldText.text = FormatBigNumber(data.gold);
+        _gemText.text = FormatBigNumber(data.gem);
         _energyText.text = $"{data.currentEnergy}/{data.maxEnergy}";
     }
-    
+
+    private string FormatBigNumber(long number)
+    {
+        if (number >= 1000000000) // 1 Miliar+
+        {
+            return (number / 1000000000f).ToString("F1", System.Globalization.CultureInfo.InvariantCulture) + "B";
+        }
+        if (number >= 1000000) // 1 Juta+
+        {
+            return (number / 1000000f).ToString("F1", System.Globalization.CultureInfo.InvariantCulture) + "M";
+        }
+        if (number >= 1000) // 1 Ribu+
+        {
+            return (number / 1000f).ToString("F1", System.Globalization.CultureInfo.InvariantCulture) + "K";
+        }
+
+        return number.ToString(); // Di bawah 1000 tetap tampil angka biasa
+    }
+
     private void UpdateCountdown(int seconds)
     {
         int minute = seconds / 60;

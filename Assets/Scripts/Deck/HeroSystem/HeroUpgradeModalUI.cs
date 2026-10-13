@@ -136,11 +136,11 @@ public class HeroUpgradeModalUI : MonoBehaviour
             _levelStarText.text = $"★{entry.star}  Lv. {entry.level}/{maxLevel}";
 
         // 2. Rincian 5 Stat
-        if (_atkText != null) _atkText.text = $"ATK: {stats.totalDamage:F0}";
-        if (_cooldownText != null) _cooldownText.text = $"Interval: {stats.attackCooldown:F2}s";
-        if (_rangeText != null) _rangeText.text = $"Range: {stats.attackRange:F1}";
-        if (_critRateText != null) _critRateText.text = $"Crit: {stats.totalCritRate:F0}%";
-        if (_critDmgText != null) _critDmgText.text = $"Crit DMG: x{stats.totalCritDamage:F1}";
+        if (_atkText != null) _atkText.text = $"{stats.totalDamage:F0}";
+        if (_cooldownText != null) _cooldownText.text = $"{stats.attackCooldown:F2}s";
+        if (_rangeText != null) _rangeText.text = $"{stats.attackRange:F1}";
+        if (_critRateText != null) _critRateText.text = $"{stats.totalCritRate:F0}%";
+        if (_critDmgText != null) _critDmgText.text = $"x{stats.totalCritDamage:F1}";
 
         // 3. Status Tombol Debug
         if (_debugLockBtnText != null)

@@ -188,6 +188,50 @@ public class PlayTimeRewardController : MonoBehaviour, ISaveable
         SaveManager.Instance?.SaveLocal();
     }
 
+    [ContextMenu("Debug: Lock All Slots Except First")]
+    public void Debug_LockAllSlotsExceptFirst()
+    {
+        if (_slotRuntimes == null || _slotConfigs == null)
+        {
+            Debug.LogWarning("[Debug] Runtime belum diinisialisasi. Jalankan game terlebih dahulu!");
+            return;
+        }
+
+        // 1. Hapus penyimpanan PlayerPrefs untuk slot indeks 1 ke atas
+        for (int i = 1; i < _slotConfigs.Length; i++)
+        {
+            string key = PrefKeyUnlockedPrefix + i;
+            if (PlayerPrefs.HasKey(key))
+            {
+                PlayerPrefs.DeleteKey(key);
+            }
+        }
+        PlayerPrefs.Save();
+
+        // 2. Paksa status runtime kembali terkunci
+        for (int i = 0; i < _slotRuntimes.Length; i++)
+        {
+            // Lewati slot pertama (indeks 0) atau slot yang berbiaya gratis
+            if (i == 0 || _slotConfigs[i].unlockGemCost <= 0)
+            {
+                continue;
+            }
+
+            _slotRuntimes[i].isUnlocked = false;
+            _slotRuntimes[i].targetTime = 0f;
+            _slotRuntimes[i].state = SlotState.Locked;
+
+            // Picu pembaruan visual ke UI
+            OnSlotUpdated?.Invoke(i);
+        }
+
+        // 3. Sinkronisasi dengan sistem penyimpanan lokal jika ada
+        SaveManager.Instance?.SaveLocal();
+
+        Debug.Log("<color=cyan>[Debug]</color> Semua data penyimpanan dihapus & slot runtime berhasil dikunci kembali (kecuali slot pertama).");
+        AlertManager.Instance?.Show("Debug: Slot berhasil dikunci kembali!");
+    }
+
     // =========================================================================
     // ISAVEABLE IMPLEMENTATION
     // =========================================================================
