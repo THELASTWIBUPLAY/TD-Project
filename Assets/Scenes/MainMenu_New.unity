@@ -13253,7 +13253,7 @@ PrefabInstance:
       objectReference: {fileID: 68840783}
     - target: {fileID: 8241688842816190922, guid: 031d0beed27b5ac4cbfbc4dafffec885, type: 3}
       propertyPath: _stageConfig.Array.size
-      value: 5
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8241688842816190922, guid: 031d0beed27b5ac4cbfbc4dafffec885, type: 3}
       propertyPath: '_stageConfig.Array.data[0]'
@@ -13275,6 +13275,26 @@ PrefabInstance:
       propertyPath: '_stageConfig.Array.data[4]'
       value: 
       objectReference: {fileID: 11400000, guid: e7d1ba44b596d8b43ae24e9f07a472a3, type: 2}
+    - target: {fileID: 8241688842816190922, guid: 031d0beed27b5ac4cbfbc4dafffec885, type: 3}
+      propertyPath: '_stageConfig.Array.data[5]'
+      value: 
+      objectReference: {fileID: 11400000, guid: ecfb38a535ee3a94398429980ae5d542, type: 2}
+    - target: {fileID: 8241688842816190922, guid: 031d0beed27b5ac4cbfbc4dafffec885, type: 3}
+      propertyPath: '_stageConfig.Array.data[6]'
+      value: 
+      objectReference: {fileID: 11400000, guid: be9b00ae712e25040b9bd65e77f68513, type: 2}
+    - target: {fileID: 8241688842816190922, guid: 031d0beed27b5ac4cbfbc4dafffec885, type: 3}
+      propertyPath: '_stageConfig.Array.data[7]'
+      value: 
+      objectReference: {fileID: 11400000, guid: b6d5333c74336d84287d1b9565f9651f, type: 2}
+    - target: {fileID: 8241688842816190922, guid: 031d0beed27b5ac4cbfbc4dafffec885, type: 3}
+      propertyPath: '_stageConfig.Array.data[8]'
+      value: 
+      objectReference: {fileID: 11400000, guid: e685a9d6f59e6c44fab01b30d0421607, type: 2}
+    - target: {fileID: 8241688842816190922, guid: 031d0beed27b5ac4cbfbc4dafffec885, type: 3}
+      propertyPath: '_stageConfig.Array.data[9]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 4aa1992cf2d07144dbb20dcb57abb664, type: 2}
     - target: {fileID: 8590737520501929388, guid: 031d0beed27b5ac4cbfbc4dafffec885, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
@@ -20026,7 +20046,7 @@ MonoBehaviour:
     claimInterval: 30
     goldReward: 250
     gemReward: 0
-  - slotName: Chest 4
+  - slotName: Chest 5
     unlockGemCost: 200
     claimInterval: 30
     goldReward: 350

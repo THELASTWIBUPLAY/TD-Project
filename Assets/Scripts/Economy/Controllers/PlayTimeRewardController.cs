@@ -34,14 +34,15 @@ public class PlayTimeRewardController : MonoBehaviour, ISaveable
         public SlotState state;
     }
 
-    [Header("Slot Configurations (4 Slots)")]
+    [Header("Slot Configurations (5 Slots)")]
     [SerializeField]
-    private SlotConfig[] _slotConfigs = new SlotConfig[4]
+    private SlotConfig[] _slotConfigs = new SlotConfig[5]
     {
-        new SlotConfig { slotName = "Chest 1", unlockGemCost = 0,   claimInterval = 1800f, goldReward = 100 },
-        new SlotConfig { slotName = "Chest 2", unlockGemCost = 50,  claimInterval = 1800f, goldReward = 150 },
-        new SlotConfig { slotName = "Chest 3", unlockGemCost = 100, claimInterval = 1800f, goldReward = 200 },
-        new SlotConfig { slotName = "Chest 4", unlockGemCost = 150, claimInterval = 1800f, goldReward = 250 }
+        new SlotConfig { slotName = "Cage 1", unlockGemCost = 0,   claimInterval = 1800f, goldReward = 100 },
+        new SlotConfig { slotName = "Cage 2", unlockGemCost = 50,  claimInterval = 1800f, goldReward = 150 },
+        new SlotConfig { slotName = "Cage 3", unlockGemCost = 100, claimInterval = 1800f, goldReward = 200 },
+        new SlotConfig { slotName = "Cage 4", unlockGemCost = 150, claimInterval = 1800f, goldReward = 250 },
+        new SlotConfig { slotName = "Cage 5", unlockGemCost = 250, claimInterval = 1800f, goldReward = 350 }
     };
 
     private SlotRuntime[] _slotRuntimes;
@@ -61,6 +62,21 @@ public class PlayTimeRewardController : MonoBehaviour, ISaveable
         Instance = this;
 
         InitializeSlots();
+    }
+
+    public int GetCalculatedGoldReward(int slotIndex)
+    {
+        if (slotIndex < 0 || slotIndex >= _slotConfigs.Length) return 0;
+
+        int baseGold = _slotConfigs[slotIndex].goldReward;
+
+        float buffPercent = TalentManager.Instance != null ? TalentManager.Instance.CurrentTalentCoinBuff : 0f;
+        Debug.Log("buff coin" + buffPercent);
+
+        //misal buff 5% -> 5 / 100 = 0.05
+        float totalGold = baseGold * (1f + (buffPercent / 100f));
+
+        return Mathf.RoundToInt(totalGold);
     }
 
     private void InitializeSlots()
@@ -176,14 +192,15 @@ public class PlayTimeRewardController : MonoBehaviour, ISaveable
         }
 
         var cfg = _slotConfigs[slotIndex];
+        int finalGold = GetCalculatedGoldReward(slotIndex);
 
         if (EconomyManager.Instance != null)
         {
-            if (cfg.goldReward > 0) EconomyManager.Instance.ModifyGold(cfg.goldReward);
+            if (finalGold > 0) EconomyManager.Instance.ModifyGold(finalGold);
             if (cfg.gemReward > 0) EconomyManager.Instance.ModifyGem(cfg.gemReward);
         }
 
-        AlertManager.Instance?.Show($"Hadiah {cfg.slotName} berhasil diambil!");
+        AlertManager.Instance?.Show($"Hadiah {cfg.slotName} berhasil diambil! (+{finalGold:N0} Gold)");
         StartSlotCycle(slotIndex);
         SaveManager.Instance?.SaveLocal();
     }

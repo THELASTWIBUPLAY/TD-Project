@@ -5,6 +5,7 @@ public class BattleRelicController : MonoBehaviour
     private void Start()
     {
         ApplyEquippedRelicPassives();
+        ApplyTalentPassives();
     }
 
     private void ApplyEquippedRelicPassives()
@@ -50,9 +51,18 @@ public class BattleRelicController : MonoBehaviour
         }
     }
 
+    private void ApplyTalentPassives()
+    {
+        // Tambahkan % Attack Buff dari Talent ke pengali damage global unit tempur
+        if (TalentManager.Instance != null)
+        {
+            Character.GlobalDamageBonusPercent += TalentManager.Instance.CurrentTalentAttackBuff;
+            Debug.Log($"[Talent Active] Attack Buff diterapkan: +{TalentManager.Instance.CurrentTalentAttackBuff}% Global ATK");
+        }
+    }
+
     private void OnDestroy()
     {
-        // PEMBERSIHAN MUTLAK:
         // Kembalikan stat global tempur ke default saat pemain keluar dari scene arena
         Character.GlobalDamageBonusPercent = 0f;
         Character.GlobalAtkSpeedMultiplier = 1f;

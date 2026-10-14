@@ -268,7 +268,14 @@ public class HeroManager : MonoBehaviour, ISaveable
             }
         }
 
-        stats.totalDamage = calculatedDamage * (1f + totalDmgPercentBonus);
+        float talentAtkPercent = 0f;
+        if (TalentManager.Instance != null)
+        {
+            // Misal Talent Attack Lv 2 (2.5% x 2 = 5%) -> diubah ke desimal (5 / 100 = 0.05)
+            talentAtkPercent = TalentManager.Instance.CurrentTalentAttackBuff / 100f;
+        }
+
+        stats.totalDamage = calculatedDamage * (1f + totalDmgPercentBonus + talentAtkPercent);
         float cdMultiplier = Mathf.Clamp(1f - totalCdReductionPercent, 0.3f, 1f);
         stats.attackCooldown = Mathf.Max(0.15f, calculatedCooldown * cdMultiplier);
         stats.attackRange = Mathf.Max(1f, calculatedRange);
