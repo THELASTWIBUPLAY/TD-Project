@@ -22,7 +22,13 @@ public enum RecruitmentChestType { Rare = 0, Legendary = 1, RareRelic = 2, EpicR
     public OwnedHero[] heroes = Array.Empty<OwnedHero>();
     public OwnedRelic[] relics = Array.Empty<OwnedRelic>();
     public HeroOpening lastOpening;
-    public int QuantityOf(string heroId) => Array.Find(heroes, h => h.heroId == heroId)?.quantity ?? 0;
+    public int QuantityOf(string heroId)
+    {
+        int total = 0;
+        foreach (var hero in heroes ?? Array.Empty<OwnedHero>())
+            if (hero != null && RecruitmentHeroes.CanonicalId(hero.heroId) == RecruitmentHeroes.CanonicalId(heroId)) total += hero.quantity;
+        return total;
+    }
     public int RelicQuantityOf(string relicId) => relics == null ? 0 : Array.Find(relics, r => r.relicId == relicId)?.quantity ?? 0;
 }
 [Serializable] public class RecruitmentReply
@@ -42,7 +48,7 @@ public class RecruitmentService : MonoBehaviour
     public event Action CollectionChanged;
     string scope;
     string playerId;
-    [Serializable] class Pending { public string requestId; public int sequence; public RecruitmentChestType chestType; }
+    [Serializable] class Pending { public string requestId; public int sequence; public RecruitmentChestType chestType; public bool debugGrant; }
     public int KeysFor(RecruitmentChestType chest) => chest switch
     {
         RecruitmentChestType.Rare => Current?.rareHeroKeys ?? 0,
@@ -59,7 +65,7 @@ public class RecruitmentService : MonoBehaviour
         RecruitmentChestType.EpicRelic => "open_epic_relic",
         _ => throw new ArgumentOutOfRangeException(nameof(chest))
     };
-    public bool HasPendingFor(RecruitmentChestType chest) => HasPending && ReadPending()?.chestType == chest;
+    public bool HasPendingFor(RecruitmentChestType chest) => HasPending && ReadPending()?.chestType == chest && !ReadPending().debugGrant;
     Pending ReadPending() => HasPending ? JsonUtility.FromJson<Pending>(PlayerPrefs.GetString(scope)) : null;
 
     async Task WaitForSignIn()
@@ -95,9 +101,15 @@ public class RecruitmentService : MonoBehaviour
     public Task<RecruitmentReply> OpenRareHeroAsync() => OpenHeroAsync(RecruitmentChestType.Rare);
     public Task<RecruitmentReply> OpenHeroAsync(RecruitmentChestType chest) => OpenChestAsync(chest);
 
-    public async Task<RecruitmentReply> OpenChestAsync(RecruitmentChestType chest)
+    public Task<RecruitmentReply> OpenChestAsync(RecruitmentChestType chest) => MutateAsync(chest, false);
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    public Task<RecruitmentReply> DebugAddKeysAsync(RecruitmentChestType chest) => MutateAsync(chest, true);
+#endif
+
+    async Task<RecruitmentReply> MutateAsync(RecruitmentChestType chest, bool debugGrant)
     {
-        string action = ActionFor(chest);
+        string action = (debugGrant ? "debug_" : "") + ActionFor(chest);
         if (Busy) throw new InvalidOperationException("Recruitment is busy.");
         Busy = true;
         CollectionChanged?.Invoke();
@@ -107,12 +119,12 @@ public class RecruitmentService : MonoBehaviour
             // Refresh authoritative state before creating a new request. Pending requests retain their original sequence.
             await Status();
             var pending = ReadPending();
-            if (pending != null && pending.chestType != chest)
+            if (pending != null && (pending.chestType != chest || pending.debugGrant != debugGrant))
                 throw new InvalidOperationException("Retry the pending opening on the other chest first.");
             if (pending == null)
             {
-                if (KeysFor(chest) < 1) return new RecruitmentReply { ok = false, error = "NO_KEYS", state = Current };
-                pending = new Pending { requestId = Guid.NewGuid().ToString("N"), sequence = Current.sequence, chestType = chest };
+                if (!debugGrant && KeysFor(chest) < 1) return new RecruitmentReply { ok = false, error = "NO_KEYS", state = Current };
+                pending = new Pending { requestId = Guid.NewGuid().ToString("N"), sequence = Current.sequence, chestType = chest, debugGrant = debugGrant };
                 PlayerPrefs.SetString(scope, JsonUtility.ToJson(pending));
                 PlayerPrefs.Save();
             }
@@ -138,6 +150,7 @@ public class RecruitmentService : MonoBehaviour
         if (!AuthenticationService.Instance.IsSignedIn || AuthenticationService.Instance.PlayerId != playerId)
             throw new InvalidOperationException("Account changed. Refresh recruitment before continuing.");
         Current = reply.state;
+        HeroManager.Instance?.ApplyRecruitmentCollection(Current.heroes);
         CollectionChanged?.Invoke();
     }
 }

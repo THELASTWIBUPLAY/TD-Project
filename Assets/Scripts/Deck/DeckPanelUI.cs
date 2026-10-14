@@ -194,6 +194,20 @@ public class DeckPanelUI : MonoBehaviour
         {
             itemComp.Setup(icon, id, type, owned, equipped, false, -1);
         }
+        if (type == DeckDraggableItem.ItemType.Hero && owned && HeroManager.Instance != null)
+        {
+            int copies = HeroManager.Instance.GetRecruitedCopies(id);
+            if (copies > 0)
+            {
+                var badge = new GameObject("CopyCount", typeof(RectTransform), typeof(TextMeshProUGUI));
+                badge.transform.SetParent(slotObj.transform, false);
+                var text = badge.GetComponent<TextMeshProUGUI>();
+                text.text = "x" + copies; text.fontSize = 16; text.color = Color.white;
+                text.alignment = TextAlignmentOptions.BottomRight; text.raycastTarget = false;
+                var rect = text.rectTransform; rect.anchorMin = Vector2.zero; rect.anchorMax = Vector2.one;
+                rect.offsetMin = new Vector2(3, 3); rect.offsetMax = new Vector2(-3, -3);
+            }
+        }
     }
 
     private void ClearContainer(Transform container)

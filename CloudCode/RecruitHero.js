@@ -3,7 +3,8 @@
 const { DataApi } = require('@unity-services/cloud-save-1.4');
 const { SettingsApi } = require('@unity-services/remote-config-1.1');
 const KEY = 'recruitment_v1';
-const HERO_IDS = ['hero_fighter_001', 'hero_ranger_001', 'hero_mage_001', 'hero_support_001', 'hero_tank_001'];
+const HERO_IDS = ['01', 'Fighter_Ora_2', 'Ranger_Alex_01', 'Ranger_Lisa_01', 'Mage_Mona_2', 'Support_Ely_01', 'Tank_Bubu_01',
+    'hero_fighter_001', 'hero_ranger_001', 'hero_mage_001', 'hero_support_001', 'hero_tank_001'];
 const RELIC_IDS = ['relic_placeholder_001', 'relic_placeholder_002', 'relic_placeholder_003', 'relic_placeholder_004', 'relic_placeholder_005'];
 const DEFAULT_RELIC_CONFIG = { enabled: true, pool: RELIC_IDS.map(relicId => ({ relicId, weight: 1 })) };
 
@@ -39,8 +40,17 @@ module.exports = async ({ params, context }) => {
         open_rare_relic: ['rare_relic', 'rareRelicKeys', 'rare_relic_chest'],
         open_epic_relic: ['epic_relic', 'epicRelicKeys', 'epic_relic_chest']
     };
-    if (!Object.prototype.hasOwnProperty.call(chests, params.action)) return reply(item ? item.value : empty, 'INVALID_REQUEST');
-    const [chestType, keyField, configKey] = chests[params.action];
+    const debugGrant = typeof params.action === 'string' && params.action.startsWith('debug_');
+    const action = debugGrant ? params.action.substring(6) : params.action;
+    if (!Object.prototype.hasOwnProperty.call(chests, action)) return reply(item ? item.value : empty, 'INVALID_REQUEST');
+    const [chestType, keyField, configKey] = chests[action];
+    const receiptType = debugGrant ? 'debug_' + chestType : chestType;
+    if (debugGrant) {
+        // This flag can only be set by an administrator/server, never the game client.
+        const permission = await api.getProtectedItems(context.projectId, context.playerId, ['recruitment_debug_enabled']);
+        if (permission.data.results.find(i => i.key === 'recruitment_debug_enabled')?.value !== true)
+            return reply(item ? item.value : empty, 'DEBUG_NOT_ALLOWED');
+    }
     const isRelic = chestType.endsWith('_relic');
     const idField = isRelic ? 'relicId' : 'heroId';
     const collectionField = isRelic ? 'relics' : 'heroes';
@@ -51,16 +61,32 @@ module.exports = async ({ params, context }) => {
 
     // Missing records cannot spend keys. Provision once through a trusted admin/reward flow.
     // Never create/reset a record here: concurrent first opens must not overwrite each other.
-    if (!item) return reply(empty, 'NO_KEYS');
+    if (!item) return reply(empty, debugGrant ? 'DEBUG_CREATE_RECORD_FIRST' : 'NO_KEYS');
     let config;
     for (let attempt = 0; attempt < 3; attempt++) {
         const state = item.value;
         if (!validState(state) || !item.writeLock) throw new Error('Invalid recruitment state or missing write lock.');
         if (state.lastOpening && state.lastOpening.requestId === params.requestId) {
-            if ((state.lastOpening.chestType || 'rare') !== chestType) return reply(state, 'INVALID_REQUEST');
+            if ((state.lastOpening.chestType || 'rare') !== receiptType) return reply(state, 'INVALID_REQUEST');
             return reply(state, '', state.lastOpening);
         }
         if (state.sequence !== params.expectedSequence) return reply(state, 'STATE_CHANGED');
+        if (debugGrant) {
+            const next = JSON.parse(JSON.stringify(state));
+            next[keyField] = (next[keyField] || 0) + 10;
+            next.sequence++;
+            if (!Number.isSafeInteger(next[keyField]) || !Number.isSafeInteger(next.sequence)) throw new Error('Key limit reached.');
+            next.lastOpening = { requestId: params.requestId, chestType: receiptType, quantity: 10, sequence: next.sequence };
+            try {
+                await api.setProtectedItem(context.projectId, context.playerId, { key: KEY, value: next, writeLock: item.writeLock });
+                return reply(next);
+            } catch (error) {
+                if (error.response?.status !== 409) throw error;
+                item = await read();
+                if (!item) throw new Error('Recruitment record disappeared.');
+                continue;
+            }
+        }
         if ((state[keyField] || 0) < 1) return reply(state, 'NO_KEYS');
         if (!config) {
             const rc = new SettingsApi(context);

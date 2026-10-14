@@ -160,6 +160,7 @@ public class SaveManager : MonoBehaviour
         if (TalentManager.Instance is ISaveable talent) talent.PopulateSaveData(target);
         if (EnergyRegenManager.Instance is ISaveable energy) energy.PopulateSaveData(target);
         if (ProfileManager.Instance is ISaveable profile) profile.PopulateSaveData(target);
+        if (HeroManager.Instance is ISaveable hero) hero.PopulateSaveData(target);
     }
 
     private void DistributeDataToManagers(GameSaveData source)
@@ -174,6 +175,7 @@ public class SaveManager : MonoBehaviour
             if (TalentManager.Instance is ISaveable talent) talent.LoadFromSaveData(source);
             if (EnergyRegenManager.Instance is ISaveable energy) energy.LoadFromSaveData(source); 
             if (ProfileManager.Instance is ISaveable profile) profile.LoadFromSaveData(source);
+            if (HeroManager.Instance is ISaveable hero) hero.LoadFromSaveData(source);
         }
         finally
         {

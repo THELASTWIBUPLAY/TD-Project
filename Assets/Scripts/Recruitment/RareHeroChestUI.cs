@@ -7,7 +7,6 @@ public class RareHeroChestUI : MonoBehaviour
     // Shared chest view; keep the class name to preserve existing prefab references.
     [SerializeField] RecruitmentChestType chestType;
     [SerializeField] RecruitmentService service;
-    [SerializeField] HeroCatalog catalog;
     [SerializeField] RelicCatalog relicCatalog;
     [SerializeField] UnityEngine.UI.Button keyButton;
     [SerializeField] TMP_Text keyLabel;
@@ -70,7 +69,7 @@ public class RareHeroChestUI : MonoBehaviour
             if (reward == null) throw new InvalidOperationException("The server returned no reward.");
             string id = IsRelic ? reward.relicId : reward.heroId;
             if (string.IsNullOrEmpty(id)) throw new InvalidOperationException("The server returned the wrong reward type.");
-            string name = IsRelic ? relicCatalog.Find(id)?.displayName ?? id : catalog.Find(id)?.displayName ?? id;
+            string name = IsRelic ? relicCatalog.Find(id)?.displayName ?? id : RecruitmentHeroes.Find(id)?.heroName ?? id;
             int quantity = IsRelic ? reply.state.RelicQuantityOf(id) : reply.state.QuantityOf(id);
             resultText.text = name + " +1\n\nOwned: " + quantity;
             resultPanel.SetActive(true);

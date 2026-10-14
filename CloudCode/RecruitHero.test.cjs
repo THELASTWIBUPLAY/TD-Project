@@ -14,7 +14,10 @@ function fixture(keys = 5, options = {}) {
     let version = 0, writes = 0, lostReply = options.lostReply;
     const config = { enabled: true, pool: [{heroId:'hero_mage_001',weight:1}], ...options.config };
     class DataApi {
-        async getProtectedItems() { return { data: { results: record ? [clone(record)] : [] } }; }
+        async getProtectedItems(project, player, keys) {
+            if (keys.includes('recruitment_debug_enabled')) return {data:{results:options.debugAllowed ? [{key:'recruitment_debug_enabled',value:true}] : []}};
+            return { data: { results: record ? [clone(record)] : [] } };
+        }
         async setProtectedItem(project, player, item) {
             if (record.writeLock !== item.writeLock) throw { response: { status: 409 } };
             record = { key:item.key, value:clone(item.value), writeLock:String(++version) }; writes++;
@@ -131,10 +134,10 @@ test('configurable Legendary weights determine selection independently of Rare',
         assert.equal((await f.call(0,'a'.repeat(32),'open_legendary')).reward.heroId,hero);
     }
 });
-test('shipped Rare and Legendary configurations start with the same five equal weights',()=>{
+test('shipped Rare and Legendary configurations start with the same seven equal weights',()=>{
     const rare=JSON.parse(fs.readFileSync(__dirname+'/rare_hero_chest.json','utf8'));
     const legend=JSON.parse(fs.readFileSync(__dirname+'/legendary_hero_chest.json','utf8'));
-    assert.deepEqual(legend,rare); assert.equal(legend.pool.length,5);
+    assert.deepEqual(legend,rare); assert.equal(legend.pool.length,7);
     assert.ok(legend.pool.every(x=>x.weight===1));
 });
 
@@ -195,3 +198,31 @@ test('shipped relic pools match the five equal default placeholders',()=>{
     assert.deepEqual(rare,epic);
     assert.deepEqual(rare.pool,Array.from({length:5},(_,i)=>({relicId:'relic_placeholder_00'+(i+1),weight:1})));
 });
+
+test('new HeroSO IDs are valid rewards', async()=>{
+    for (const heroId of ['01','Fighter_Ora_2','Ranger_Alex_01','Ranger_Lisa_01','Mage_Mona_2','Support_Ely_01','Tank_Bubu_01']) {
+        const f=fixture(1,{config:{pool:[{heroId,weight:1}]}});
+        assert.equal((await f.call(0)).reward.heroId,heroId);
+    }
+});
+test('debug keys require a server-managed permission',async()=>{
+    const f=fixture(0); assert.equal((await f.call(0,'a'.repeat(32),'debug_open')).error,'DEBUG_NOT_ALLOWED'); assert.equal(f.writes(),0);
+});
+test('debug grant adds ten keys and retry cannot add them twice',async()=>{
+    const f=fixture(0,{debugAllowed:true});
+    assert.equal((await f.call(0,'a'.repeat(32),'debug_open')).ok,true);
+    assert.equal((await f.call(0,'a'.repeat(32),'debug_open')).ok,true);
+    assert.equal(f.state().rareHeroKeys,10); assert.equal(f.writes(),1);
+    assert.equal((await f.call(0,'a'.repeat(32),'open')).error,'INVALID_REQUEST');
+});
+test('debug grant lost reply can be recovered without minting twice',async()=>{
+    const f=fixture(0,{debugAllowed:true,lostReply:true});
+    await assert.rejects(f.call(0,'a'.repeat(32),'debug_open_epic_relic'));
+    assert.equal((await f.call(0,'a'.repeat(32),'debug_open_epic_relic')).ok,true);
+    assert.equal(f.state().epicRelicKeys,10); assert.equal(f.writes(),1);
+});
+test('debug grant does not overwrite missing records',async()=>{
+    const f=fixture(0,{debugAllowed:true,missing:true});
+    assert.equal((await f.call(0,'a'.repeat(32),'debug_open')).error,'DEBUG_CREATE_RECORD_FIRST'); assert.equal(f.writes(),0);
+});
+

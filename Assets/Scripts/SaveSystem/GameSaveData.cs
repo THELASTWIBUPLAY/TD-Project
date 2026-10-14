@@ -71,6 +71,7 @@ public class TalentSaveData
 public class HeroProgressEntry
 {
     public string heroId;
+    public int recruitedCopies;
     public int currentFragments;
     public bool isUnlocked;
 
