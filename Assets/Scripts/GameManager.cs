@@ -12,11 +12,13 @@ public class GameManager : MonoBehaviour
 
     [Header("Speed & Pause Controls")]
     public TextMeshProUGUI speedButtonText;
-    private int currentSpeedIndex = 1; 
-    private readonly float[] speedMultipliers = { 0.5f, 1f, 2f, 3f, 5f };
+    private int currentSpeedIndex = 0; 
+    private readonly float[] speedMultipliers = { 1f, 1.5f, 2f, 5f }; 
     private bool isPaused = false;
     private bool isMuted = false;
 
+    [Header("Level UI")]
+    public TextMeshProUGUI levelNumberText; 
 
     [Header("Pause Modal")]
     public GameObject PausePanel;
@@ -76,6 +78,7 @@ public class GameManager : MonoBehaviour
         UpdateSpeedUI(); 
         if (PausePanel != null) PausePanel.SetActive(false);
         UpdateExpUI();
+        UpdateLevelUI();
 
         bool isEndless = (WaveManager.Instance != null && 
                           WaveManager.Instance.stageConfig != null && 
@@ -233,12 +236,21 @@ public class GameManager : MonoBehaviour
 
         Debug.Log($"[GameManager.LevelUp] Level {currentLevel}: Base={baseCurve:F0}, NextExp={expToNextLevel}");
 
+        UpdateLevelUI();
+
         if (UpgradeManager.Instance != null)
         {
             UpgradeManager.Instance.ShowUpgradeSelection();
         }
     }
 
+    private void UpdateLevelUI()
+    {
+        if (levelNumberText != null)
+        {
+            levelNumberText.text = currentLevel.ToString();
+        }
+    }
 
     private void UpdateExpUI()
     {

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 1643688731197144020}
   - component: {fileID: 5818637967606467372}
   - component: {fileID: 4979986003387755086}
+  - component: {fileID: 189495260789205995}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Enemy
@@ -80,7 +81,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
-  m_Color: {r: 0.7584905, g: 0.12971184, b: 0.072986804, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -166,6 +167,38 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHp: 20
+  currentHp: 0
   moveSpeed: 2
   damageToBase: 10
   expReward: 5
+  hitFlashColor: {r: 1, g: 1, b: 1, a: 1}
+  flashDuration: 0.08
+  archetype: 0
+  baseLineY: -2
+  isChilled: 0
+  normalController: {fileID: 9100000, guid: d3057373a6f61e24a978d8522fa6a376, type: 2}
+  scoutController: {fileID: 9100000, guid: 98b4447e59f6eef4e8cadf27e2958e3b, type: 2}
+  tankMobController: {fileID: 9100000, guid: 76d4555bd80c48143901b338a96a7cc8, type: 2}
+  bossController: {fileID: 9100000, guid: 5c9bc800b6f661e49afb4b8b5a589ce7, type: 2}
+--- !u!95 &189495260789205995
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6756288937295200511}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 5c9bc800b6f661e49afb4b8b5a589ce7, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

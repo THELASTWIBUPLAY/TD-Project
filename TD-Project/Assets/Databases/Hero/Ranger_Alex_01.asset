@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edd7cd6221943ca49ac0f2c66d309006, type: 3}
+  m_Name: Ranger_Alex_01
+  m_EditorClassIdentifier: 
+  heroId: Ranger_Alex_01
+  heroName: Alex
+  heroDescription: 
+  heroIcon: {fileID: -6771979813793897808, guid: 2ac1052ca654876449b415b2828682b4, type: 3}
+  classType: 4
+  rarity: {fileID: 0}
+  baseDamage: 15
+  baseAttackCooldown: 0.8
+  baseAttackRange: 5.5
+  baseCritRate: 8.3
+  baseCritDamage: 1.5
+  inGamePrefab: {fileID: 0}
