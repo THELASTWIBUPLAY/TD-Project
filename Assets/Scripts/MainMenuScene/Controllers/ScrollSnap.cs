@@ -8,36 +8,43 @@ public class ScrollSnap : MonoBehaviour, IEndDragHandler, IDragHandler
     [SerializeField] private ScrollRect _scrollRect;
     [SerializeField] private RectTransform _contentPanel;
     [SerializeField] private RectTransform[] _viewPages;
-    [SerializeField] private Button _nextBtn;
-    [SerializeField] private Button _previousBtn;
+    [SerializeField] private Button _nextBtn;     // Tombol ke bawah / halaman berikutnya
+    [SerializeField] private Button _previousBtn; // Tombol ke atas / halaman sebelumnya
 
     [Header("Settings")]
     [SerializeField] private float _snapSpeed = 10f;
 
     private float[] _pagePositions;
-    private int _targetPage;
-    private bool _isDragging;
+    private int _targetPage = 0;
+    private bool _isDragging = false;
 
     private void Start()
     {
-        int pageCount = _viewPages.Length;
-        if (pageCount == 0) return;
+        if (_viewPages == null || _viewPages.Length == 0) return;
 
+        int pageCount = _viewPages.Length;
         _pagePositions = new float[pageCount];
 
-        // Menghitung titik koordinat normalisasi (0 sampai 1) untuk setiap stage
+        // Pada vertical scroll: Index 0 (Page 1) ada di posisi atas (1.0)
+        // bergerak turun ke halaman terakhir di posisi bawah (0.0)
         for (int i = 0; i < pageCount; i++)
         {
-            _pagePositions[i] = (float)i / (pageCount - 1);
+            _pagePositions[i] = (pageCount > 1) ? 1f - ((float)i / (pageCount - 1)) : 1f;
+        }
+
+        // Posisikan scroll langsung ke halaman awal saat start
+        if (_scrollRect != null)
+        {
+            _scrollRect.verticalNormalizedPosition = _pagePositions[_targetPage];
         }
     }
 
     private void Update()
     {
-        if (!_isDragging)
+        if (!_isDragging && _scrollRect != null && _pagePositions != null && _pagePositions.Length > 0)
         {
-            float currentPos = _scrollRect.horizontalNormalizedPosition;
-            _scrollRect.horizontalNormalizedPosition = Mathf.Lerp(currentPos, _pagePositions[_targetPage], Time.deltaTime * _snapSpeed);
+            float currentPos = _scrollRect.verticalNormalizedPosition;
+            _scrollRect.verticalNormalizedPosition = Mathf.Lerp(currentPos, _pagePositions[_targetPage], Time.deltaTime * _snapSpeed);
         }
 
         if (_viewPages != null && _viewPages.Length > 0)
@@ -52,13 +59,14 @@ public class ScrollSnap : MonoBehaviour, IEndDragHandler, IDragHandler
         _isDragging = true;
     }
 
-    // Mendeteksi ketika pemain melepas jari/klik mouse
     public void OnEndDrag(PointerEventData eventData)
     {
         _isDragging = false;
-        float currentPos = _scrollRect.horizontalNormalizedPosition;
+        if (_scrollRect == null || _pagePositions == null || _pagePositions.Length == 0) return;
 
-        // Cari stage mana yang posisinya paling dekat dengan posisi scroll saat ini
+        float currentPos = _scrollRect.verticalNormalizedPosition;
+
+        // Cari halaman dengan jarak vertikal terdekat
         float closestDistance = float.MaxValue;
         for (int i = 0; i < _pagePositions.Length; i++)
         {
@@ -73,7 +81,6 @@ public class ScrollSnap : MonoBehaviour, IEndDragHandler, IDragHandler
 
     public void GoToNextPage()
     {
-        // Cek apakah halaman berikutnya masih ada di dalam batas array
         if (_targetPage + 1 < _viewPages.Length)
         {
             _targetPage++;
@@ -82,7 +89,6 @@ public class ScrollSnap : MonoBehaviour, IEndDragHandler, IDragHandler
 
     public void GoToPreviousPage()
     {
-        // Cek agar tidak minus dari halaman pertama (indeks 0)
         if (_targetPage - 1 >= 0)
         {
             _targetPage--;

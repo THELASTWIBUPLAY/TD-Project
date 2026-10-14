@@ -15,4 +15,5 @@ MonoBehaviour:
   dungeons:
   - dungeonName: Endless
     dungeonScene: SampleScene
+    dungeonSprite: {fileID: 4305708606642364458, guid: 45e9440247d41cf4cb1a2410be03dc26, type: 3}
     energyCost: 10

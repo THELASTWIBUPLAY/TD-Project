@@ -6,6 +6,7 @@ public class StageConfig : ScriptableObject
     [Header("Mode Configuration")]
     public string stageName = "Level 1";
     public int stageLevel = 1;
+    public Sprite stageSprite;
     public bool isEndless = false;
     public int maxWave = 10;
     public int energyCost = 5;

@@ -7,6 +7,7 @@ public class DungeonSlotUI : MonoBehaviour
     [Header("UI Dependencies")]
     [SerializeField] private TextMeshProUGUI _dungeonNameText;
     [SerializeField] private TextMeshProUGUI _energyCostText;
+    [SerializeField] private Image _dungeonImage;
     [SerializeField] private Button _playBtn;
 
     private DungeonUI _ui;
@@ -33,7 +34,10 @@ public class DungeonSlotUI : MonoBehaviour
             _dungeonNameText.text = data.dungeonName;
 
         if (_energyCostText != null)
-            _energyCostText.text = $"Energy Cost: {data.energyCost}";
+            _energyCostText.text = $"{data.energyCost}";
+
+        if (_dungeonImage != null)
+            _dungeonImage.sprite = data.dungeonSprite;
     }
 
     private void OnPlayButtonClicked()

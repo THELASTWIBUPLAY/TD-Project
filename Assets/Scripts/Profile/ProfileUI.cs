@@ -118,19 +118,37 @@ public class ProfileUI : MonoBehaviour
 
     public void OpenEditModal()
     {
-        transform.SetAsLastSibling();
+        if (ProfileManager.Instance == null)
+        {
+            Debug.LogWarning("[ProfileUI] Gagal membuka Edit Modal: ProfileManager.Instance bernilai NULL!");
+            return;
+        }
 
-        if (ProfileManager.Instance == null || _editPanel == null) return;
+        if (_editPanel == null)
+        {
+            Debug.LogWarning("[ProfileUI] Gagal membuka Edit Modal: Slot '_editPanel' di Inspector masih KOSONG!");
+            return;
+        }
 
-        if (_nameInput != null) _nameInput.text = ProfileManager.Instance.PlayerName;
+        if (_nameInput != null)
+            _nameInput.text = ProfileManager.Instance.PlayerName;
 
         _editPanel.gameObject.SetActive(true);
+
+        _editPanel.alpha = 1f;
+        _editPanel.interactable = true;
+        _editPanel.blocksRaycasts = true;
+
+        _editPanel.transform.SetAsLastSibling();
     }
 
     public void CloseEditModal()
     {
         if (_editPanel != null)
         {
+            _editPanel.alpha = 0f;
+            _editPanel.interactable = false;
+            _editPanel.blocksRaycasts = false;
             _editPanel.gameObject.SetActive(false);
         }
     }

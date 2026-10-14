@@ -7,6 +7,7 @@ public struct DungeonData
 {
     public string dungeonName;
     public string dungeonScene;
+    public Sprite dungeonSprite;
     public int energyCost;
 }
 

@@ -9,7 +9,9 @@ public class PlayConfirmationUI : MonoBehaviour
     private ConfirmationMode _currentMode = ConfirmationMode.None;
 
     [Header("Settings")]
+    [SerializeField] private Image _image;
     [SerializeField] private TextMeshProUGUI _titleText;
+    [SerializeField] private TextMeshProUGUI _levelText;
     [SerializeField] private TextMeshProUGUI _energyCostText;
     //[SerializeField] private RewardsSlotUI[] rewardsSlots;
     [SerializeField] private Button _playBtn;
@@ -38,6 +40,8 @@ public class PlayConfirmationUI : MonoBehaviour
 
     public void SetupDungeon(DungeonData data)
     {
+        _levelText.gameObject.SetActive(false);
+
         _currentMode = ConfirmationMode.Dungeon;
 
         _energyCost = data.energyCost;
@@ -49,6 +53,9 @@ public class PlayConfirmationUI : MonoBehaviour
 
         if (_titleText != null)
             _titleText.text = data.dungeonName;
+
+        if (_image != null)
+            _image.sprite = data.dungeonSprite;
     }
 
     public void SetupLevel(StageConfig data)
@@ -64,6 +71,23 @@ public class PlayConfirmationUI : MonoBehaviour
 
         if (_titleText != null)
             _titleText.text = data.stageName;
+
+        if (data.stageLevel % 5 == 0)
+        {
+            if (_levelText != null)
+                _levelText.text = _levelSceneName;
+
+            _levelText.color = Color.orangeRed;
+        }
+        else
+        {
+            if (_levelText != null)
+                _levelText.text = _levelSceneName;
+            _levelText.color = Color.white;
+        }
+
+        if (_image != null)
+            _image.sprite = data.stageSprite;
     }
 
     private void OnPlayButtonClicked()

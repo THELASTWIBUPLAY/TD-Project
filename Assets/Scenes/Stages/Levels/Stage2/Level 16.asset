@@ -10,12 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 26ed33e1f9a85da4a8aba5b12ca08528, type: 3}
-  m_Name: Level 4
+  m_Name: Level 16
   m_EditorClassIdentifier: 
-  stageName: Magica Forest
-  stageLevel: 4
+  stageName: Blasphemy Beach
+  stageLevel: 16
+  stageSprite: {fileID: -3260171324595997514, guid: e298ab0fc06527e40811ab778b981789, type: 3}
   isEndless: 0
-  maxWave: 10
+  maxWave: 3
   energyCost: 5
   baseEnemyCount: 5
   enemyCountWaveMultiplier: 2
@@ -31,5 +32,5 @@ MonoBehaviour:
   scoreMiniBoss: 120
   scoreFinalBoss: 350
   scoreWaveClearBonus: 50
-  gold: 1000
+  gold: 500
   gem: 5
