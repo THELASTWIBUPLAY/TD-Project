@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,8 +8,11 @@ public class DeckPanelUI : MonoBehaviour
 {
     public static DeckPanelUI Instance { get; private set; }
 
-    private enum InventoryTab { Hero, Relic }
+    public enum InventoryTab { Hero, Relic }
+    public enum InventoryFilter { All, Unlocked, Locked }
+
     private InventoryTab _currentTab = InventoryTab.Hero;
+    private InventoryFilter _currentFilter = InventoryFilter.All;
 
     [Header("Modal Panels")]
     [SerializeField] private HeroUpgradeModalUI _heroUpgradeModal;
@@ -21,13 +26,17 @@ public class DeckPanelUI : MonoBehaviour
     [SerializeField] private Button _tabHeroBtn;
     [SerializeField] private Button _tabRelicBtn;
 
-    [Header("Bottom Box: Section Titles")]
-    [SerializeField] private TextMeshProUGUI _ownedTitleText;
-    [SerializeField] private TextMeshProUGUI _lockedTitleText;
+    [Header("Bottom Box: Filter Buttons")]
+    [SerializeField] private Button _filterAllBtn;
+    [SerializeField] private Button _filterUnlockedBtn;
+    [SerializeField] private Button _filterLockedBtn;
 
-    [Header("Bottom Box: Separate ScrollView Containers")]
-    [SerializeField] private Transform _ownedContent;
-    [SerializeField] private Transform _lockedContent;
+    [Header("Filter Visual Feedback")]
+    [SerializeField] private Color _activeFilterColor = Color.white;
+    [SerializeField] private Color _inactiveFilterColor = new Color(0.6f, 0.6f, 0.6f, 1f);
+
+    [Header("Bottom Box: Single Horizontal ScrollView")]
+    [SerializeField] private Transform _inventoryContent;
     [SerializeField] private GameObject _itemSlotPrefab;
 
     [Header("Databases")]
@@ -43,6 +52,7 @@ public class DeckPanelUI : MonoBehaviour
         }
         Instance = this;
 
+        // Inisialisasi slot equipped
         if (_heroDropSlots != null)
         {
             for (int i = 0; i < _heroDropSlots.Length; i++)
@@ -61,12 +71,19 @@ public class DeckPanelUI : MonoBehaviour
             }
         }
 
+        // Listener Tab Utama
         if (_tabHeroBtn != null) _tabHeroBtn.onClick.AddListener(() => SwitchTab(InventoryTab.Hero));
         if (_tabRelicBtn != null) _tabRelicBtn.onClick.AddListener(() => SwitchTab(InventoryTab.Relic));
+
+        // Listener Filter
+        if (_filterAllBtn != null) _filterAllBtn.onClick.AddListener(() => SetFilter(InventoryFilter.All));
+        if (_filterUnlockedBtn != null) _filterUnlockedBtn.onClick.AddListener(() => SetFilter(InventoryFilter.Unlocked));
+        if (_filterLockedBtn != null) _filterLockedBtn.onClick.AddListener(() => SetFilter(InventoryFilter.Locked));
     }
 
     private void OnEnable()
     {
+        UpdateFilterButtonsVisual();
         RefreshAllViews();
 
         if (HeroManager.Instance != null)
@@ -111,41 +128,60 @@ public class DeckPanelUI : MonoBehaviour
         RefreshInventoryRows();
     }
 
+    public void SetFilter(InventoryFilter filter)
+    {
+        _currentFilter = filter;
+        UpdateFilterButtonsVisual();
+        RefreshInventoryRows();
+    }
+
+    private void UpdateFilterButtonsVisual()
+    {
+        SetButtonVisual(_filterAllBtn, _currentFilter == InventoryFilter.All);
+        SetButtonVisual(_filterUnlockedBtn, _currentFilter == InventoryFilter.Unlocked);
+        SetButtonVisual(_filterLockedBtn, _currentFilter == InventoryFilter.Locked);
+    }
+
+    private void SetButtonVisual(Button btn, bool isActive)
+    {
+        if (btn == null) return;
+        var img = btn.GetComponent<Image>();
+        if (img != null)
+        {
+            img.color = isActive ? _activeFilterColor : _inactiveFilterColor;
+        }
+    }
+
     // =========================================================================
-    // INVENTORY RENDERING (DUAL SCROLL VIEW)
+    // INVENTORY RENDERING (SINGLE SCROLL VIEW WITH FILTER)
     // =========================================================================
 
     public void RefreshInventoryRows()
     {
-        ClearContainer(_ownedContent);
-        ClearContainer(_lockedContent);
+        ClearContainer(_inventoryContent);
 
         if (_currentTab == InventoryTab.Hero)
         {
-            if (_ownedTitleText != null) _ownedTitleText.text = "Your Unit";
-            if (_lockedTitleText != null) _lockedTitleText.text = "Locked Hero";
-
             PopulateHeroRows();
         }
         else
         {
-            if (_ownedTitleText != null) _ownedTitleText.text = "Your Relic";
-            if (_lockedTitleText != null) _lockedTitleText.text = "Locked Relic";
-
             PopulateRelicRows();
         }
     }
 
     private void PopulateHeroRows()
     {
-        if (_heroDatabase == null) return;
+        if (_heroDatabase == null || _inventoryContent == null) return;
+
+        List<HeroSO> unlockedList = new List<HeroSO>();
+        List<HeroSO> lockedList = new List<HeroSO>();
 
         foreach (var hero in _heroDatabase.AllHeroes)
         {
             if (hero == null) continue;
 
-            bool isOwned = HeroManager.Instance != null && HeroManager.Instance.IsHeroUnlocked(hero.heroId);
-
+            // Cek apakah hero sedang terpasang di 5 slot Deck
             bool isEquipped = false;
             if (HeroManager.Instance != null && HeroManager.Instance.EquippedHeroIds != null)
             {
@@ -159,27 +195,46 @@ public class DeckPanelUI : MonoBehaviour
                 }
             }
 
+            // Jika sedang dipakai di slot atas, sembunyikan dari daftar inventory bawah
+            if (isEquipped) continue;
+
+            bool isOwned = HeroManager.Instance != null && HeroManager.Instance.IsHeroUnlocked(hero.heroId);
+
             if (isOwned)
-            {
-                if (isEquipped) continue;
-                CreateDraggableSlot(_ownedContent, hero.heroIcon, hero.heroId, DeckDraggableItem.ItemType.Hero, true, false);
-            }
+                unlockedList.Add(hero);
             else
+                lockedList.Add(hero);
+        }
+
+        // Tampilkan item Unlocked jika filter All atau Unlocked
+        if (_currentFilter == InventoryFilter.All || _currentFilter == InventoryFilter.Unlocked)
+        {
+            foreach (var hero in unlockedList)
             {
-                CreateDraggableSlot(_lockedContent, hero.heroIcon, hero.heroId, DeckDraggableItem.ItemType.Hero, false, false);
+                CreateDraggableSlot(_inventoryContent, hero.heroIcon, hero.heroId, DeckDraggableItem.ItemType.Hero, true, false);
+            }
+        }
+
+        // Tampilkan item Locked jika filter All atau Locked
+        if (_currentFilter == InventoryFilter.All || _currentFilter == InventoryFilter.Locked)
+        {
+            foreach (var hero in lockedList)
+            {
+                CreateDraggableSlot(_inventoryContent, hero.heroIcon, hero.heroId, DeckDraggableItem.ItemType.Hero, false, false);
             }
         }
     }
 
     private void PopulateRelicRows()
     {
-        if (_relicDatabase == null) return;
+        if (_relicDatabase == null || _inventoryContent == null) return;
+
+        List<RelicSO> unlockedList = new List<RelicSO>();
+        List<RelicSO> lockedList = new List<RelicSO>();
 
         foreach (var relic in _relicDatabase.AllRelics)
         {
             if (relic == null) continue;
-
-            bool isOwned = RelicManager.Instance != null && RelicManager.Instance.IsRelicUnlocked(relic.relicId);
 
             bool isEquipped = false;
             if (RelicManager.Instance != null && RelicManager.Instance.EquippedRelicIds != null)
@@ -194,14 +249,29 @@ public class DeckPanelUI : MonoBehaviour
                 }
             }
 
+            if (isEquipped) continue;
+
+            bool isOwned = RelicManager.Instance != null && RelicManager.Instance.IsRelicUnlocked(relic.relicId);
+
             if (isOwned)
-            {
-                if (isEquipped) continue;
-                CreateDraggableSlot(_ownedContent, relic.relicIcon, relic.relicId, DeckDraggableItem.ItemType.Relic, true, false);
-            }
+                unlockedList.Add(relic);
             else
+                lockedList.Add(relic);
+        }
+
+        if (_currentFilter == InventoryFilter.All || _currentFilter == InventoryFilter.Unlocked)
+        {
+            foreach (var relic in unlockedList)
             {
-                CreateDraggableSlot(_lockedContent, relic.relicIcon, relic.relicId, DeckDraggableItem.ItemType.Relic, false, false);
+                CreateDraggableSlot(_inventoryContent, relic.relicIcon, relic.relicId, DeckDraggableItem.ItemType.Relic, true, false);
+            }
+        }
+
+        if (_currentFilter == InventoryFilter.All || _currentFilter == InventoryFilter.Locked)
+        {
+            foreach (var relic in lockedList)
+            {
+                CreateDraggableSlot(_inventoryContent, relic.relicIcon, relic.relicId, DeckDraggableItem.ItemType.Relic, false, false);
             }
         }
     }
@@ -214,6 +284,8 @@ public class DeckPanelUI : MonoBehaviour
         {
             itemComp.Setup(icon, id, type, owned, equipped, false, -1);
         }
+
+        // Tampilkan badge jumlah salinan hasil gacha/rekrutmen jika hero sudah terbuka
         if (type == DeckDraggableItem.ItemType.Hero && owned && HeroManager.Instance != null)
         {
             int copies = HeroManager.Instance.GetRecruitedCopies(id);
@@ -222,10 +294,16 @@ public class DeckPanelUI : MonoBehaviour
                 var badge = new GameObject("CopyCount", typeof(RectTransform), typeof(TextMeshProUGUI));
                 badge.transform.SetParent(slotObj.transform, false);
                 var text = badge.GetComponent<TextMeshProUGUI>();
-                text.text = "x" + copies; text.fontSize = 16; text.color = Color.white;
-                text.alignment = TextAlignmentOptions.BottomRight; text.raycastTarget = false;
-                var rect = text.rectTransform; rect.anchorMin = Vector2.zero; rect.anchorMax = Vector2.one;
-                rect.offsetMin = new Vector2(3, 3); rect.offsetMax = new Vector2(-3, -3);
+                text.text = "x" + copies;
+                text.fontSize = 16;
+                text.color = Color.white;
+                text.alignment = TextAlignmentOptions.BottomRight;
+                text.raycastTarget = false;
+                var rect = text.rectTransform;
+                rect.anchorMin = Vector2.zero;
+                rect.anchorMax = Vector2.one;
+                rect.offsetMin = new Vector2(3, 3);
+                rect.offsetMax = new Vector2(-3, -3);
             }
         }
     }
@@ -276,7 +354,6 @@ public class DeckPanelUI : MonoBehaviour
             RelicManager.Instance?.SwapEquippedRelics(fromIndex, toIndex);
         }
 
-        // Diletakkan di luar if-else agar baik Hero maupun Relic langsung menyegarkan tampilan
         RefreshAllViews();
     }
 
