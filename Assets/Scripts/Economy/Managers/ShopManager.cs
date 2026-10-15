@@ -61,10 +61,6 @@ public class ShopManager : MonoBehaviour
         EconomyManager.Instance.ModifyGem(-gemCost);
         EconomyManager.Instance.ModifyGold(item.amount);
 
-        // Gameplay integration
-        DailyQuestManager.Instance?.AddProgress(DailyQuestType.SpendGem, gemCost);
-        AchievementManager.Instance?.AddProgress(AchievementType.SpendGem, gemCost);
-
         AlertManager.Instance?.Show($"Successfully bought {item.amount:N0} Gold!");
 
         SaveManager.Instance?.SaveLocal();

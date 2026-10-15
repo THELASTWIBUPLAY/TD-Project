@@ -50,6 +50,14 @@ public class AuthManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
+    private void Start()
+    {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayMenuBgm();
+        }
+    }
+
     /// <summary>
     /// Initiate unity services
     /// </summary>

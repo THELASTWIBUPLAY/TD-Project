@@ -26,6 +26,7 @@ namespace Assets.Scripts.Economy.Managers
                 return;
             }
             Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
 
         public int GetProgress(string achievementID)

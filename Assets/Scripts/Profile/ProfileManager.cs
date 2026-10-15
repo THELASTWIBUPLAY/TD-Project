@@ -19,6 +19,7 @@ public class ProfileManager : MonoBehaviour, ISaveable
     private string _playerBio;
     private int _accountLevel = 1;
     private int _accountExp = 0;
+    private int _energyOnLevelUp = 5;
 
     public string PlayerId => AuthManager.Instance != null ? AuthManager.Instance.PlayerId : "Offline_ID";
     public string PlayerName => _playerName;
@@ -98,6 +99,10 @@ public class ProfileManager : MonoBehaviour, ISaveable
         {
             _accountExp -= ExpToNextLevel;
             _accountLevel++;
+            if (EconomyManager.Instance != null)
+            {
+                EconomyManager.Instance.OnPlayerLevelUp(_energyOnLevelUp);
+            }
             AlertManager.Instance?.Show($"Level up to Lv. {_accountLevel}!");
         }
 

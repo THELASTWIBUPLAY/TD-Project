@@ -1,3 +1,4 @@
+using Assets.Scripts.Economy.Managers;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -150,6 +151,8 @@ public class SlotGridManager : MonoBehaviour
     {
         sacrificeA.ClearSlot();
         sacrificeB.ClearSlot();
+
+        AchievementManager.Instance?.AddProgress(AchievementType.MergeCharacters, 1); // Catat merge per 3 unti
 
         if (targetSlot.currentCharacter != null)
         {

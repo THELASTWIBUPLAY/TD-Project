@@ -34,6 +34,8 @@ public class StageConfig : ScriptableObject
     public int scoreWaveClearBonus = 50;
 
     [Header("Rewards")]
-    public int gold;
-    public int gem;
+    public int gold = 100;
+    public int gem = 5;
+    [Tooltip("Jumlah EXP Akun (Profile) yang didapat saat menyelesaikan stage (100% saat menang, 20% saat kalah)")]
+    public int accountExp = 50;
 }
