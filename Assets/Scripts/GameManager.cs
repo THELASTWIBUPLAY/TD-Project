@@ -1,8 +1,9 @@
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
-using TMPro;
+using Assets.Scripts.Economy.Managers;
 using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 
 public class GameManager : MonoBehaviour
@@ -12,11 +13,13 @@ public class GameManager : MonoBehaviour
 
     [Header("Speed & Pause Controls")]
     public TextMeshProUGUI speedButtonText;
-    private int currentSpeedIndex = 1; 
-    private readonly float[] speedMultipliers = { 0.5f, 1f, 2f, 3f, 5f };
+    private int currentSpeedIndex = 0; 
+    private readonly float[] speedMultipliers = { 1f, 1.5f, 2f, 5f }; 
     private bool isPaused = false;
     private bool isMuted = false;
 
+    [Header("Level UI")]
+    public TextMeshProUGUI levelNumberText; 
 
     [Header("Pause Modal")]
     public GameObject PausePanel;
@@ -56,6 +59,15 @@ public class GameManager : MonoBehaviour
     [Header("UI Dependencies")]
     [SerializeField] private CanvasGroup _confirmPanel;
 
+    [Header("Stage Clear Reward UI")]
+    [Tooltip("Teks untuk menampilkan jumlah Gold yang didapat saat menang")]
+    public TextMeshProUGUI gameWinGoldRewardText;
+    [Tooltip("Teks untuk menampilkan jumlah Gem yang didapat saat menang")]
+    public TextMeshProUGUI gameWinGemRewardText;
+    [Tooltip("Teks untuk menampilkan jumlah Exp yang didapat saat menang")]
+    public TextMeshProUGUI gameWinExpRewardText;
+
+    private bool isGameEnded = false;
 
     public int totalEnemiesKilled = 0;
 
@@ -76,6 +88,7 @@ public class GameManager : MonoBehaviour
         UpdateSpeedUI(); 
         if (PausePanel != null) PausePanel.SetActive(false);
         UpdateExpUI();
+        UpdateLevelUI();
 
         bool isEndless = (WaveManager.Instance != null && 
                           WaveManager.Instance.stageConfig != null && 
@@ -233,12 +246,21 @@ public class GameManager : MonoBehaviour
 
         Debug.Log($"[GameManager.LevelUp] Level {currentLevel}: Base={baseCurve:F0}, NextExp={expToNextLevel}");
 
+        UpdateLevelUI();
+
         if (UpgradeManager.Instance != null)
         {
             UpgradeManager.Instance.ShowUpgradeSelection();
         }
     }
 
+    private void UpdateLevelUI()
+    {
+        if (levelNumberText != null)
+        {
+            levelNumberText.text = currentLevel.ToString();
+        }
+    }
 
     private void UpdateExpUI()
     {
@@ -257,7 +279,12 @@ public class GameManager : MonoBehaviour
 
     public void TriggerGameOver()
     {
+        if (isGameEnded) return;
+        isGameEnded = true;
+
         Time.timeScale = 0f;
+
+        ProcessEndGameRewards(isWin: false);
 
         if (gameOverPanel != null)
         {
@@ -267,7 +294,7 @@ public class GameManager : MonoBehaviour
         int finalWave = WaveManager.Instance != null ? WaveManager.Instance.currentWave : 1;
         if (gameOverWaveText != null)
         {
-            gameOverWaveText.text = $"Bertahan Hingga:\n<size=120%>Wave {finalWave}</size>";
+            gameOverWaveText.text = $"Survived \n<size=120%>Wave {finalWave}</size>";
         }
 
         UpdateSummaryUI(gameOverScoreText, gameOverKillsText, gameOverHighscoreText);
@@ -276,16 +303,100 @@ public class GameManager : MonoBehaviour
 
     public void TriggerGameWin()
     {
+        if (isGameEnded) return; 
+        isGameEnded = true;
+
         Time.timeScale = 0f;
 
-        if (gameWinPanel != null)
+        ProcessEndGameRewards(isWin: true);
+
+        if (gameWinPanel != null)   
         {
             gameWinPanel.SetActive(true);
         }
-
         UpdateSummaryUI(gameWinScoreText, gameWinKillsText, gameWinHighscoreText);
     }
 
+    /// <summary>
+    /// Mengelola pembagian hadiah (100% jika Menang, 20% jika Kalah), Profile EXP,
+    /// serta mencatat progres Daily Quest dan Achievement secara sekaligus (Batch).
+    /// </summary>
+    private void ProcessEndGameRewards(bool isWin)
+    {
+        float rewardMultiplier = isWin ? 1.0f : 0.20f;
+        int finalWave = WaveManager.Instance != null ? WaveManager.Instance.currentWave : 1;
+
+        int finalGold = 0;
+        int finalGem = 0;
+        int finalExp = 0;
+
+        if (WaveManager.Instance != null && WaveManager.Instance.stageConfig != null)
+        {
+            StageConfig cfg = WaveManager.Instance.stageConfig;
+
+            float coinBuffPercent = TalentManager.Instance != null ? TalentManager.Instance.CurrentTalentCoinBuff : 0f;
+            float buffedGold = cfg.gold * (1f + (coinBuffPercent / 100f));
+
+            finalGold = Mathf.RoundToInt(buffedGold * rewardMultiplier);
+            finalGem = Mathf.RoundToInt(cfg.gem * rewardMultiplier);
+            finalExp = Mathf.RoundToInt(cfg.accountExp * rewardMultiplier);
+
+            // Berikan Gold & Gem ke EconomyManager
+            if (EconomyManager.Instance != null)
+            {
+                if (finalGold > 0) EconomyManager.Instance.ModifyGold(finalGold);
+                if (finalGem > 0) EconomyManager.Instance.ModifyGem(finalGem);
+            }
+
+            // Berikan Account EXP ke ProfileManager
+            if (ProfileManager.Instance != null && finalExp > 0)
+            {
+                ProfileManager.Instance.AddAccountExp(finalExp);
+            }
+
+            // Catat Quest ClearDungeon & Achievement Endless jika Menang // TO DO: sesuaikan dengan jenis tantangan
+            if (isWin)
+            {
+                DailyQuestManager.Instance?.AddProgress(DailyQuestType.ClearDungeon, 1);
+
+                if (cfg.isEndless)
+                {
+                    AchievementManager.Instance?.AddProgress(AchievementType.ClearEndlessStage, 1);
+                }
+            }
+        }
+
+        // UPDATE PROGRES KILL & WAVE KE DAILY QUEST DAN ACHIEVEMENT (BATCHING)
+        if (totalEnemiesKilled > 0)
+        {
+            DailyQuestManager.Instance?.AddProgress(DailyQuestType.Kill, totalEnemiesKilled);
+            AchievementManager.Instance?.AddProgress(AchievementType.TotalKills, totalEnemiesKilled);
+        }
+
+        // Rekor wave tertinggi yang dicapai pemain
+        AchievementManager.Instance?.UpdateMaxProgress(AchievementType.ReachWave, finalWave);
+
+        // TAMPILKAN INFO HADIAH KE UI PANEL
+        string rewardSummary = $"+{finalGold:N0} Gold   +{finalGem:N0} Gem   +{finalExp:N0} EXP";
+        if (isWin)
+        {
+            gameWinGoldRewardText.text = $"{finalGold}";
+            gameWinGemRewardText.text = $"{finalGem}";
+            gameWinExpRewardText.text = $"{finalExp}";
+        }
+        else if (!isWin)
+        {
+            gameWinGoldRewardText.text = $"{finalGold}";
+            gameWinGemRewardText.text = $"{finalGem}";
+            gameWinExpRewardText.text = $"{finalExp}";
+        }
+
+        //SIMPAN SELURUH PERUBAHAN KE DISK LOKAL SATU KALI
+        SaveManager.Instance?.SaveLocal();
+
+        string statusLabel = isWin ? "VICTORY (100%)" : "GAME OVER (20%)";
+        Debug.Log($"<color=cyan>[EndGame {statusLabel}]</color> Gold: +{finalGold}, Gem: +{finalGem}, EXP: +{finalExp} | Kills: {totalEnemiesKilled}, Wave: {finalWave}");
+    }
 
     private void UpdateSummaryUI(TextMeshProUGUI txtScore, TextMeshProUGUI txtKills, TextMeshProUGUI txtHighscore)
     {

@@ -34,6 +34,13 @@ public class SettingsManager : MonoBehaviour
     {
         AudioListener.volume = volume;
         PlayerPrefs.SetFloat("GameVolume", volume);
+        PlayerPrefs.Save();
+
+        // Teruskan perubahan slider langsung ke AudioManager
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.ApplySettingsVolume(volume);
+        }
     }
 
     private void OpenCreditPanel()

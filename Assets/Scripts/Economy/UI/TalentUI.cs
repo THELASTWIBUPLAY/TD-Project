@@ -1,6 +1,4 @@
-using System.Linq;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,6 +15,7 @@ public class TalentUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _coinBuffPrice;
 
     // Level
+    [SerializeField] private TextMeshProUGUI _totalLevelText;
     [SerializeField] private TextMeshProUGUI _atkLevelText;
     [SerializeField] private TextMeshProUGUI _hpLevelText;
     [SerializeField] private TextMeshProUGUI _coinLevelText;
@@ -61,9 +60,6 @@ public class TalentUI : MonoBehaviour
         if (TalentManager.Instance != null)
         {
             _progressBar.maxValue = TalentManager.Instance.MaxTalentLevel * 3;
-
-            TalentManager.Instance.OnTalentUpdated += HandleTalentUpdate;
-            TalentManager.Instance.OnTalentRewardUpdated += HandleRewardUpdate;
         }
 
         PositionRewardSlotOnSlider();
@@ -121,7 +117,9 @@ public class TalentUI : MonoBehaviour
         HandleTalentUpdate(TalentManager.TalentType.Attack, tm.AttackLevel, tm.CurrentTalentAttackBuff, tm.GetUpgradeCost(tm.AttackLevel));
         HandleTalentUpdate(TalentManager.TalentType.Hp, tm.HpLevel, tm.CurrentTalentHpBuff, tm.GetUpgradeCost(tm.HpLevel));
         HandleTalentUpdate(TalentManager.TalentType.Coin, tm.CoinLevel, tm.CurrentTalentCoinBuff, tm.GetUpgradeCost(tm.CoinLevel));
-    
+
+        _totalLevelText.text = $"Total Level \n {tm.TotalTalentLevel}";
+
         for (int i = 0; i < _rewardSlots.Length; i++)
         {
             if (_rewardSlots[i] == null) continue;
@@ -148,27 +146,28 @@ public class TalentUI : MonoBehaviour
         {
             case TalentManager.TalentType.Attack:
                 _atkLevelText.text = $"LV. {level}";
-                _atkBuffText.text = $"+{buff:F1}% ATK";
+                _atkBuffText.text = $"+{buff:F1}%";
                 _atkBuffPrice.text = isMax ? "MAX" : cost.ToString("N0");
                 _atkBuffBtn.interactable = !isMax;
                 break;
 
             case TalentManager.TalentType.Hp:
                 _hpLevelText.text = $"LV. {level}";
-                _hpBuffText.text = $"+{buff:F1}% HP";
+                _hpBuffText.text = $"+{buff:F1}%";
                 _hpBuffPrice.text = isMax ? "MAX" : cost.ToString("N0");
                 _hpBuffBtn.interactable = !isMax;
                 break;
 
             case TalentManager.TalentType.Coin:
                 _coinLevelText.text = $"LV. {level}";
-                _coinBuffText.text = $"+{buff:F1}% Coins";
+                _coinBuffText.text = $"+{buff:F1}%";
                 _coinBuffPrice.text = isMax ? "MAX" : cost.ToString("N0");
                 _coinBuffBtn.interactable = !isMax;
                 break;
         }
 
         _progressBar.value = TalentManager.Instance.TotalTalentLevel;
+        _totalLevelText.text = $"Total Level \n {TalentManager.Instance.TotalTalentLevel}";
     }
 
     private void HandleRewardUpdate(int tierIndex, TalentManager.TalentReward reward, TalentManager.TalentRewardState state)

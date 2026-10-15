@@ -85,6 +85,8 @@ public class DailyRewardUI : MonoBehaviour
 
     public void OpenDailyPanel()
     {
+        transform.SetAsLastSibling();
+
         MainMenuManager.Instance.TogglePanel(_myCanvas, true);
         MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.MainPanel, false);
     }

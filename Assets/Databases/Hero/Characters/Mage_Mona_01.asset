@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edd7cd6221943ca49ac0f2c66d309006, type: 3}
+  m_Name: Mage_Mona_01
+  m_EditorClassIdentifier: Assembly-CSharp::HeroSO
+  heroId: Mage_Mona_01
+  heroName: Mona
+  classType: 1
+  heroDescription: 
+  heroIcon: {fileID: -2951802150405364340, guid: a222e6e7a28002e40b52dce65895337a, type: 3}
+  rarity: 0
+  requiredFragments: 50
+  baseDamage: 30
+  baseAttackCooldown: 1.5
+  baseAttackRange: 5.5
+  baseCritRate: 2.5
+  baseCritDamage: 1.5
+  damageGrowthPerLevel: 2.5
+  _ascendPassives:
+  - unlockAtStar: 0
+    passiveName: Aether Circuit
+    passiveDescription: 
+    bonusAttackPercent: 0.05
+    flatAttackBonus: 20
+    cooldownReductionPercent: 0.1
+    flatAttackRangeBonus: 0.05
+    bonusCritRate: 0
+    bonusCritDamage: 0.05
+  - unlockAtStar: 2
+    passiveName: Astral Transmigration
+    passiveDescription: 
+    bonusAttackPercent: 0.15
+    flatAttackBonus: 45
+    cooldownReductionPercent: 0.15
+    flatAttackRangeBonus: 0.2
+    bonusCritRate: 5
+    bonusCritDamage: 0.25
+  - unlockAtStar: 2
+    passiveName: Tacet Genesis
+    passiveDescription: 
+    bonusAttackPercent: 0.35
+    flatAttackBonus: 120
+    cooldownReductionPercent: 0.15
+    flatAttackRangeBonus: 0.05
+    bonusCritRate: 25
+    bonusCritDamage: 0.5
+  inGamePrefab: {fileID: 0}

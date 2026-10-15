@@ -1,3 +1,4 @@
+using Assets.Scripts.Economy.Managers;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -151,6 +152,8 @@ public class SlotGridManager : MonoBehaviour
         sacrificeA.ClearSlot();
         sacrificeB.ClearSlot();
 
+        AchievementManager.Instance?.AddProgress(AchievementType.MergeCharacters, 1); // Catat merge per 3 unti
+
         if (targetSlot.currentCharacter != null)
         {
             targetSlot.currentCharacter.SetupClass(cls, newStar);
@@ -175,6 +178,30 @@ public class SlotGridManager : MonoBehaviour
     void Update()
     {
 
+    }
+
+    public void SpawnCharacterFromWheel(CharacterClassType classType)
+    {
+        CharacterSlot emptySlot = GetRandomEmptySlot();
+
+        if (emptySlot != null)
+        {
+            GameObject newCharGO = Instantiate(characterPrefab, emptySlot.transform.position, Quaternion.identity);
+            Character newChar = newCharGO.GetComponent<Character>();
+
+            if (newChar != null)
+            {
+                newChar.SetupClass(classType, 1);
+            }
+
+            emptySlot.AssignCharacter(newCharGO);
+
+            CheckAndExecuteMerge();
+        }
+        else
+        {
+            Debug.LogWarning("[SlotGridManager] Grid Penuh! Tidak dapat men-deploy karakter dari Spin Wheel.");
+        }
     }
 
     [ContextMenu("Debug: Set Center to Star 3 & Evolve")]

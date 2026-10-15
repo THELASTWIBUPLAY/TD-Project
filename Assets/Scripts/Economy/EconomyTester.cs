@@ -10,6 +10,12 @@ public class EconomyTester : MonoBehaviour
             Debug.Log("[TEST] Add 50 Gem!");
         }
 
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            EconomyManager.Instance.ModifyEnergy(50);
+            Debug.Log("[TEST] Add 50 Energy!");
+        }
+
         if (Input.GetKeyDown(KeyCode.H))
         {
             EconomyManager.Instance.SimulateMemoryHack(9999);

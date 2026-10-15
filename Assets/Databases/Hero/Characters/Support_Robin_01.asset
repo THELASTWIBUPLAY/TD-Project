@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edd7cd6221943ca49ac0f2c66d309006, type: 3}
+  m_Name: Support_Robin_01
+  m_EditorClassIdentifier: Assembly-CSharp::HeroSO
+  heroId: Support_Robin_01
+  heroName: Robin
+  classType: 2
+  heroDescription: 
+  heroIcon: {fileID: -2951802150405364340, guid: 21ffb7b9a43e7b2469bc168a9f23f376, type: 3}
+  rarity: 0
+  requiredFragments: 50
+  baseDamage: 20
+  baseAttackCooldown: 0.8
+  baseAttackRange: 5.5
+  baseCritRate: 5
+  baseCritDamage: 1.5
+  damageGrowthPerLevel: 2.5
+  _ascendPassives:
+  - unlockAtStar: 0
+    passiveName: Resonance
+    passiveDescription: 
+    bonusAttackPercent: 0.05
+    flatAttackBonus: 10
+    cooldownReductionPercent: 0
+    flatAttackRangeBonus: 0
+    bonusCritRate: 5
+    bonusCritDamage: 0.1
+  - unlockAtStar: 2
+    passiveName: Vox Renascentia
+    passiveDescription: 
+    bonusAttackPercent: 0.05
+    flatAttackBonus: 10
+    cooldownReductionPercent: 0
+    flatAttackRangeBonus: 0
+    bonusCritRate: 5
+    bonusCritDamage: 0.1
+  - unlockAtStar: 2
+    passiveName: Vox Gloriosa
+    passiveDescription: 
+    bonusAttackPercent: 0.05
+    flatAttackBonus: 10
+    cooldownReductionPercent: 0
+    flatAttackRangeBonus: 0
+    bonusCritRate: 5
+    bonusCritDamage: 0.1
+  inGamePrefab: {fileID: 0}

@@ -104,7 +104,5 @@ public class AchievementSlotUI : MonoBehaviour
         {
             EventSystem.current.SetSelectedGameObject(null);
         }
-
-        ApplyVisualState(AchievementState.Claimed);
     }
 }

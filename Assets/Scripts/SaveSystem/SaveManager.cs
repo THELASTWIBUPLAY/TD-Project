@@ -72,6 +72,8 @@ public class SaveManager : MonoBehaviour
     /// </summary>
     public bool LoadLocal()
     {
+
+
         if (!File.Exists(LocalSaveFilePath))
         {
             Debug.Log("[SaveManager] File save lokal belum ditemukan (Pemain Baru).");
@@ -156,6 +158,11 @@ public class SaveManager : MonoBehaviour
         if (AchievementManager.Instance is ISaveable ach) ach.PopulateSaveData(target);
         if (DailyRewardViewModel.Instance is ISaveable reward) reward.PopulateSaveData(target);
         if (TalentManager.Instance is ISaveable talent) talent.PopulateSaveData(target);
+        if (EnergyRegenManager.Instance is ISaveable energy) energy.PopulateSaveData(target);
+        if (ProfileManager.Instance is ISaveable profile) profile.PopulateSaveData(target);
+        if (HeroManager.Instance is ISaveable hero) hero.PopulateSaveData(target);
+        if (RelicManager.Instance is ISaveable relic) relic.PopulateSaveData(target);
+        if (PlayTimeRewardController.Instance is ISaveable playtime) playtime.PopulateSaveData(target);
     }
 
     private void DistributeDataToManagers(GameSaveData source)
@@ -168,6 +175,11 @@ public class SaveManager : MonoBehaviour
             if (AchievementManager.Instance is ISaveable ach) ach.LoadFromSaveData(source);
             if (DailyRewardViewModel.Instance is ISaveable reward) reward.LoadFromSaveData(source);
             if (TalentManager.Instance is ISaveable talent) talent.LoadFromSaveData(source);
+            if (EnergyRegenManager.Instance is ISaveable energy) energy.LoadFromSaveData(source); 
+            if (ProfileManager.Instance is ISaveable profile) profile.LoadFromSaveData(source);
+            if (HeroManager.Instance is ISaveable hero) hero.LoadFromSaveData(source);
+            if (RelicManager.Instance is ISaveable relic) relic.LoadFromSaveData(source);
+            if (PlayTimeRewardController.Instance is ISaveable playtime) playtime.LoadFromSaveData(source);
         }
         finally
         {

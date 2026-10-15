@@ -56,6 +56,24 @@ public class UpgradeManager : MonoBehaviour
     public int maxRerollCount = 3; 
     private int currentRerollCount;
 
+    [Header("Card Icons Setup")]
+    [SerializeField] private Sprite defaultCardIcon;
+    [SerializeField] private Sprite recruitIcon;
+    [SerializeField] private Sprite deployFighterIcon;
+    [SerializeField] private Sprite deployRangedIcon;
+    [SerializeField] private Sprite deployMageIcon;
+    [SerializeField] private Sprite deploySupportIcon;
+    [SerializeField] private Sprite deployTankIcon;
+    [SerializeField] private Sprite boostAttackIcon;
+    [SerializeField] private Sprite boostAttackSpeedIcon;
+    [SerializeField] private Sprite frostAuraIcon;
+    [SerializeField] private Sprite bountyHunterIcon;
+    [SerializeField] private Sprite emergencyRepairIcon;
+    [SerializeField] private Sprite fortifiedBastionIcon;
+    [SerializeField] private Sprite trickshotIcon;
+    [SerializeField] private Sprite blackMarketIcon;
+    [SerializeField] private Sprite desperateGambitIcon;
+
     private readonly List<UpgradeCard> cardPool = new List<UpgradeCard>();
     private readonly List<UpgradeCard> currentOptions = new List<UpgradeCard>();
     private readonly List<GameObject> spawnedCards = new List<GameObject>();
@@ -76,6 +94,7 @@ public class UpgradeManager : MonoBehaviour
         }
         Instance = this;
 
+        SyncDeckToAllowedClasses();
         InitCardPool();
     }
 
@@ -97,6 +116,39 @@ public class UpgradeManager : MonoBehaviour
     #endregion
 
     #region Initialization & Card Pool
+    /// <summary>
+    /// Memeriksa isi Deck di HeroManager dan mem-ban otomatis class yang tidak dibawa pemain.
+    /// </summary>
+    private void SyncDeckToAllowedClasses()
+    {
+        if (HeroManager.Instance == null || HeroManager.Instance.Database == null) return;
+
+        HashSet<CharacterClassType> deckClasses = new HashSet<CharacterClassType>();
+
+        foreach (string id in HeroManager.Instance.EquippedHeroIds)
+        {
+            if (string.IsNullOrEmpty(id)) continue;
+            HeroSO hero = HeroManager.Instance.Database.GetHeroById(id);
+            if (hero != null)
+            {
+                deckClasses.Add(hero.classType);
+            }
+        }
+
+        //Jika Deck kosong melompong, jangan ban semua class
+        if (deckClasses.Count == 0) return;
+
+        bannedClasses.Clear();
+        foreach (CharacterClassType cls in AllClassTypes)
+        {
+            if (!deckClasses.Contains(cls))
+            {
+                bannedClasses.Add(cls);
+                Debug.Log($"[Deck Filter] Class {cls} dikunci dari Upgrade & Arena karena tidak ada di Deck.");
+            }
+        }
+    }
+
     private void InitCardPool()
     {
         cardPool.Clear();
@@ -139,7 +191,7 @@ public class UpgradeManager : MonoBehaviour
 
     private void InitRerollSystem()
     {
-        currentRerollCount = maxRerollCount;
+        currentRerollCount = 1; 
         UpdateRerollUI();
 
         if (rerollButton != null)
@@ -186,6 +238,9 @@ public class UpgradeManager : MonoBehaviour
             Debug.Log("[UpgradeManager] Semua skill sudah MAX dan arena penuh!");
             return;
         }
+
+        currentRerollCount = 1;
+        UpdateRerollUI();
 
         PopulateOptionsFromAvailable(available);
 
@@ -275,8 +330,11 @@ public class UpgradeManager : MonoBehaviour
             if (cardUI != null)
             {
                 int cardIndex = i;
-                int requiredStars = c.currentLevel + 1;
-                cardUI.SetupCard(displayTitle, displayDesc, null, requiredStars, () => ApplyUpgradeByIndex(cardIndex));
+                int requiredStars = (c.buffType == BuffType.EmergencyRepair) ? 0 : (c.currentLevel + 1);
+
+                Sprite cardIcon = GetCardIcon(c);
+
+                cardUI.SetupCard(displayTitle, displayDesc, cardIcon, requiredStars, () => ApplyUpgradeByIndex(cardIndex));
             }
         }
     }
@@ -351,6 +409,37 @@ public class UpgradeManager : MonoBehaviour
         if (card.buffType == BuffType.DesperateGambit) return 3f;
 
         return 70f;
+    }
+
+    private Sprite GetCardIcon(UpgradeCard card)
+    {
+        if (card.buffType == BuffType.AddRandomCharacter) return recruitIcon;
+        
+        if (card.buffType == BuffType.AddSpecificCharacter)
+        {
+            switch (card.targetClassType)
+            {
+                case CharacterClassType.Fighter: return deployFighterIcon;
+                case CharacterClassType.Ranged: return deployRangedIcon;
+                case CharacterClassType.Mage: return deployMageIcon;
+                case CharacterClassType.Support: return deploySupportIcon;
+                case CharacterClassType.Tank: return deployTankIcon;
+            }
+        }
+
+        switch (card.buffType)
+        {
+            case BuffType.BoostAttack: return boostAttackIcon;
+            case BuffType.BoostAttackSpeed: return boostAttackSpeedIcon;
+            case BuffType.SlowMob: return frostAuraIcon;
+            case BuffType.ExpGain: return bountyHunterIcon;
+            case BuffType.EmergencyRepair: return emergencyRepairIcon;
+            case BuffType.FortifiedBastion: return fortifiedBastionIcon;
+            case BuffType.TrickshotFighter: return trickshotIcon;
+            case BuffType.BlackMarketDeal: return blackMarketIcon;
+            case BuffType.DesperateGambit: return desperateGambitIcon;
+            default: return defaultCardIcon;
+        }
     }
     #endregion
 
@@ -851,6 +940,7 @@ public class UpgradeManager : MonoBehaviour
                 if (c.buffType != BuffType.AddRandomCharacter && 
                     c.buffType != BuffType.AddSpecificCharacter && 
                     c.buffType != BuffType.BlackMarketDeal && 
+                    c.buffType != BuffType.EmergencyRepair &&
                     c.currentLevel > 0)
                 {
                     float currentVal = c.playerValues != null && c.playerValues.Length > 0 
@@ -864,7 +954,9 @@ public class UpgradeManager : MonoBehaviour
 
                     if (itemUI != null)
                     {
-                        itemUI.SetupBuff(null, c.cardName, effectDesc, c.currentLevel);
+                        Sprite buffIcon = GetCardIcon(c); 
+
+                        itemUI.SetupBuff(buffIcon, c.cardName, effectDesc, c.currentLevel);
                     }
                 }
             }

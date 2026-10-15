@@ -11,14 +11,10 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private string _gameVerMinor;
     [SerializeField] private string _gameVerPatches;
 
-    [Header("UI Settings")]
-    [SerializeField] private string _gameTitle;
-
     // Panels
     [Header("Panels")]
     [SerializeField] private CanvasGroup _mainPanel;
     [SerializeField] private CanvasGroup _levelSelectorPanel;
-    [SerializeField] private CanvasGroup _loadPanel;
     [SerializeField] private CanvasGroup _settingPanel;
     [SerializeField] private CanvasGroup _creditsPanel;
     [SerializeField] private CanvasGroup _shopPanel;
@@ -28,14 +24,12 @@ public class MainMenuManager : MonoBehaviour
 
     public CanvasGroup MainPanel => _mainPanel;
     public CanvasGroup LevelSelectorPanel => _levelSelectorPanel;
-    public CanvasGroup LoadPanel => _loadPanel;
     public CanvasGroup SettingsPanel => _settingPanel;
     public CanvasGroup CreditsPanel => _creditsPanel;
     public CanvasGroup ShopPanel => _shopPanel;
     public CanvasGroup TalentPanel => _talentPanel;
     public CanvasGroup DeckPanel => _deckPanel;
     public CanvasGroup DungeonPanel => _dungeonPanel;
-
 
     [Header("UI Groups")]
     [SerializeField] private CanvasGroup _bottomMenu;
@@ -52,7 +46,6 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _gameTitleText;
     [SerializeField] private TextMeshProUGUI _gameVersionText;
     [SerializeField] private Button _playBtn;
-    [SerializeField] private Button _loadBtn;
     [SerializeField] private Button _settingsBtn;
     [SerializeField] private Button _creditsBtn;
     [SerializeField] private Button _exitBtn;
@@ -69,14 +62,27 @@ public class MainMenuManager : MonoBehaviour
 
     private void Start()
     {
-        _gameTitleText.text = _gameTitle;
         _gameVersionText.text = $"Version {_gameVerMajor}.{_gameVerMinor}.{_gameVerPatches}";
+
+        TogglePanel(_settingPanel, false);
+        TogglePanel(_creditsPanel, false);
+        TogglePanel(_levelSelectorPanel, false);
+        TogglePanel(_shopPanel, false);
+        TogglePanel(_talentPanel, false);
+        TogglePanel(_deckPanel, false);
+        TogglePanel(_dungeonPanel, false);
+
+        TogglePanel(_mainPanel, true);
     }
 
     public void TogglePanel(CanvasGroup panel, bool isVisible)
     {
-        panel.alpha = isVisible ? 1 : 0;
+        if (panel == null) return;
+
+        panel.alpha = isVisible ? 1f : 0f;
         panel.interactable = isVisible;
         panel.blocksRaycasts = isVisible;
+
+        panel.gameObject.SetActive(isVisible);
     }
 }

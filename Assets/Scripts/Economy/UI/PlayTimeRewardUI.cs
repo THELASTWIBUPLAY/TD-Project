@@ -1,86 +1,54 @@
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using Unity.VisualScripting;
 
 public class PlayTimeRewardUI : MonoBehaviour
 {
     [Header("Dependencies")]
     [SerializeField] private PlayTimeRewardController _controller;
-    [SerializeField] private TextMeshProUGUI _timerText;
-    [SerializeField] private Button _claimBtn;
+    [SerializeField] private PlayTimeSlotUI[] _slots = new PlayTimeSlotUI[4];
 
-    // Dirty Checking
-    private int _lastDisplayedSecond = -1;
+    private void Awake()
+    {
+        if (_controller == null)
+            _controller = PlayTimeRewardController.Instance ?? FindFirstObjectByType<PlayTimeRewardController>();
+    }
 
     private void OnEnable()
     {
-        _controller.OnRewardReady += HandleRewardReady;
-        _controller.OnRewardClaimed += HandleRewardClaimed;
+        if (_controller != null)
+            _controller.OnSlotUpdated += HandleSlotUpdated;
 
-        _claimBtn.onClick.AddListener(_controller.ClaimReward);
+        RefreshAllSlots();
     }
 
     private void OnDisable()
     {
-        _controller.OnRewardReady -= HandleRewardReady;
-        _controller.OnRewardClaimed -= HandleRewardClaimed;
-
-        _claimBtn.onClick.RemoveListener(_controller.ClaimReward);
+        if (_controller != null)
+            _controller.OnSlotUpdated -= HandleSlotUpdated;
     }
 
     private void Start()
     {
-        RefreshUIState();
+        RefreshAllSlots();
     }
 
-    private void Update()
+    private void RefreshAllSlots()
     {
-        if (_controller.CurrentState != PlayTimeRewardController.RewardState.CountingDown)
-            return;
+        if (_controller == null) return;
 
-        UpdateTimerDisplay();
-    }
-
-    private void UpdateTimerDisplay()
-    {
-        int currentSecond = Mathf.CeilToInt(_controller.RemainingSeconds);
-
-        if (currentSecond == _lastDisplayedSecond) return;
-
-        _lastDisplayedSecond = currentSecond;
-
-        int minutes = currentSecond / 60;
-        int seconds = currentSecond % 60;
-
-        _timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
-    }
-
-    // Event Listener
-    private void HandleRewardReady()
-    {
-        RefreshUIState();
-    }
-
-    private void HandleRewardClaimed()
-    {
-        _lastDisplayedSecond = -1;
-        RefreshUIState();
-    }
-
-    private void RefreshUIState()
-    {
-        bool isReady = _controller.CurrentState == PlayTimeRewardController.RewardState.ReadyToClaim;
-
-        _claimBtn.interactable = isReady;
-
-        if (isReady)
+        for (int i = 0; i < _slots.Length; i++)
         {
-            _timerText.text = "CLAIM!";
+            if (_slots[i] != null)
+            {
+                _slots[i].Setup(_controller, i);
+            }
         }
-        else
+    }
+
+    private void HandleSlotUpdated(int slotIndex)
+    {
+        if (slotIndex >= 0 && slotIndex < _slots.Length && _slots[slotIndex] != null)
         {
-            UpdateTimerDisplay();
+            _slots[slotIndex].RefreshDisplay();
         }
     }
 }

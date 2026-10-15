@@ -47,9 +47,9 @@ public class AchievementUI : MonoBehaviour
 		if (AchievementManager.Instance == null || AchievementManager.Instance.Database == null)
 			return;
 
-		var list = AchievementManager.Instance.Database.Achievements;
+        var list = AchievementManager.Instance.GetActiveAchievements();
 
-		for (int i = 0; i < _slots.Length; i++)
+        for (int i = 0; i < _slots.Length; i++)
 		{
 			if (_slots[i] == null) continue;
 
@@ -70,7 +70,9 @@ public class AchievementUI : MonoBehaviour
 
 	public void OpenPanel()
 	{
-		RefreshUI();
+        transform.SetAsLastSibling();
+
+        RefreshUI();
 		if (MainMenuManager.Instance != null)
 		{
 			MainMenuManager.Instance.TogglePanel(_myCanvas, true);

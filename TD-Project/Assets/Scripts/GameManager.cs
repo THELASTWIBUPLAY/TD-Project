@@ -1,0 +1,381 @@
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using TMPro;
+using System.Collections.Generic;
+
+
+public class GameManager : MonoBehaviour
+{
+    public static GameManager Instance { get; private set; }
+
+
+    [Header("Speed & Pause Controls")]
+    public TextMeshProUGUI speedButtonText;
+    private int currentSpeedIndex = 1; 
+    private readonly float[] speedMultipliers = { 0.5f, 1f, 2f, 3f, 5f };
+    private bool isPaused = false;
+    private bool isMuted = false;
+
+
+    [Header("Pause Modal")]
+    public GameObject PausePanel;
+
+
+    [Header("EXP & Level System")]
+    public Slider expSlider;
+    public TextMeshProUGUI expText;
+    public int currentLevel = 1;
+    public float currentExp = 0f;
+    public float expToNextLevel = 20f;
+
+
+    [Header("End Game UI Panels")]
+    public GameObject gameOverPanel;
+    public TextMeshProUGUI gameOverWaveText;
+    public GameObject gameWinPanel;
+
+
+    [Header("Scoring System")]
+    public TextMeshProUGUI scoreText;
+    public int currentScore = 0;
+
+
+    [Header("End Game Summary References")]
+    public TextMeshProUGUI gameOverScoreText;
+    public TextMeshProUGUI gameOverKillsText;
+    public TextMeshProUGUI gameOverHighscoreText;
+
+    [Header("Damage Tracker System")]
+    public Dictionary<CharacterClassType, float> classTotalDamage = new Dictionary<CharacterClassType, float>();
+
+    public TextMeshProUGUI gameWinScoreText;
+    public TextMeshProUGUI gameWinKillsText;
+    public TextMeshProUGUI gameWinHighscoreText;
+
+    [Header("UI Dependencies")]
+    [SerializeField] private CanvasGroup _confirmPanel;
+
+
+    public int totalEnemiesKilled = 0;
+
+
+    void Awake()
+    {
+        Instance = this;
+        Projectile.GlobalRicochetUnlocked = false;
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = 60;
+
+        ResetDamageTracker();
+    }
+
+
+    void Start()
+    {
+        UpdateSpeedUI(); 
+        if (PausePanel != null) PausePanel.SetActive(false);
+        UpdateExpUI();
+
+        bool isEndless = (WaveManager.Instance != null && 
+                          WaveManager.Instance.stageConfig != null && 
+                          WaveManager.Instance.stageConfig.isEndless);
+
+        if (scoreText != null)
+        {
+            scoreText.gameObject.SetActive(isEndless);
+            if (isEndless) UpdateScoreUI();
+        }
+    }
+
+
+    public void AddScore(int amount)
+    {
+        if (WaveManager.Instance != null && WaveManager.Instance.stageConfig != null)
+        {
+            if (!WaveManager.Instance.stageConfig.isEndless) return;
+        }
+
+        currentScore += amount;
+        UpdateScoreUI();
+    }
+
+
+    void UpdateScoreUI()
+    {
+        if (scoreText != null)
+        {
+            scoreText.text = $"Score: {currentScore:N0}";
+        }
+    }
+
+
+    public void RegisterKill()
+    {
+        totalEnemiesKilled++;
+    }
+
+   public void ToggleSpeed()
+    {
+        if (isPaused) return;
+        currentSpeedIndex = (currentSpeedIndex + 1) % speedMultipliers.Length;
+        Time.timeScale = speedMultipliers[currentSpeedIndex];
+
+        UpdateSpeedUI();
+    }
+
+
+    private void UpdateSpeedUI()
+    {
+        if (speedButtonText != null)
+        {
+
+            speedButtonText.text = $"{speedMultipliers[currentSpeedIndex]:0.#}x";
+        }
+    }
+
+
+    public void TogglePause()
+    {
+        isPaused = !isPaused;
+        Time.timeScale = isPaused ? 0f : speedMultipliers[currentSpeedIndex];
+
+        if (PausePanel != null)
+        {
+            PausePanel.SetActive(isPaused);
+        }
+    }
+
+
+    public void ResumeGame()
+    {
+        isPaused = false;
+        if (PausePanel != null) PausePanel.SetActive(false);
+        Time.timeScale = speedMultipliers[currentSpeedIndex];
+    }
+
+
+    public void QuitGame()
+    {
+        _confirmPanel.alpha = 1;
+        _confirmPanel.interactable = true;
+        _confirmPanel.blocksRaycasts = true;
+    }
+
+    public void OnQuitYes()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("MainMenu");
+        Debug.Log("Quit Game dipanggil! Kembali ke Main Menu.");
+    }
+
+    public void OnQuitNo()
+    {
+        _confirmPanel.alpha = 0;
+        _confirmPanel.interactable = false;
+        _confirmPanel.blocksRaycasts = false;
+    }
+
+
+    public void RestoreSpeedAfterModal()
+    {
+        if (UpgradeManager.Instance != null)
+        {
+            if (UpgradeManager.Instance.evolutionChoicePanel != null && UpgradeManager.Instance.evolutionChoicePanel.activeSelf)
+            {
+                Time.timeScale = 0f;
+                return;
+            }
+
+            if (UpgradeManager.Instance.classPickModalPanel != null && UpgradeManager.Instance.classPickModalPanel.activeSelf)
+            {
+                Time.timeScale = 0f;
+                return;
+            }
+        }
+        
+        Time.timeScale = speedMultipliers[currentSpeedIndex];
+    }
+
+
+    public void ToggleMute()
+    {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.ToggleMute();
+        }
+        else
+        {
+            isMuted = !isMuted;
+            AudioListener.pause = isMuted;
+        }
+    }
+
+
+    public void AddExp(float amount)
+    {
+        currentExp += amount;
+        if (currentExp >= expToNextLevel)
+        {
+            LevelUp();
+        }
+        UpdateExpUI();
+    }
+
+
+    private void LevelUp()
+    {
+        currentExp -= expToNextLevel;
+        currentLevel++;
+
+        float baseCurve = 30f + (currentLevel * 15f) + (Mathf.Pow(currentLevel, 1.4f) * 1.5f);
+        expToNextLevel = Mathf.Round(baseCurve * 1.2f);
+
+        Debug.Log($"[GameManager.LevelUp] Level {currentLevel}: Base={baseCurve:F0}, NextExp={expToNextLevel}");
+
+        if (UpgradeManager.Instance != null)
+        {
+            UpgradeManager.Instance.ShowUpgradeSelection();
+        }
+    }
+
+
+    private void UpdateExpUI()
+    {
+        if (expSlider != null)
+        {
+            expSlider.maxValue = expToNextLevel;
+            expSlider.value = currentExp;
+        }
+
+        if (expText != null)
+        {
+            expText.text = $"Lv.{currentLevel} ({currentExp}/{expToNextLevel})";
+        }
+    }
+
+
+    public void TriggerGameOver()
+    {
+        Time.timeScale = 0f;
+
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(true);
+        }
+
+        int finalWave = WaveManager.Instance != null ? WaveManager.Instance.currentWave : 1;
+        if (gameOverWaveText != null)
+        {
+            gameOverWaveText.text = $"Bertahan Hingga:\n<size=120%>Wave {finalWave}</size>";
+        }
+
+        UpdateSummaryUI(gameOverScoreText, gameOverKillsText, gameOverHighscoreText);
+    }
+
+
+    public void TriggerGameWin()
+    {
+        Time.timeScale = 0f;
+
+        if (gameWinPanel != null)
+        {
+            gameWinPanel.SetActive(true);
+            GameWinReward();
+        }
+
+        UpdateSummaryUI(gameWinScoreText, gameWinKillsText, gameWinHighscoreText);
+    }
+
+    // Add rewards to economy
+    private void GameWinReward()
+    {
+        var wm = WaveManager.Instance.stageConfig;
+
+        if (EconomyManager.Instance != null)
+        {
+            EconomyManager.Instance.ModifyGold(wm.gold);
+            EconomyManager.Instance.ModifyGem(wm.gem);
+        }
+    }
+
+    private void UpdateSummaryUI(TextMeshProUGUI txtScore, TextMeshProUGUI txtKills, TextMeshProUGUI txtHighscore)
+    {
+        bool isEndless = (WaveManager.Instance != null && 
+                          WaveManager.Instance.stageConfig != null && 
+                          WaveManager.Instance.stageConfig.isEndless);
+
+        int savedHighscore = PlayerPrefs.GetInt("Endless_Highscore", 0);
+        bool isNewRecord = false;
+
+        if (isEndless && currentScore > savedHighscore)
+        {
+            savedHighscore = currentScore;
+            PlayerPrefs.SetInt("Endless_Highscore", savedHighscore);
+            PlayerPrefs.Save();
+            isNewRecord = true;
+        }
+
+        if (txtKills != null) txtKills.text = $"Total Musuh Dikalahkan: \n<size=120%>{totalEnemiesKilled:N0}</size>";
+
+
+        if (txtScore != null)
+        {
+            txtScore.gameObject.SetActive(isEndless);
+            txtScore.text = $"Skor Akhir: \n<size=120%>{currentScore:N0}</size>";
+        }
+
+        if (txtHighscore != null)
+        {
+            txtHighscore.gameObject.SetActive(isEndless);
+            txtHighscore.text = isNewRecord ? $"<color=yellow>NEW HIGH SCORE!</color> {savedHighscore:N0}" 
+                                          : $"High Score: \n<size=120%>{savedHighscore:N0}</size>";
+        }
+    }
+
+
+    public void RestartGame()
+    {
+        Time.timeScale = 1f;
+        Enemy.ResetGlobalStats();
+        Character.GlobalDamageBonusPercent = 0f;
+        Character.GlobalAtkSpeedMultiplier = 1f;
+        Projectile.GlobalRicochetUnlocked = false; 
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void ResetDamageTracker()
+    {
+        classTotalDamage.Clear();
+        foreach (CharacterClassType classType in System.Enum.GetValues(typeof(CharacterClassType)))
+        {
+            classTotalDamage[classType] = 0f;
+        }
+    }
+
+    public void RecordDamage(CharacterClassType classType, float amount)
+    {
+        if (classTotalDamage.ContainsKey(classType))
+        {
+            classTotalDamage[classType] += amount;
+        }
+    }
+
+    public float GetGlobalTotalDamage()
+    {
+        float total = 0f;
+        foreach (var val in classTotalDamage.Values) total += val;
+        return total > 0 ? total : 1f; 
+    }
+
+    public static string FormatNumber(float value)
+    {
+        if (value >= 1_000_000f)
+            return (value / 1_000_000f).ToString("0.#") + "M";
+        if (value >= 1_000f)
+            return (value / 1_000f).ToString("0.#") + "K";
+        
+        return value.ToString("F0");
+    }
+}
