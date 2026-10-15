@@ -153,6 +153,42 @@ public class Character : MonoBehaviour
                 if (anim != null && tankController != null) anim.runtimeAnimatorController = tankController;
                 break;
         }
+
+        // 2. Ambil stat dari Hero spesifik di Deck (Mendukung >1 Hero dengan Class yang sama)
+        if (HeroManager.Instance != null)
+        {
+            HeroSO targetHero = null;
+
+            // Jika karakter ini sudah memiliki heroId spesifik, ambil langsung dari Database
+            if (!string.IsNullOrEmpty(heroId) && HeroManager.Instance.Database != null)
+            {
+                targetHero = HeroManager.Instance.Database.GetHeroById(heroId);
+            }
+
+            // Jika belum punya heroId, pilih salah satu Hero dari Deck yang sesuai classType-nya
+            if (targetHero == null)
+            {
+                targetHero = HeroManager.Instance.GetEquippedHeroByClass(classType);
+                if (targetHero != null)
+                {
+                    heroId = targetHero.heroId; // Kunci identitas hero pada unit ini
+                }
+            }
+
+            if (targetHero != null)
+            {
+                CalculatedHeroStats calcStats = HeroManager.Instance.GetCalculatedStats(targetHero.heroId);
+
+                baseAttackDamage = calcStats.totalDamage;
+                baseAttackCooldown = calcStats.attackCooldown;
+                attackRange = calcStats.attackRange;
+                critRate = calcStats.totalCritRate / 100f;
+                critDamage = calcStats.totalCritDamage;
+
+                Debug.Log($"[Arena Spawn] {targetHero.heroName} (ID:{heroId} | {classType}) aktif! ATK:{baseAttackDamage:F1}, CD:{baseAttackCooldown:F2}s, RNG:{attackRange:F1}");
+            }
+        }
+
         UpdateStarDisplay();
     }
 
