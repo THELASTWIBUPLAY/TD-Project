@@ -13,10 +13,8 @@ MonoBehaviour:
   m_Name: HeroDB
   m_EditorClassIdentifier: 
   _allHeroes:
-  - {fileID: 11400000, guid: 8f420f661f7792a4fb7f04e9440e5226, type: 2}
-  - {fileID: 11400000, guid: a5c24d4acd0dc04498224019e65681ac, type: 2}
-  - {fileID: 11400000, guid: e907f2dc35ca3f8479320af8c29cb022, type: 2}
-  - {fileID: 11400000, guid: fbb5ed663e4d36a4b995404f2c65ebed, type: 2}
-  - {fileID: 11400000, guid: 9da0becb94908c24b9103630fe26e113, type: 2}
-  - {fileID: 11400000, guid: aea5049999e93f5498e7a87c5109c7c3, type: 2}
-  - {fileID: 11400000, guid: f817a32acf0af4242b240a269a012975, type: 2}
+  - {fileID: 11400000, guid: cbd14d3757398bd4399cbfbb1c1410ae, type: 2}
+  - {fileID: 11400000, guid: eebac49743f0c194bb18e391a1a22475, type: 2}
+  - {fileID: 11400000, guid: 275044753776db84a972c52df56aed05, type: 2}
+  - {fileID: 11400000, guid: d32e410c760832f48a8d300674344da4, type: 2}
+  - {fileID: 11400000, guid: 8602cb80de593f34c85527d948c1d398, type: 2}

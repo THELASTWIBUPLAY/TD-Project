@@ -43,6 +43,7 @@ public class RouletteWheelGenerator : MonoBehaviour
     void Start()
     {
         SetupDefaultRewardsIfEmpty();
+        SyncWheelWithDeck(); // Buat sync ke deck agar karakter yang keluar sesuai sama di deck
         GenerateWheelSlots();
 
         if (spinButton != null)
@@ -55,6 +56,68 @@ public class RouletteWheelGenerator : MonoBehaviour
         {
             skipButton.onClick.RemoveAllListeners();
             skipButton.onClick.AddListener(SkipSpin);
+        }
+    }
+
+    /// <summary>
+    /// Menyaring slot karakter pada Roulette Wheel agar hanya menampilkan Hero/Class yang terpasang di Deck.
+    /// </summary>
+    private void SyncWheelWithDeck()
+    {
+        if (HeroManager.Instance == null || HeroManager.Instance.Database == null) return;
+
+        // Kumpulkan daftar Hero yang benar-benar terpasang di 5 slot Deck
+        List<HeroSO> equippedHeroes = new List<HeroSO>();
+        foreach (string id in HeroManager.Instance.EquippedHeroIds)
+        {
+            if (!string.IsNullOrEmpty(id))
+            {
+                HeroSO hero = HeroManager.Instance.Database.GetHeroById(id);
+                if (hero != null) equippedHeroes.Add(hero);
+            }
+        }
+
+        // Jika pemain belum memasang 1 pun hero di Deck, biarkan roda menggunakan default
+        if (equippedHeroes.Count == 0) return;
+
+        // impan kamus template visual (Icon & Animator) per Class dari pengaturan Inspector saat ini
+        Dictionary<CharacterClassType, WheelSlotData> classVisualTemplates = new Dictionary<CharacterClassType, WheelSlotData>();
+        foreach (var slot in slotRewards)
+        {
+            if (slot.rewardType == WheelRewardType.Character && !classVisualTemplates.ContainsKey(slot.characterClass))
+            {
+                classVisualTemplates[slot.characterClass] = new WheelSlotData
+                {
+                    slotName = slot.slotName,
+                    rewardType = WheelRewardType.Character,
+                    characterClass = slot.characterClass,
+                    slotIcon = slot.slotIcon,
+                    idleAnimator = slot.idleAnimator
+                };
+            }
+        }
+
+        //Ganti setiap slot bertipe Character di roda dengan Hero dari Deck secara berurutan
+        int deckIndex = 0;
+        for (int i = 0; i < slotRewards.Count; i++)
+        {
+            if (slotRewards[i].rewardType == WheelRewardType.Character)
+            {
+                // Ambil hero dari deck (jika isi deck kurang dari 5, ulangi dari indeks 0 secara proporsional)
+                HeroSO deckHero = equippedHeroes[deckIndex % equippedHeroes.Count];
+                deckIndex++;
+
+                slotRewards[i].slotName = deckHero.heroName;
+                slotRewards[i].characterClass = deckHero.classType;
+
+                // Pasang kembali animator & icon sesuai class hero tersebut
+                if (classVisualTemplates.TryGetValue(deckHero.classType, out WheelSlotData template))
+                {
+                    slotRewards[i].idleAnimator = template.idleAnimator;
+                    // Gunakan icon dari HeroSO jika ada, atau fallback ke icon template roda
+                    slotRewards[i].slotIcon = deckHero.heroIcon != null ? deckHero.heroIcon : template.slotIcon;
+                }
+            }
         }
     }
 

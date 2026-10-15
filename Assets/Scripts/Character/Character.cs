@@ -5,6 +5,7 @@ using TMPro;
 public class Character : MonoBehaviour
 {
     [Header("Class & Star Config")]
+    public string heroId;
     public CharacterClassType classType = CharacterClassType.Fighter;
     [Range(1, 3)]
     public int starLevel = 1;
@@ -153,43 +154,27 @@ public class Character : MonoBehaviour
                 if (anim != null && tankController != null) anim.runtimeAnimatorController = tankController;
                 break;
         }
+        UpdateStarDisplay();
 
-        // 2. Ambil stat dari Hero spesifik di Deck (Mendukung >1 Hero dengan Class yang sama)
+        // Ambil stat dari deck :b
         if (HeroManager.Instance != null)
         {
-            HeroSO targetHero = null;
-
-            // Jika karakter ini sudah memiliki heroId spesifik, ambil langsung dari Database
-            if (!string.IsNullOrEmpty(heroId) && HeroManager.Instance.Database != null)
+            HeroSO equippedHero = HeroManager.Instance.ResolveHeroForCharacter(classType, ref heroId);
+            if (equippedHero != null)
             {
-                targetHero = HeroManager.Instance.Database.GetHeroById(heroId);
-            }
 
-            // Jika belum punya heroId, pilih salah satu Hero dari Deck yang sesuai classType-nya
-            if (targetHero == null)
-            {
-                targetHero = HeroManager.Instance.GetEquippedHeroByClass(classType);
-                if (targetHero != null)
-                {
-                    heroId = targetHero.heroId; // Kunci identitas hero pada unit ini
-                }
-            }
+                CalculatedHeroStats calcStats = HeroManager.Instance.GetCalculatedStats(equippedHero.heroId);
 
-            if (targetHero != null)
-            {
-                CalculatedHeroStats calcStats = HeroManager.Instance.GetCalculatedStats(targetHero.heroId);
-
+                // Override stat dasar arena dengan hasil kalkulasi Level & Ascend Hero dari Menu!
                 baseAttackDamage = calcStats.totalDamage;
                 baseAttackCooldown = calcStats.attackCooldown;
                 attackRange = calcStats.attackRange;
                 critRate = calcStats.totalCritRate / 100f;
                 critDamage = calcStats.totalCritDamage;
 
-                Debug.Log($"[Arena Spawn] {targetHero.heroName} (ID:{heroId} | {classType}) aktif! ATK:{baseAttackDamage:F1}, CD:{baseAttackCooldown:F2}s, RNG:{attackRange:F1}");
+                Debug.Log($"[Arena Spawn] {equippedHero.heroName} ({classType}) aktif! ATK:{baseAttackDamage:F1}, CD:{baseAttackCooldown:F2}s, RNG:{attackRange:F1}");
             }
         }
-
-        UpdateStarDisplay();
     }
 
     void Update()

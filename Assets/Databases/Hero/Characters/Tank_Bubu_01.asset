@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edd7cd6221943ca49ac0f2c66d309006, type: 3}
+  m_Name: Tank_Bubu_01
+  m_EditorClassIdentifier: Assembly-CSharp::HeroSO
+  heroId: Tank_Bubu_01
+  heroName: Bubu
+  classType: 3
+  heroDescription: 
+  heroIcon: {fileID: -2951802150405364340, guid: 61a5fa3bb0b0c7044989228d1b1aa89f, type: 3}
+  rarity: 0
+  requiredFragments: 50
+  baseDamage: 20
+  baseAttackCooldown: 0.8
+  baseAttackRange: 5.5
+  baseCritRate: 5
+  baseCritDamage: 1.5
+  damageGrowthPerLevel: 2.5
+  _ascendPassives:
+  - unlockAtStar: 1
+    passiveName: Daunting Smite
+    passiveDescription: 
+    bonusAttackPercent: 0.1
+    flatAttackBonus: 5
+    cooldownReductionPercent: 0
+    flatAttackRangeBonus: 0
+    bonusCritRate: 0
+    bonusCritDamage: 0.1
+  - unlockAtStar: 2
+    passiveName: Enduring Bulwark
+    passiveDescription: 
+    bonusAttackPercent: 0.2
+    flatAttackBonus: 10
+    cooldownReductionPercent: 0
+    flatAttackRangeBonus: 0
+    bonusCritRate: 0
+    bonusCritDamage: 0.1
+  - unlockAtStar: 3
+    passiveName: Unyielding Will
+    passiveDescription: 
+    bonusAttackPercent: 0.45
+    flatAttackBonus: 20
+    cooldownReductionPercent: 0
+    flatAttackRangeBonus: 0
+    bonusCritRate: 0
+    bonusCritDamage: 0.3
+  inGamePrefab: {fileID: 0}

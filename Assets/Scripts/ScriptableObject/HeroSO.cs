@@ -40,6 +40,7 @@ public class HeroSO : ScriptableObject
     [Tooltip("Format ID unik: type_name_id (contoh: meele_mika_1)")]
     public string heroId;
     public string heroName;
+    public CharacterClassType classType;
     [TextArea(2, 4)] public string heroDescription;
     public Sprite heroIcon;
     public HeroRarity rarity;

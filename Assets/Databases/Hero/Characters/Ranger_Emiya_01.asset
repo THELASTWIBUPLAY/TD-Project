@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edd7cd6221943ca49ac0f2c66d309006, type: 3}
+  m_Name: Ranger_Emiya_01
+  m_EditorClassIdentifier: Assembly-CSharp::HeroSO
+  heroId: Ranger_Emiya_01
+  heroName: Emiya
+  classType: 4
+  heroDescription: 
+  heroIcon: {fileID: -2951802150405364340, guid: 3328a6a778e062a46a2d95bbf5bfecb3, type: 3}
+  rarity: 0
+  requiredFragments: 50
+  baseDamage: 40
+  baseAttackCooldown: 0.5
+  baseAttackRange: 7.5
+  baseCritRate: 20
+  baseCritDamage: 5
+  damageGrowthPerLevel: 2.5
+  _ascendPassives:
+  - unlockAtStar: 1
+    passiveName: Caladbolg Projection
+    passiveDescription: 
+    bonusAttackPercent: 0.2
+    flatAttackBonus: 30
+    cooldownReductionPercent: 0
+    flatAttackRangeBonus: 0.5
+    bonusCritRate: 5
+    bonusCritDamage: 0.2
+  - unlockAtStar: 0
+    passiveName: 'Rho Aias: Distortion Arrow'
+    passiveDescription: 
+    bonusAttackPercent: 0.3
+    flatAttackBonus: 50
+    cooldownReductionPercent: 0
+    flatAttackRangeBonus: 0.5
+    bonusCritRate: 15
+    bonusCritDamage: 0.3
+  - unlockAtStar: 0
+    passiveName: Unlimited Blade Works
+    passiveDescription: 
+    bonusAttackPercent: 0.5
+    flatAttackBonus: 150
+    cooldownReductionPercent: 0
+    flatAttackRangeBonus: 0.5
+    bonusCritRate: 15
+    bonusCritDamage: 0.5
+  inGamePrefab: {fileID: 0}

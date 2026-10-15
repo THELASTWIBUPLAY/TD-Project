@@ -34,6 +34,13 @@ public class HeroManager : MonoBehaviour, ISaveable
     private readonly Dictionary<string, HeroProgressEntry> _progressMap = new Dictionary<string, HeroProgressEntry>();
     public event Action OnHeroDataUpdated;
 
+    // =========================================================================
+    // EQUIPPED DECK SYSTEM (5 SLOTS)
+    // =========================================================================
+    [Header("Equipped Deck Slots")]
+    private readonly string[] _equippedHeroIds = new string[5];
+    public IReadOnlyList<string> EquippedHeroIds => _equippedHeroIds;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -60,6 +67,42 @@ public class HeroManager : MonoBehaviour, ISaveable
             _progressMap[heroId] = entry;
         }
         return entry;
+    }
+
+
+    public string GetEquippedHeroAt(int slotIndex)
+    {
+        if (slotIndex < 0 || slotIndex >= _equippedHeroIds.Length) return string.Empty;
+        return _equippedHeroIds[slotIndex];
+    }
+
+    public void SetEquippedHero(int slotIndex, string heroId)
+    {
+        if (slotIndex < 0 || slotIndex >= _equippedHeroIds.Length) return;
+        _equippedHeroIds[slotIndex] = heroId;
+        OnHeroDataUpdated?.Invoke();
+        SaveManager.Instance?.SaveLocal();
+    }
+
+    public void SwapEquippedHeroes(int fromIndex, int toIndex)
+    {
+        if (fromIndex < 0 || fromIndex >= _equippedHeroIds.Length ||
+            toIndex < 0 || toIndex >= _equippedHeroIds.Length) return;
+
+        string temp = _equippedHeroIds[toIndex];
+        _equippedHeroIds[toIndex] = _equippedHeroIds[fromIndex];
+        _equippedHeroIds[fromIndex] = temp;
+
+        OnHeroDataUpdated?.Invoke();
+        SaveManager.Instance?.SaveLocal();
+    }
+
+    public void UnequipHero(int slotIndex)
+    {
+        if (slotIndex < 0 || slotIndex >= _equippedHeroIds.Length) return;
+        _equippedHeroIds[slotIndex] = string.Empty;
+        OnHeroDataUpdated?.Invoke();
+        SaveManager.Instance?.SaveLocal();
     }
 
     public int GetFragments(string heroId) => GetOrCreateEntry(heroId).currentFragments;
@@ -285,6 +328,113 @@ public class HeroManager : MonoBehaviour, ISaveable
         return stats;
     }
 
+    /// <summary>
+    /// Mengambil daftar seluruh HeroSO yang sedang terpasang di 5 slot Deck.
+    /// </summary>
+    public List<HeroSO> GetEquippedHeroSOList()
+    {
+        List<HeroSO> list = new List<HeroSO>();
+        if (_database == null) return list;
+
+        for (int i = 0; i < _equippedHeroIds.Length; i++)
+        {
+            string id = _equippedHeroIds[i];
+            if (!string.IsNullOrEmpty(id))
+            {
+                var hero = _database.GetHeroById(id);
+                if (hero != null) list.Add(hero);
+            }
+        }
+        return list;
+    }
+
+    /// <summary>
+    /// Mencari HeroSO yang sedang dipasang di Deck berdasarkan kelasnya (Fighter, Ranged, dll).
+    /// </summary>
+    public HeroSO GetEquippedHeroByClass(CharacterClassType targetClass)
+    {
+        if (_database == null) return null;
+
+        // 1. Prioritaskan mencari dari 5 slot Deck yang sedang dipakai
+        for (int i = 0; i < _equippedHeroIds.Length; i++)
+        {
+            string id = _equippedHeroIds[i];
+            if (!string.IsNullOrEmpty(id))
+            {
+                var hero = _database.GetHeroById(id);
+                if (hero != null && hero.classType == targetClass)
+                    return hero;
+            }
+        }
+
+        // 2. Fallback: Jika tidak ada di deck, cari dari database hero yang memiliki class tersebut
+        foreach (var hero in _database.AllHeroes)
+        {
+            if (hero != null && hero.classType == targetClass)
+                return hero;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Menentukan HeroSO untuk unit di arena. 
+    /// Jika unit belum punya heroId, pilih salah satu dari 5 slot Deck yang cocok dengan classType-nya lalu kunci ID-nya.
+    /// Jika unit sudah punya heroId (misal saat naik bintang/merge), pertahankan hero yang sama.
+    /// </summary>
+    public HeroSO ResolveHeroForCharacter(CharacterClassType targetClass, ref string assignedHeroId)
+    {
+        if (_database == null) return null;
+
+        // CEK APAKAH KARAKTER SUDAH PUNYA IDENTITAS HERO YANG VALID
+        // (Berguna saat unit melakukan Merge dari Bintang 1 ke Bintang 2 agar karakternya tidak berubah)
+        if (!string.IsNullOrEmpty(assignedHeroId))
+        {
+            HeroSO existingHero = _database.GetHeroById(assignedHeroId);
+            if (existingHero != null && existingHero.classType == targetClass)
+            {
+                return existingHero;
+            }
+        }
+
+        // JIKA BELUM PUNYA ID (Baru di-spawn), CARI SEMUA HERO DI DECK YANG KELASNYA COCOK
+        List<HeroSO> matchingDeckHeroes = new List<HeroSO>();
+
+        for (int i = 0; i < _equippedHeroIds.Length; i++)
+        {
+            string id = _equippedHeroIds[i];
+            if (!string.IsNullOrEmpty(id))
+            {
+                HeroSO hero = _database.GetHeroById(id);
+                if (hero != null && hero.classType == targetClass)
+                {
+                    matchingDeckHeroes.Add(hero);
+                }
+            }
+        }
+
+        // Jika pemain memasang 1 s/d 5 Hero dengan class yang sama di Deck,
+        // pilih salah satu secara acak dan kunci ID-nya ke unit tersebut!
+        if (matchingDeckHeroes.Count > 0)
+        {
+            HeroSO chosenHero = matchingDeckHeroes[UnityEngine.Random.Range(0, matchingDeckHeroes.Count)];
+            assignedHeroId = chosenHero.heroId; // Mengisi otomatis variabel heroId di Character.cs!
+            return chosenHero;
+        }
+
+        // FALLBACK Jika di Deck tidak ada class tersebut, ambil dari database yang class-nya cocok
+        foreach (var hero in _database.AllHeroes)
+        {
+            if (hero != null && hero.classType == targetClass)
+            {
+                assignedHeroId = hero.heroId;
+                return hero;
+            }
+        }
+
+        return null;
+    }
+
     // =========================================================================
     // DEBUG TOOLS
     // =========================================================================
@@ -351,7 +501,13 @@ public class HeroManager : MonoBehaviour, ISaveable
 
     public void PopulateSaveData(GameSaveData saveData)
     {
-        if (saveData == null || saveData.heroData == null) return;
+        if (saveData?.heroData == null) return;
+
+        // 1. Simpan daftar 5 hero yang dipasang di deck
+        saveData.heroData.equippedHeroIds.Clear();
+        saveData.heroData.equippedHeroIds.AddRange(_equippedHeroIds);
+
+        // 2. Simpan progres level, fragmen, dan bintang hero
         saveData.heroData.heroProgressList.Clear();
         foreach (var pair in _progressMap.Values)
         {
@@ -361,7 +517,17 @@ public class HeroManager : MonoBehaviour, ISaveable
 
     public void LoadFromSaveData(GameSaveData saveData)
     {
-        if (saveData == null || saveData.heroData == null) return;
+        if (saveData?.heroData == null) return;
+
+        // 1. Muat kembali slot deck yang tersimpan
+        for (int i = 0; i < _equippedHeroIds.Length; i++)
+        {
+            _equippedHeroIds[i] = (saveData.heroData.equippedHeroIds != null && i < saveData.heroData.equippedHeroIds.Count)
+                ? saveData.heroData.equippedHeroIds[i]
+                : string.Empty;
+        }
+
+        // 2. Muat progres status hero
         _progressMap.Clear();
         foreach (var entry in saveData.heroData.heroProgressList)
         {
@@ -369,6 +535,7 @@ public class HeroManager : MonoBehaviour, ISaveable
             if (entry.star < 1) entry.star = 1;
             _progressMap[entry.heroId] = entry;
         }
+
         OnHeroDataUpdated?.Invoke();
     }
 }

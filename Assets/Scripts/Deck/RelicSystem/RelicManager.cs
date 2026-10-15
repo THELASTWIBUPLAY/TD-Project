@@ -17,8 +17,9 @@ public class RelicManager : MonoBehaviour, ISaveable
     [SerializeField] private string _testRelicId = "relic_fire_01";
 
     private readonly Dictionary<string, RelicProgressEntry> _progressMap = new Dictionary<string, RelicProgressEntry>();
-    private readonly List<string> _equippedRelicIds = new List<string>();
 
+    [Header("Deck Config (3 Slots)")]
+    private readonly string[] _equippedRelicIds = new string[3];
     public IReadOnlyList<string> EquippedRelicIds => _equippedRelicIds;
     public event Action OnRelicDataUpdated;
 
@@ -72,36 +73,66 @@ public class RelicManager : MonoBehaviour, ISaveable
         return entry;
     }
 
-    public bool EquipRelic(string relicId)
+    public string GetEquippedRelicAt(int slotIndex)
     {
-        if (!IsRelicUnlocked(relicId))
+        if (slotIndex < 0 || slotIndex >= _equippedRelicIds.Length) return string.Empty;
+        return _equippedRelicIds[slotIndex];
+    }
+
+    public void SetEquippedRelic(int slotIndex, string relicId)
+    {
+        if (slotIndex < 0 || slotIndex >= _equippedRelicIds.Length) return;
+
+        // Cegah duplikasi jika relik yang sama sudah terpasang di slot lain
+        for (int i = 0; i < _equippedRelicIds.Length; i++)
         {
-            AlertManager.Instance?.Show("Relic belum terbuka!");
-            return false;
+            if (_equippedRelicIds[i] == relicId)
+                _equippedRelicIds[i] = string.Empty;
         }
 
-        if (_equippedRelicIds.Contains(relicId)) return false;
-
-        if (_equippedRelicIds.Count >= _maxEquippedSlots)
-        {
-            _equippedRelicIds.RemoveAt(0);
-        }
-
-        _equippedRelicIds.Add(relicId);
+        _equippedRelicIds[slotIndex] = relicId;
         OnRelicDataUpdated?.Invoke();
         SaveManager.Instance?.SaveLocal();
-        return true;
+    }
+
+    public void SwapEquippedRelics(int fromIndex, int toIndex)
+    {
+        if (fromIndex < 0 || fromIndex >= _equippedRelicIds.Length ||
+            toIndex < 0 || toIndex >= _equippedRelicIds.Length) return;
+
+        string temp = _equippedRelicIds[toIndex];
+        _equippedRelicIds[toIndex] = _equippedRelicIds[fromIndex];
+        _equippedRelicIds[fromIndex] = temp;
+
+        OnRelicDataUpdated?.Invoke();
+        SaveManager.Instance?.SaveLocal();
+    }
+
+    public void UnequipRelicAt(int slotIndex)
+    {
+        if (slotIndex < 0 || slotIndex >= _equippedRelicIds.Length) return;
+        _equippedRelicIds[slotIndex] = string.Empty;
+        OnRelicDataUpdated?.Invoke();
+        SaveManager.Instance?.SaveLocal();
     }
 
     public void UnequipRelic(string relicId)
     {
-        if (_equippedRelicIds.Remove(relicId))
+        bool changed = false;
+        for (int i = 0; i < _equippedRelicIds.Length; i++)
+        {
+            if (_equippedRelicIds[i] == relicId)
+            {
+                _equippedRelicIds[i] = string.Empty;
+                changed = true;
+            }
+        }
+        if (changed)
         {
             OnRelicDataUpdated?.Invoke();
             SaveManager.Instance?.SaveLocal();
         }
     }
-
     // =========================================================================
     // TESTING TOOLS (Eksekusi via Klik Kanan Inspector saat Play Mode)
     // =========================================================================
@@ -165,7 +196,7 @@ public class RelicManager : MonoBehaviour, ISaveable
     {
         if (_database == null) return;
 
-        _equippedRelicIds.Clear(); // Kosongkan seluruh slot terpasang
+        //_equippedRelicIds.Clear(); // Kosongkan seluruh slot terpasang
 
         foreach (var relic in _database.AllRelics)
         {
@@ -186,7 +217,8 @@ public class RelicManager : MonoBehaviour, ISaveable
 
     public void PopulateSaveData(GameSaveData saveData)
     {
-        if (saveData == null || saveData.relicData == null) return;
+        if (saveData?.relicData == null) return;
+
         saveData.relicData.equippedRelicIds = new List<string>(_equippedRelicIds);
         saveData.relicData.relicProgressList.Clear();
         foreach (var pair in _progressMap.Values)
@@ -197,7 +229,7 @@ public class RelicManager : MonoBehaviour, ISaveable
 
     public void LoadFromSaveData(GameSaveData saveData)
     {
-        if (saveData == null || saveData.relicData == null) return;
+        if (saveData?.relicData == null) return;
 
         _progressMap.Clear();
         foreach (var entry in saveData.relicData.relicProgressList)
@@ -205,10 +237,11 @@ public class RelicManager : MonoBehaviour, ISaveable
             _progressMap[entry.relicId] = entry;
         }
 
-        _equippedRelicIds.Clear();
-        if (saveData.relicData.equippedRelicIds != null)
+        for (int i = 0; i < _equippedRelicIds.Length; i++)
         {
-            _equippedRelicIds.AddRange(saveData.relicData.equippedRelicIds);
+            _equippedRelicIds[i] = (saveData.relicData.equippedRelicIds != null && i < saveData.relicData.equippedRelicIds.Count)
+                ? saveData.relicData.equippedRelicIds[i]
+                : string.Empty;
         }
 
         OnRelicDataUpdated?.Invoke();

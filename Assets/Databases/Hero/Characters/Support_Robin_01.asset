@@ -10,46 +10,47 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: edd7cd6221943ca49ac0f2c66d309006, type: 3}
-  m_Name: Fighter_Lukas_01
-  m_EditorClassIdentifier: 
-  heroId: 01
-  heroName: Lukas
+  m_Name: Support_Robin_01
+  m_EditorClassIdentifier: Assembly-CSharp::HeroSO
+  heroId: Support_Robin_01
+  heroName: Robin
+  classType: 2
   heroDescription: 
-  heroIcon: {fileID: -1971440522577996489, guid: b482299ef13b83847a87a5aa2c026f35, type: 3}
+  heroIcon: {fileID: -2951802150405364340, guid: 21ffb7b9a43e7b2469bc168a9f23f376, type: 3}
   rarity: 0
   requiredFragments: 50
-  baseDamage: 15
+  baseDamage: 20
   baseAttackCooldown: 0.8
   baseAttackRange: 5.5
   baseCritRate: 5
   baseCritDamage: 1.5
   damageGrowthPerLevel: 2.5
   _ascendPassives:
-  - unlockAtStar: 1
-    passiveName: Fire Breath
-    passiveDescription: Nambah offesive abilty
-    bonusAttackPercent: 10
-    flatAttackBonus: 5
-    cooldownReductionPercent: 0
-    flatAttackRangeBonus: 0
-    bonusCritRate: 2
-    bonusCritDamage: 0
-  - unlockAtStar: 2
-    passiveName: Fire Wall
-    passiveDescription: 
-    bonusAttackPercent: 3.9
-    flatAttackBonus: 3.27
-    cooldownReductionPercent: 0
-    flatAttackRangeBonus: 0
-    bonusCritRate: 1.44
-    bonusCritDamage: 0
   - unlockAtStar: 0
-    passiveName: 
+    passiveName: Resonance
     passiveDescription: 
-    bonusAttackPercent: 1.08
-    flatAttackBonus: 3.61
+    bonusAttackPercent: 0.05
+    flatAttackBonus: 10
     cooldownReductionPercent: 0
     flatAttackRangeBonus: 0
-    bonusCritRate: 3.36
-    bonusCritDamage: 0
+    bonusCritRate: 5
+    bonusCritDamage: 0.1
+  - unlockAtStar: 2
+    passiveName: Vox Renascentia
+    passiveDescription: 
+    bonusAttackPercent: 0.05
+    flatAttackBonus: 10
+    cooldownReductionPercent: 0
+    flatAttackRangeBonus: 0
+    bonusCritRate: 5
+    bonusCritDamage: 0.1
+  - unlockAtStar: 2
+    passiveName: Vox Gloriosa
+    passiveDescription: 
+    bonusAttackPercent: 0.05
+    flatAttackBonus: 10
+    cooldownReductionPercent: 0
+    flatAttackRangeBonus: 0
+    bonusCritRate: 5
+    bonusCritDamage: 0.1
   inGamePrefab: {fileID: 0}

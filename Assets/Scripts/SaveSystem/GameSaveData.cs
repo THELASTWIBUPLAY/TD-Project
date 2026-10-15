@@ -104,6 +104,12 @@ public class RelicSaveData
 }
 
 [Serializable]
+public class PlayTimeSaveData
+{
+    public List<int> unlockedSlotIndices = new List<int>();
+}
+
+[Serializable]
 public class GameSaveData
 {
     public int saveVersion = 1;
@@ -116,4 +122,5 @@ public class GameSaveData
     public TalentSaveData talent = new TalentSaveData();
     public RelicSaveData relicData = new RelicSaveData();
     public HeroSaveData heroData = new HeroSaveData();
+    public PlayTimeSaveData playTime = new PlayTimeSaveData();
 }

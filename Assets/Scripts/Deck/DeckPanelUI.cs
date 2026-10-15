@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -36,10 +34,6 @@ public class DeckPanelUI : MonoBehaviour
     [SerializeField] private HeroDatabaseSO _heroDatabase;
     [SerializeField] private RelicDatabaseSO _relicDatabase;
 
-    // State Equipped Array
-    private readonly string[] _equippedHeroes = new string[5];
-    private readonly string[] _equippedRelics = new string[3];
-
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -73,21 +67,26 @@ public class DeckPanelUI : MonoBehaviour
 
     private void OnEnable()
     {
-        RefreshEquippedView();
-        RefreshInventoryRows();
+        RefreshAllViews();
 
         if (HeroManager.Instance != null)
-            HeroManager.Instance.OnHeroDataUpdated += RefreshInventoryRows;
+            HeroManager.Instance.OnHeroDataUpdated += RefreshAllViews;
         if (RelicManager.Instance != null)
-            RelicManager.Instance.OnRelicDataUpdated += RefreshInventoryRows;
+            RelicManager.Instance.OnRelicDataUpdated += RefreshAllViews;
     }
 
     private void OnDisable()
     {
         if (HeroManager.Instance != null)
-            HeroManager.Instance.OnHeroDataUpdated -= RefreshInventoryRows;
+            HeroManager.Instance.OnHeroDataUpdated -= RefreshAllViews;
         if (RelicManager.Instance != null)
-            RelicManager.Instance.OnRelicDataUpdated -= RefreshInventoryRows;
+            RelicManager.Instance.OnRelicDataUpdated -= RefreshAllViews;
+    }
+
+    private void RefreshAllViews()
+    {
+        RefreshEquippedView();
+        RefreshInventoryRows();
     }
 
     public void OpenHeroUpgradeModal(string heroId)
@@ -145,9 +144,20 @@ public class DeckPanelUI : MonoBehaviour
         {
             if (hero == null) continue;
 
-            // BACA STATUS KEPEMILIKAN DARI HEROMANAGER
             bool isOwned = HeroManager.Instance != null && HeroManager.Instance.IsHeroUnlocked(hero.heroId);
-            bool isEquipped = Array.Exists(_equippedHeroes, id => id == hero.heroId);
+
+            bool isEquipped = false;
+            if (HeroManager.Instance != null && HeroManager.Instance.EquippedHeroIds != null)
+            {
+                for (int i = 0; i < HeroManager.Instance.EquippedHeroIds.Count; i++)
+                {
+                    if (HeroManager.Instance.EquippedHeroIds[i] == hero.heroId)
+                    {
+                        isEquipped = true;
+                        break;
+                    }
+                }
+            }
 
             if (isOwned)
             {
@@ -156,7 +166,6 @@ public class DeckPanelUI : MonoBehaviour
             }
             else
             {
-                // Unit yang belum terbuka masuk ke ScrollView Locked
                 CreateDraggableSlot(_lockedContent, hero.heroIcon, hero.heroId, DeckDraggableItem.ItemType.Hero, false, false);
             }
         }
@@ -171,12 +180,23 @@ public class DeckPanelUI : MonoBehaviour
             if (relic == null) continue;
 
             bool isOwned = RelicManager.Instance != null && RelicManager.Instance.IsRelicUnlocked(relic.relicId);
-            bool isEquipped = Array.Exists(_equippedRelics, id => id == relic.relicId);
+
+            bool isEquipped = false;
+            if (RelicManager.Instance != null && RelicManager.Instance.EquippedRelicIds != null)
+            {
+                for (int i = 0; i < RelicManager.Instance.EquippedRelicIds.Count; i++)
+                {
+                    if (RelicManager.Instance.EquippedRelicIds[i] == relic.relicId)
+                    {
+                        isEquipped = true;
+                        break;
+                    }
+                }
+            }
 
             if (isOwned)
             {
                 if (isEquipped) continue;
-
                 CreateDraggableSlot(_ownedContent, relic.relicIcon, relic.relicId, DeckDraggableItem.ItemType.Relic, true, false);
             }
             else
@@ -211,62 +231,67 @@ public class DeckPanelUI : MonoBehaviour
 
     public void HandleItemDroppedOnSlot(DeckDraggableItem.ItemType type, int targetSlotIndex, string incomingId, bool fromEquipped, int sourceIndex)
     {
-        string[] targetArray = (type == DeckDraggableItem.ItemType.Hero) ? _equippedHeroes : _equippedRelics;
-
-        if (fromEquipped && sourceIndex >= 0)
+        if (type == DeckDraggableItem.ItemType.Hero)
         {
-            HandleSlotToSlotSwap(type, sourceIndex, targetSlotIndex);
+            if (fromEquipped && sourceIndex >= 0)
+                HeroManager.Instance?.SwapEquippedHeroes(sourceIndex, targetSlotIndex);
+            else
+                HeroManager.Instance?.SetEquippedHero(targetSlotIndex, incomingId);
         }
         else
         {
-            targetArray[targetSlotIndex] = incomingId;
-            RefreshEquippedView();
-            RefreshInventoryRows();
-            SaveManager.Instance?.SaveLocal();
+            if (fromEquipped && sourceIndex >= 0)
+                RelicManager.Instance?.SwapEquippedRelics(sourceIndex, targetSlotIndex);
+            else
+                RelicManager.Instance?.SetEquippedRelic(targetSlotIndex, incomingId);
         }
+
+        RefreshAllViews();
     }
 
     public void HandleSlotToSlotSwap(DeckDraggableItem.ItemType type, int fromIndex, int toIndex)
     {
         if (fromIndex == toIndex) return;
 
-        string[] targetArray = (type == DeckDraggableItem.ItemType.Hero) ? _equippedHeroes : _equippedRelics;
+        if (type == DeckDraggableItem.ItemType.Hero)
+        {
+            HeroManager.Instance?.SwapEquippedHeroes(fromIndex, toIndex);
+        }
+        else
+        {
+            RelicManager.Instance?.SwapEquippedRelics(fromIndex, toIndex);
+        }
 
-        string temp = targetArray[toIndex];
-        targetArray[toIndex] = targetArray[fromIndex];
-        targetArray[fromIndex] = temp;
-
-        RefreshEquippedView();
-        RefreshInventoryRows();
-        SaveManager.Instance?.SaveLocal();
+        // Diletakkan di luar if-else agar baik Hero maupun Relic langsung menyegarkan tampilan
+        RefreshAllViews();
     }
 
     public void UnequipItemFromSlot(DeckDraggableItem.ItemType type, int slotIndex)
     {
-        string[] targetArray = (type == DeckDraggableItem.ItemType.Hero) ? _equippedHeroes : _equippedRelics;
-
-        if (slotIndex >= 0 && slotIndex < targetArray.Length)
+        if (type == DeckDraggableItem.ItemType.Hero)
         {
-            targetArray[slotIndex] = string.Empty;
-
-            RefreshEquippedView();
-            RefreshInventoryRows();
-            SaveManager.Instance?.SaveLocal();
+            HeroManager.Instance?.UnequipHero(slotIndex);
         }
+        else
+        {
+            RelicManager.Instance?.UnequipRelicAt(slotIndex);
+        }
+
+        RefreshAllViews();
     }
 
     public void RefreshEquippedView()
     {
         for (int i = 0; i < _heroDropSlots.Length; i++)
         {
-            string id = _equippedHeroes[i];
+            string id = HeroManager.Instance != null ? HeroManager.Instance.GetEquippedHeroAt(i) : string.Empty;
             var hero = !string.IsNullOrEmpty(id) ? _heroDatabase?.GetHeroById(id) : null;
             _heroDropSlots[i].SetupSlot(hero != null ? hero.heroIcon : null, id);
         }
 
         for (int i = 0; i < _relicDropSlots.Length; i++)
         {
-            string id = _equippedRelics[i];
+            string id = RelicManager.Instance != null ? RelicManager.Instance.GetEquippedRelicAt(i) : string.Empty;
             var relic = !string.IsNullOrEmpty(id) ? _relicDatabase?.GetRelicById(id) : null;
             _relicDropSlots[i].SetupSlot(relic != null ? relic.relicIcon : null, id);
         }

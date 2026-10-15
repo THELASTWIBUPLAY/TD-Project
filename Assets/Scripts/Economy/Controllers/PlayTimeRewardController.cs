@@ -255,11 +255,51 @@ public class PlayTimeRewardController : MonoBehaviour, ISaveable
 
     public void PopulateSaveData(GameSaveData saveData)
     {
-        // Menyinkronkan status buka slot ke save file jika field sudah tersedia
+        if (saveData == null) return;
+        if (saveData.playTime == null) saveData.playTime = new PlayTimeSaveData();
+
+        saveData.playTime.unlockedSlotIndices.Clear();
+        if (_slotRuntimes == null) return;
+
+        for (int i = 0; i < _slotRuntimes.Length; i++)
+        {
+            if (_slotRuntimes[i] != null && _slotRuntimes[i].isUnlocked)
+            {
+                saveData.playTime.unlockedSlotIndices.Add(i);
+            }
+        }
     }
 
     public void LoadFromSaveData(GameSaveData saveData)
     {
-        InitializeSlots();
+        if (saveData?.playTime == null) return;
+
+        if (_slotConfigs == null || _slotConfigs.Length == 0) return;
+        _slotRuntimes = new SlotRuntime[_slotConfigs.Length];
+
+        HashSet<int> unlockedSet = new HashSet<int>(saveData.playTime.unlockedSlotIndices);
+
+        for (int i = 0; i < _slotConfigs.Length; i++)
+        {
+            _slotRuntimes[i] = new SlotRuntime();
+
+            // Slot 0 selalu gratis, slot sisanya dibaca dari file save
+            bool isUnlocked = (i == 0 || _slotConfigs[i].unlockGemCost <= 0) || unlockedSet.Contains(i);
+            _slotRuntimes[i].isUnlocked = isUnlocked;
+
+            if (isUnlocked)
+            {
+                StartSlotCycle(i);
+            }
+            else
+            {
+                _slotRuntimes[i].state = SlotState.Locked;
+            }
+        }
+
+        for (int i = 0; i < _slotConfigs.Length; i++)
+        {
+            OnSlotUpdated?.Invoke(i);
+        }
     }
 }

@@ -94,6 +94,7 @@ public class UpgradeManager : MonoBehaviour
         }
         Instance = this;
 
+        SyncDeckToAllowedClasses();
         InitCardPool();
     }
 
@@ -115,6 +116,39 @@ public class UpgradeManager : MonoBehaviour
     #endregion
 
     #region Initialization & Card Pool
+    /// <summary>
+    /// Memeriksa isi Deck di HeroManager dan mem-ban otomatis class yang tidak dibawa pemain.
+    /// </summary>
+    private void SyncDeckToAllowedClasses()
+    {
+        if (HeroManager.Instance == null || HeroManager.Instance.Database == null) return;
+
+        HashSet<CharacterClassType> deckClasses = new HashSet<CharacterClassType>();
+
+        foreach (string id in HeroManager.Instance.EquippedHeroIds)
+        {
+            if (string.IsNullOrEmpty(id)) continue;
+            HeroSO hero = HeroManager.Instance.Database.GetHeroById(id);
+            if (hero != null)
+            {
+                deckClasses.Add(hero.classType);
+            }
+        }
+
+        //Jika Deck kosong melompong, jangan ban semua class
+        if (deckClasses.Count == 0) return;
+
+        bannedClasses.Clear();
+        foreach (CharacterClassType cls in AllClassTypes)
+        {
+            if (!deckClasses.Contains(cls))
+            {
+                bannedClasses.Add(cls);
+                Debug.Log($"[Deck Filter] Class {cls} dikunci dari Upgrade & Arena karena tidak ada di Deck.");
+            }
+        }
+    }
+
     private void InitCardPool()
     {
         cardPool.Clear();

@@ -143,21 +143,21 @@ public class TalentUI : MonoBehaviour
         {
             case TalentManager.TalentType.Attack:
                 _atkLevelText.text = $"LV. {level}";
-                _atkBuffText.text = $"+{buff:F1}% ATK";
+                _atkBuffText.text = $"+{buff:F1}%";
                 _atkBuffPrice.text = isMax ? "MAX" : cost.ToString("N0");
                 _atkBuffBtn.interactable = !isMax;
                 break;
 
             case TalentManager.TalentType.Hp:
                 _hpLevelText.text = $"LV. {level}";
-                _hpBuffText.text = $"+{buff:F1}% HP";
+                _hpBuffText.text = $"+{buff:F1}%";
                 _hpBuffPrice.text = isMax ? "MAX" : cost.ToString("N0");
                 _hpBuffBtn.interactable = !isMax;
                 break;
 
             case TalentManager.TalentType.Coin:
                 _coinLevelText.text = $"LV. {level}";
-                _coinBuffText.text = $"+{buff:F1}% Coins";
+                _coinBuffText.text = $"+{buff:F1}%";
                 _coinBuffPrice.text = isMax ? "MAX" : cost.ToString("N0");
                 _coinBuffBtn.interactable = !isMax;
                 break;
