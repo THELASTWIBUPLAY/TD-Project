@@ -15,6 +15,7 @@ public class TalentUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _coinBuffPrice;
 
     // Level
+    [SerializeField] private TextMeshProUGUI _totalLevelText;
     [SerializeField] private TextMeshProUGUI _atkLevelText;
     [SerializeField] private TextMeshProUGUI _hpLevelText;
     [SerializeField] private TextMeshProUGUI _coinLevelText;
@@ -116,7 +117,9 @@ public class TalentUI : MonoBehaviour
         HandleTalentUpdate(TalentManager.TalentType.Attack, tm.AttackLevel, tm.CurrentTalentAttackBuff, tm.GetUpgradeCost(tm.AttackLevel));
         HandleTalentUpdate(TalentManager.TalentType.Hp, tm.HpLevel, tm.CurrentTalentHpBuff, tm.GetUpgradeCost(tm.HpLevel));
         HandleTalentUpdate(TalentManager.TalentType.Coin, tm.CoinLevel, tm.CurrentTalentCoinBuff, tm.GetUpgradeCost(tm.CoinLevel));
-    
+
+        _totalLevelText.text = $"Total Level \n {tm.TotalTalentLevel}";
+
         for (int i = 0; i < _rewardSlots.Length; i++)
         {
             if (_rewardSlots[i] == null) continue;
@@ -164,6 +167,7 @@ public class TalentUI : MonoBehaviour
         }
 
         _progressBar.value = TalentManager.Instance.TotalTalentLevel;
+        _totalLevelText.text = $"Total Level \n {TalentManager.Instance.TotalTalentLevel}";
     }
 
     private void HandleRewardUpdate(int tierIndex, TalentManager.TalentReward reward, TalentManager.TalentRewardState state)
