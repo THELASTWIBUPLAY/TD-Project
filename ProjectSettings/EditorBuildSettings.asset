@@ -10,10 +10,10 @@ EditorBuildSettings:
     guid: eb931ee9e815200469a6911ddb1e75d7
   - enabled: 1
     path: Assets/Scenes/MainMenu.unity
-    guid: 0eea0f85b4e1be549a7cfe05807932ae
+    guid: 46b9c15dc9571e943aa9a271429378d1
   - enabled: 1
-    path: Assets/Scenes/Levels/Stage1/Level 1.unity
-    guid: 8c9cfa26abfee488c85f1582747f6a02
+    path: Assets/Scenes/SampleScene.unity
+    guid: 762def4c026410a4e9ea83f33d960e48
   - enabled: 1
     path: Assets/Scenes/Levels/Stage1/Level 1.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
@@ -24,17 +24,41 @@ EditorBuildSettings:
     path: Assets/Scenes/Levels/Stage1/Level 3.unity
     guid: 8536b26bcec25a54db8dfd6b564d0334
   - enabled: 1
+    path: Assets/Scenes/Levels/Stage1/Level 4.unity
+    guid: 02bfd0bd599f28b49a8c816e0f95385a
+  - enabled: 1
     path: Assets/Scenes/Levels/Stage1/Level 5.unity
     guid: d8b681e0c3926ec44ab6d7f61ebf6864
   - enabled: 1
     path: Assets/Scenes/Levels/Stage1/Level 6.unity
     guid: ca76a310665592d438c08a3132b8d4c8
   - enabled: 1
-    path: Assets/Scenes/Levels/Stage1/Level 4.unity
-    guid: 02bfd0bd599f28b49a8c816e0f95385a
+    path: Assets/Scenes/Levels/Stage1/Level 7.unity
+    guid: f5cef2168185c0b448902ed49396dcea
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
-    guid: 762def4c026410a4e9ea83f33d960e48
+    path: Assets/Scenes/Levels/Stage1/Level 8.unity
+    guid: 352f3561139e4c54dabfc515e757f794
+  - enabled: 1
+    path: Assets/Scenes/Levels/Stage1/Level 9.unity
+    guid: 24f84e8984b91c0468710cadccfc3796
+  - enabled: 1
+    path: Assets/Scenes/Levels/Stage1/Level 10.unity
+    guid: adb369d1177928d4fb37ddc6b12978dd
+  - enabled: 1
+    path: Assets/Scenes/Levels/Stage2/Level 11.unity
+    guid: b20a068ea4670be43b270dc748891233
+  - enabled: 1
+    path: Assets/Scenes/Levels/Stage2/Level 12.unity
+    guid: c998cc3953fa92b4f8b2b46e4ab87e24
+  - enabled: 1
+    path: Assets/Scenes/Levels/Stage2/Level 13.unity
+    guid: 6a02154914ca870469ff23d1588b8d9d
+  - enabled: 1
+    path: Assets/Scenes/Levels/Stage2/Level 14.unity
+    guid: 6eb47f813e95939409e46fbc61f97d73
+  - enabled: 1
+    path: Assets/Scenes/Levels/Stage2/Level 15.unity
+    guid: a20b56226820e8e4281621fa1ae1399b
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

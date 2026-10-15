@@ -5,9 +5,6 @@ using UnityEngine;
 using Unity.Services.Core;
 using Unity.Services.CloudCode;
 using System.Threading.Tasks;
-using UnityEditor.Rendering;
-using Unity.VisualScripting.Antlr3.Runtime.Tree;
-using Unity.Services.CloudSave;
 
 public class EnergyRegenManager : MonoBehaviour, ISaveable
 {

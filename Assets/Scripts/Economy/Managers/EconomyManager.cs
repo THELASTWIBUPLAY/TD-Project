@@ -1,6 +1,5 @@
 using Assets.Scripts.Economy.Managers;
 using System;
-using Unity.Microsoft.GDK;
 using UnityEngine;
 
 public class EconomyManager : MonoBehaviour, ISaveable
