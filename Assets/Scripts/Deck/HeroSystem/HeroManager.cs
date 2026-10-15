@@ -108,7 +108,39 @@ public class HeroManager : MonoBehaviour, ISaveable
     public int GetFragments(string heroId) => GetOrCreateEntry(heroId).currentFragments;
     public int GetHeroLevel(string heroId) => GetOrCreateEntry(heroId).level;
     public int GetHeroStar(string heroId) => GetOrCreateEntry(heroId).star;
-    public bool IsHeroUnlocked(string heroId) => GetOrCreateEntry(heroId).isUnlocked;
+    public bool IsHeroUnlocked(string heroId) => GetOrCreateEntry(heroId).isUnlocked || GetOrCreateEntry(heroId).recruitedCopies > 0;
+    public int GetRecruitedCopies(string heroId) => GetOrCreateEntry(heroId).recruitedCopies;
+
+    // A complete server snapshot, not an incremental grant: refreshing/retrying cannot duplicate rewards.
+    public void ApplyRecruitmentCollection(OwnedHero[] heroes)
+    {
+        if (_database == null || heroes == null) return;
+        var quantities = new Dictionary<string, int>();
+        foreach (var owned in heroes)
+        {
+            if (owned == null || owned.quantity <= 0) continue;
+            string id = RecruitmentHeroes.CanonicalId(owned.heroId);
+            if (_database.GetHeroById(id) == null)
+            {
+                Debug.LogWarning("[Recruitment] Hero is missing from HeroDB: " + id);
+                continue;
+            }
+            quantities.TryGetValue(id, out int count);
+            quantities[id] = checked(count + owned.quantity);
+        }
+        bool changed = false;
+        foreach (var hero in _database.AllHeroes)
+        {
+            if (!hero) continue;
+            var entry = GetOrCreateEntry(hero.heroId);
+            quantities.TryGetValue(hero.heroId, out int count);
+            changed |= entry.recruitedCopies != count;
+            entry.recruitedCopies = count;
+        }
+        if (!changed) return;
+        OnHeroDataUpdated?.Invoke();
+        SaveManager.Instance?.SaveLocal();
+    }
 
     public void AddFragments(string heroId, int amount)
     {
