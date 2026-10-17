@@ -16,8 +16,8 @@ public class ProfileUI : MonoBehaviour
     [SerializeField] private Button _openEditBtn;
 
     [Header("UI Dependencies (Btn)")]
-    [SerializeField] private TextMeshProUGUI _playerNameBtnText;
-    [SerializeField] private TextMeshProUGUI _playerLevelBtnText;
+    //[SerializeField] private TextMeshProUGUI _playerNameBtnText;
+    //[SerializeField] private TextMeshProUGUI _playerLevelBtnText;
     [SerializeField] private Button _playerProfileBtn;
 
 
@@ -110,8 +110,8 @@ public class ProfileUI : MonoBehaviour
 
             _expProgress.value = Mathf.Clamp01(profile.AccountExp / profile.ExpToNextLevel);
 
-            _playerNameBtnText.text = profile.PlayerName;
-            _playerLevelBtnText.text = "Lv. " + profile.AccountLevel.ToString();
+            //_playerNameBtnText.text = profile.PlayerName;
+            //_playerLevelBtnText.text = "Lv. " + profile.AccountLevel.ToString();
         }
     }
 

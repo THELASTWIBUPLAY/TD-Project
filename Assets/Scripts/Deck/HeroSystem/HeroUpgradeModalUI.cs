@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Purchasing;
 using UnityEngine.UI;
 
 public class HeroUpgradeModalUI : MonoBehaviour
@@ -40,9 +41,12 @@ public class HeroUpgradeModalUI : MonoBehaviour
     [SerializeField] private Button _closeButton;
 
     private string _currentHeroId;
+    private CanvasGroup _myCanvasGroup;
 
     private void Awake()
     {
+        _myCanvasGroup = GetComponent<CanvasGroup>();
+
         if (_closeButton != null)
             _closeButton.onClick.AddListener(CloseModal);
 
@@ -59,7 +63,26 @@ public class HeroUpgradeModalUI : MonoBehaviour
     public void SetupModal(string heroId)
     {
         _currentHeroId = heroId;
-        gameObject.SetActive(true);
+
+        if (_myCanvasGroup == null) _myCanvasGroup = GetComponent<CanvasGroup>();
+
+        if (MainMenuManager.Instance != null && _myCanvasGroup != null)
+        {
+            MainMenuManager.Instance.OpenPopup(_myCanvasGroup);
+        }
+        else
+        {
+            // Fallback pengaman mandiri jika tidak lewat MainMenuManager
+            gameObject.SetActive(true);
+            if (_myCanvasGroup != null)
+            {
+                _myCanvasGroup.alpha = 1f;
+                _myCanvasGroup.interactable = true;
+                _myCanvasGroup.blocksRaycasts = true;
+            }
+            transform.SetAsLastSibling();
+        }
+
         if (_ascendSkillsPanel != null) _ascendSkillsPanel.SetActive(false);
         RefreshModal();
     }
@@ -67,7 +90,21 @@ public class HeroUpgradeModalUI : MonoBehaviour
     public void CloseModal()
     {
         if (_ascendSkillsPanel != null) _ascendSkillsPanel.SetActive(false);
-        gameObject.SetActive(false);
+
+        if (MainMenuManager.Instance != null && _myCanvasGroup != null)
+        {
+            MainMenuManager.Instance.ClosePopup(_myCanvasGroup);
+        }
+        else
+        {
+            if (_myCanvasGroup != null)
+            {
+                _myCanvasGroup.alpha = 0f;
+                _myCanvasGroup.interactable = false;
+                _myCanvasGroup.blocksRaycasts = false;
+            }
+            gameObject.SetActive(false);
+        }
     }
 
     private void ToggleSkillsPanel(bool show)
@@ -91,6 +128,7 @@ public class HeroUpgradeModalUI : MonoBehaviour
         // Bersihkan list kartu sebelumnya
         foreach (Transform child in _skillsContainer)
         {
+            bool isHeroUnlocked = HeroManager.Instance.IsHeroUnlocked(_currentHeroId);
             Destroy(child.gameObject);
         }
 
@@ -117,6 +155,8 @@ public class HeroUpgradeModalUI : MonoBehaviour
 
     public void RefreshModal()
     {
+        bool isHeroUnlocked = HeroManager.Instance.IsHeroUnlocked(_currentHeroId);
+
         if (HeroManager.Instance == null) return;
 
         var hero = HeroManager.Instance.Database?.GetHeroById(_currentHeroId);
@@ -133,7 +173,7 @@ public class HeroUpgradeModalUI : MonoBehaviour
 
         int maxLevel = config != null ? config.GetMaxLevelForStar(entry.star) : 30;
         if (_levelStarText != null)
-            _levelStarText.text = $"★{entry.star}  Lv. {entry.level}/{maxLevel}";
+            _levelStarText.text = $"★{entry.star}  Lv. {entry.level}/{maxLevel} - {hero.classType}";
 
         // 2. Rincian 5 Stat
         if (_atkText != null) _atkText.text = $"{stats.totalDamage:F0}";
@@ -145,13 +185,13 @@ public class HeroUpgradeModalUI : MonoBehaviour
         // 3. Status Tombol Debug
         if (_debugLockBtnText != null)
         {
-            _debugLockBtnText.text = entry.isUnlocked ? "DEBUG: LOCK HERO" : "DEBUG: UNLOCK HERO";
+            _debugLockBtnText.text = isHeroUnlocked ? "DEBUG: LOCK HERO" : "DEBUG: UNLOCK HERO";
         }
 
         // 4. Tombol Aksi Dinamis
         _actionButton.onClick.RemoveAllListeners();
 
-        if (!entry.isUnlocked)
+        if (!isHeroUnlocked)
         {
             _actionButton.interactable = false;
             _actionButtonText.text = "LOCKED";

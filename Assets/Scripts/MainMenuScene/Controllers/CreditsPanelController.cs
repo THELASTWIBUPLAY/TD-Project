@@ -38,7 +38,7 @@ public class CreditsPanelController : MonoBehaviour
         isScrolling = true;
     }
 
-    private void StopScroll()
+    public void StopScroll()
     {
         isScrolling = false;
     }

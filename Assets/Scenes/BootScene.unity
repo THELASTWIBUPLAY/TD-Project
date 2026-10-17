@@ -159,10 +159,11 @@ MonoBehaviour:
   sfxCryo: {fileID: 8300000, guid: 8bed1ed749788484c99d311d7fafd0f5, type: 3}
   sfxGunslinger: {fileID: 8300000, guid: 87e0aa7d1287e314ea4959525be941de, type: 3}
   sfxIncomingBoss: {fileID: 8300000, guid: 016aac5f02b63fc4691b36858dce1c8e, type: 3}
+  menuBgm: {fileID: 8300000, guid: b767aace78a91874c8d01320ce929d21, type: 3}
   bgmMusic: {fileID: 8300000, guid: 376c1d6a548f0764d87d93c39a9504e7, type: 3}
   bossBgm: {fileID: 8300000, guid: 219d5ff9a0d68bc4aa084a2cf69f4140, type: 3}
-  menuBgm: {fileID: 8300000, guid: b767aace78a91874c8d01320ce929d21, type: 3}
   defaultBgmVolume: 0.45
+  bootVolumeMultiplier: 0.8
   minSoundInterval: 0.05
 --- !u!4 &28482960
 Transform:
@@ -1416,7 +1417,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 200, y: 50}
+  m_SizeDelta: {x: 600, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &2019080859
 GameObject:

@@ -9,18 +9,6 @@ public class SettingsManager : MonoBehaviour
     [SerializeField] private Button _exitBtn;
     [SerializeField] private CreditsPanelController _creditsPanelController;
 
-    private void OnEnable()
-    {
-        _creditBtn.onClick.AddListener(OpenCreditPanel);
-        _exitBtn.onClick.AddListener(ExitGame);
-    }
-
-    private void OnDisable()
-    {
-        _creditBtn.onClick.RemoveListener(OpenCreditPanel);
-        _exitBtn.onClick.RemoveListener(ExitGame);
-    }
-
     private void Start()
     {
         float savedVolume = PlayerPrefs.GetFloat("GameVolume", 1f);
@@ -41,24 +29,5 @@ public class SettingsManager : MonoBehaviour
         {
             AudioManager.Instance.ApplySettingsVolume(volume);
         }
-    }
-
-    private void OpenCreditPanel()
-    {
-        if (MainMenuManager.Instance != null)
-        {
-            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.MainPanel, false);
-            MainMenuManager.Instance.TogglePanel(MainMenuManager.Instance.CreditsPanel, true);
-            _creditsPanelController.StartScroll();
-        }
-    }
-
-    private void ExitGame()
-    {
-        Application.Quit();
-
-        #if UNITY_EDITOR
-                UnityEditor.EditorApplication.isPlaying = false;
-        #endif
     }
 }
